@@ -1,0 +1,20 @@
+<% size_class = question.answer_size.presence || 'short' %>
+<div class="question <%= 'question-large' if size_class == 'long' %>">
+  <div class="question-header">
+    <span class="question-number"><%= number %></span>
+    <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
+  </div>
+  <div class="question-content">
+    <%= simple_format(question.content) %>
+  </div>
+  <div class="answer-space">
+    <% case question.question_type %>
+    <% when 'multiple_choice' %>
+      <%= render 'questions/multiple_choice', question: question %>
+    <% when 'calculation' %>
+      <%= render 'questions/calculation', question: question %>
+    <% else %>
+      <div class="answer-lines answer-lines-<%= size_class %>"></div>
+    <% end %>
+  </div>
+</div>

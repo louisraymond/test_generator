@@ -1,0 +1,8 @@
+<div class="answer-box"></div>
+<div class="final-answer">
+  <span class="final-answer-label"><%= question.answer_label || 'answer' %> =</span>
+  <div class="final-answer-line"></div>
+  <% if question.unit.present? %>
+    <span class="final-answer-unit"><%= question.unit %></span>
+  <% end %>
+</div>

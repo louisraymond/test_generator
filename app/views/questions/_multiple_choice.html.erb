@@ -1,0 +1,9 @@
+<div class="mc-options">
+  <% Array(question.options).each_with_index do |option, index| %>
+    <div class="mc-option">
+      <div class="mc-checkbox"></div>
+      <span class="mc-label"><%= ('A'.ord + index).chr %></span>
+      <span><%= option %></span>
+    </div>
+  <% end %>
+</div>
