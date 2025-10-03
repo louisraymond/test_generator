@@ -2,25 +2,105 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <%= stylesheet_link_tag 'exam', media: 'all' %>
+  <style>
+    @page {
+      margin: 20mm;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.4;
+      margin: 0;
+      padding: 20mm;
+    }
+    
+    .header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 14pt;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      font-size: 9pt;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    th, td {
+      border: 1px solid #000;
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      font-size: 10pt;
+    }
+    
+    .question-col {
+      width: 10%;
+    }
+    
+    .answers-col {
+      width: 35%;
+    }
+    
+    .guidance-col {
+      width: 45%;
+    }
+    
+    .mark-col {
+      width: 10%;
+      text-align: center;
+    }
+    
+    td {
+      font-size: 10pt;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Marking Scheme: <%= @exam.title %></h1>
-
-  <% @exam.questions.each_with_index do |question, index| %>
-    <div class="question">
-      <div class="question-header">
-        <span class="question-number"><%= index + 1 %></span>
-        <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
-      </div>
-      <div class="question-content">
-        <%= simple_format(question.content) %>
-      </div>
-      <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;">
-        <strong>Answer:</strong>
-        <%= simple_format(question.answer) %>
-      </div>
-    </div>
-  <% end %>
+  <div class="header">MARK SCHEME – <%= @exam.title %></div>
+  <div class="subtitle">Success criteria are detailed to guide consistent marking. Accept equivalent phrasing where meaning is preserved.</div>
+  
+  <table>
+    <thead>
+      <tr>
+        <th class="question-col">Question</th>
+        <th class="answers-col">Answers</th>
+        <th class="guidance-col">Additional Comments/Guidance</th>
+        <th class="mark-col">Mark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @exam.questions.each_with_index do |question, index| %>
+        <tr>
+          <td class="question-col"><%= index + 1 %></td>
+          <td class="answers-col"><%= simple_format(question.answer) %></td>
+          <td class="guidance-col">
+            Award <%= question.points %> <%= 'mark'.pluralize(question.points) %> for <%= question.content.truncate(100) %>
+          </td>
+          <td class="mark-col"><%= question.points %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </body>
 </html>
