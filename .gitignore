@@ -6,6 +6,13 @@
 
 # Ignore bundler config.
 /.bundle
+/node_modules
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+.byebug_history
 
 # Ignore all environment files (except templates).
 /.env*
@@ -33,3 +40,11 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+implementation_review.md
+
+# RSpec persistence files
+.rspec_status
+spec/examples.txt
+
+# Coverage output
+/coverage/
