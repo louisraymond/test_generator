@@ -6,7 +6,13 @@ class QuestionsController < ApplicationController
       format.html
       format.pdf do
         html = render_to_string(template: 'questions/types_preview', layout: 'pdf', formats: [:html])
-        pdf = Grover.new(html, base_url: request.base_url).to_pdf
+        pdf = Grover.new(
+          html,
+          base_url: request.base_url,
+          emulate_media: 'print',
+          print_background: true,
+          prefer_css_page_size: true
+        ).to_pdf
         send_data pdf, filename: 'preview.pdf', type: 'application/pdf'
       end
     end

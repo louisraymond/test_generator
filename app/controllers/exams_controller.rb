@@ -38,7 +38,13 @@ class ExamsController < ApplicationController
       format.html
       format.pdf do
         html = render_to_string(template: 'exams/show', layout: 'pdf', formats: [:html])
-        pdf = Grover.new(html, base_url: request.base_url).to_pdf
+        pdf = Grover.new(
+          html,
+          base_url: request.base_url,
+          emulate_media: 'print',
+          print_background: true,
+          prefer_css_page_size: true
+        ).to_pdf
         send_data pdf, filename: "exam_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
@@ -49,8 +55,14 @@ class ExamsController < ApplicationController
 
     respond_to do |format|
       format.pdf do
-        html = render_to_string(template: 'exams/marking_scheme', layout: 'pdf', formats: [:html])
-        pdf = Grover.new(html, base_url: request.base_url).to_pdf
+        html = render_to_string(template: 'exams/marking_scheme', layout: false, formats: [:html])
+        pdf = Grover.new(
+          html,
+          base_url: request.base_url,
+          emulate_media: 'print',
+          print_background: true,
+          prefer_css_page_size: true
+        ).to_pdf
         send_data pdf, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
