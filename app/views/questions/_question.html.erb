@@ -2,10 +2,10 @@
 <div class="question <%= 'question-large' if size_class == 'long' %>">
   <div class="question-header">
     <span class="question-number"><%= number %></span>
+    <div class="question-text">
+      <%= simple_format(question.content) %>
+    </div>
     <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
-  </div>
-  <div class="question-content">
-    <%= simple_format(question.content) %>
   </div>
   <div class="answer-space">
     <% case question.question_type %>
