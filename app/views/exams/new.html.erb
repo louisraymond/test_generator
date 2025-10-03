@@ -1,0 +1,30 @@
+<h1>Generate Exam</h1>
+
+<% if flash[:alert].present? %>
+  <div class="alert"><%= flash[:alert] %></div>
+<% end %>
+
+<div class="form-wrapper">
+  <%= form_with url: exams_path, method: :post, local: true do |f| %>
+    <%= f.text_field :title, placeholder: 'Exam title (optional)' %>
+
+    <fieldset>
+      <legend>Select Topics</legend>
+      <div class="topic-list">
+        <% @topics.each do |topic| %>
+          <div class="topic-checkbox">
+            <%= check_box_tag 'topic_ids[]', topic.id, false, id: "topic_#{topic.id}" %>
+            <%= label_tag "topic_#{topic.id}", topic.name %>
+          </div>
+        <% end %>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Number of Questions</legend>
+      <%= f.number_field :question_count, placeholder: 'Number of questions', min: 1 %>
+    </fieldset>
+
+    <%= f.submit 'Generate Exam' %>
+  <% end %>
+</div>

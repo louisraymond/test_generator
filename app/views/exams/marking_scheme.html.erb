@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <%= stylesheet_link_tag 'exam', media: 'all' %>
+</head>
+<body>
+  <h1>Marking Scheme: <%= @exam.title %></h1>
+
+  <% @exam.questions.each_with_index do |question, index| %>
+    <div class="question">
+      <div class="question-header">
+        <span class="question-number"><%= index + 1 %></span>
+        <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
+      </div>
+      <div class="question-content">
+        <%= simple_format(question.content) %>
+      </div>
+      <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;">
+        <strong>Answer:</strong>
+        <%= simple_format(question.answer) %>
+      </div>
+    </div>
+  <% end %>
+</body>
+</html>

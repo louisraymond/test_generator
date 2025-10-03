@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
+  </style>
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>
