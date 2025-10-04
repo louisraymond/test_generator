@@ -662,7 +662,7 @@ ActiveRecord::Base.transaction do
     options: { 'image' => 'Transistor_symbol_npn_no_circle.svg', 'labels' => ['C', 'B', 'E'] }
   )
 
-  # Converted: op-amp pins as labeling
+  # Converted: op-amp pins as labeling (with callouts)
   Question.create!(
     topic: electronics,
     source: commons,
@@ -672,7 +672,7 @@ ActiveRecord::Base.transaction do
     points: 2,
     answer_size: 'short',
     question_type: 'diagram_label',
-    options: { 'image' => 'Op-amp_symbol.svg', 'labels' => ['+', '−', 'Out'] }
+    options: { 'image' => 'Op-amp_symbol.svg', 'labels' => ['+', '−', 'Out'], 'markers' => [ { 'x' => 26, 'y' => 35 }, { 'x' => 26, 'y' => 65 }, { 'x' => 75, 'y' => 50 } ] }
   )
 
   # Converted: resistor symbol as labeling
@@ -701,7 +701,7 @@ ActiveRecord::Base.transaction do
     options: { 'image' => 'RC_lowpass_filter.svg', 'masks' => [ { 'x' => 35, 'y' => 60, 'w' => 12, 'h' => 12 }, { 'x' => 63, 'y' => 23, 'w' => 10, 'h' => 18 } ] }
   )
 
-  # Converted: op-amp simplified as labeling
+  # Converted: op-amp simplified as labeling (with callouts)
   Question.create!(
     topic: electronics,
     source: commons,
@@ -711,7 +711,7 @@ ActiveRecord::Base.transaction do
     points: 2,
     answer_size: 'short',
     question_type: 'diagram_label',
-    options: { 'image' => 'Op-amp_symbol_simplified.svg', 'labels' => ['+', '−', 'Out'] }
+    options: { 'image' => 'Op-amp_symbol_simplified.svg', 'labels' => ['+', '−', 'Out'], 'markers' => [ { 'x' => 26, 'y' => 35 }, { 'x' => 26, 'y' => 65 }, { 'x' => 75, 'y' => 50 } ] }
   )
 
 
