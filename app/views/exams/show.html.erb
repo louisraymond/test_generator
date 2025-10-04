@@ -12,7 +12,7 @@
     <% end %>
 
     <% @exam.questions.each_with_index do |question, index| %>
-      <%= render 'questions/question', question: question, number: index + 1 %>
+      <%= render 'questions/question', question: question, number: index + 1, seed: "#{@exam.id}-#{index + 1}" %>
     <% end %>
 
     <div class="actions-bar">

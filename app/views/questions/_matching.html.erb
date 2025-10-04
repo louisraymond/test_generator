@@ -1,14 +1,26 @@
 <%# Expected options: { 'left': [...], 'right': [...] } %>
 <% data = question.options.is_a?(Hash) ? question.options : {} %>
 <% left = Array(data['left']) %>
-<% right = Array(data['right']).shuffle %>
+<% # Deterministic shuffle for the right column based on a stable seed per exam-question position %>
+<% seed_str = (local_assigns[:seed] || "q-#{question.id}").to_s %>
+<% seed_num = 0; seed_str.each_byte { |b| seed_num = ((seed_num * 31) + b) & 0xffffffff } %>
+<% rng = Random.new(seed_num) %>
+<% right = Array(data['right']).dup.shuffle(random: rng) %>
 
 <div class="matching-table">
   <% left.each_with_index do |l, i| %>
     <div class="matching-row">
-      <div class="match-left"><%= l %></div>
-      <div class="match-line"></div>
-      <div class="match-right"><strong><%= right[i] %></strong></div>
+      <div class="match-left">
+        <div class="match-sq"><span class="match-text"><%= l %></span></div>
+      </div>
+      <div class="match-gap"></div>
+      <div class="match-right">
+        <% letter = ("A".ord + i).chr %>
+        <div class="match-sq">
+          <span class="match-label"><%= letter %>)</span>
+          <span class="match-text"><%= right[i] %></span>
+        </div>
+      </div>
     </div>
   <% end %>
-</div>
+  </div>
