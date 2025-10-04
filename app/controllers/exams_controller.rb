@@ -102,4 +102,37 @@ class ExamsController < ApplicationController
       topic_weights: {}
     )
   end
+
+  # Lightweight JSON endpoint to preview availability and allocation
+  def preview_counts
+    topic_ids = Array(params[:topic_ids]).reject(&:blank?)
+    types     = Array(params[:question_types]).reject(&:blank?)
+    count     = params[:question_count].to_i
+    weights   = (params[:topic_weights] || {}).to_h.transform_keys(&:to_s)
+
+    scope = Question.where(topic_id: topic_ids)
+    scope = scope.where(question_type: types) if types.present?
+
+    total_available = scope.count
+    per_type = scope.group(:question_type).count
+    per_topic = scope.group(:topic_id).count
+
+    allocation = {}
+    if topic_ids.any? && count.positive?
+      begin
+        alloc = ExamBuilder.allocate_by_weights(scope, topic_ids, weights, [count, total_available].min)
+        # Count how many picked per topic id
+        allocation = alloc.group_by { |q| q.topic_id.to_s }.transform_values(&:size)
+      rescue => _e
+        allocation = {}
+      end
+    end
+
+    render json: {
+      total_available: total_available,
+      per_type: per_type,
+      per_topic: per_topic,
+      suggested_allocation: allocation
+    }
+  end
 end

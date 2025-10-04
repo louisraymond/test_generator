@@ -98,57 +98,166 @@ h1 {
 .mc-label { font-weight: 700; text-align: center; }
 
 /* Sub-questions */
-.sub-question { margin-left: 20px; margin-bottom: 15px; }
+.sub-question { margin: 6mm 0 10mm; margin-left: 12mm; }
 .sub-question-number { font-weight: bold; display: inline-block; min-width: 40px; }
 
 /* Screen-only: new exam form */
 @media screen {
+  body { background: #f3f4f6; }
+
   .form-wrapper {
     background: #fff;
-    border-radius: 6px;
-    padding: 24px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-    max-width: 720px;
-    margin: 24px auto;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    max-width: 960px;
+    margin: 24px auto 48px;
   }
-  .form-wrapper fieldset { border: none; padding: 0; margin: 0 0 16px; }
-  fieldset legend { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-  .topic-list { display: grid; gap: 10px; }
-  .topic-checkbox { display: flex; align-items: center; gap: 10px; }
-  .topic-checkbox label { cursor: pointer; }
+
+  .form-wrapper fieldset { border: none; padding: 0; margin: 0 0 18px; }
+  fieldset legend { font-size: 18px; font-weight: 600; margin-bottom: 10px; color:#1f2937; }
+
   input[type='text'], input[type='number'] {
-    width: 100%; padding: 10px 12px; border-radius: 4px; border: 1px solid #c7c7c7; font-size: 15px;
+    width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid #c7c7c7; font-size: 15px;
   }
-  input[type='submit'] {
-    padding: 10px 18px; background: #303f9f; border: none; color: #fff; border-radius: 4px;
-    font-size: 15px; cursor: pointer; transition: background 0.2s ease-in-out;
-  }
-  input[type='submit']:hover { background: #283593; }
+  input[type='text'] { margin-bottom: 14px; }
+
   .alert {
-    background: #ffe0b2; border: 1px solid #ffb74d; color: #e65100; padding: 12px 16px; border-radius: 4px; margin-bottom: 18px;
+    background: #ffe0b2; border: 1px solid #ffb74d; color: #e65100; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px;
   }
+
+  .generator-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .generator-main fieldset {
+    background: #f8f9fb;
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid #e1e4ea;
+  }
+
+  .field-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+  }
+
+  .field label { display:block; font-size: 13px; margin-bottom: 4px; color:#334155; font-weight:600; }
+  .field input { width: 150px; }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .toggle input { accent-color: #303f9f; }
+
+  .type-grid { display:flex; flex-wrap:wrap; gap:8px; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef2f7;
+    border: 1px solid #cdd5e5;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 13px;
+  }
+  .pill input { accent-color: #303f9f; }
+
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e1e4ea;
+    padding: 12px 16px;
+  }
+
+  .topic-list { display: grid; gap: 12px; }
+  .topic-checkbox { display: flex; align-items: center; justify-content: space-between; }
+  .topic-name { display:flex; align-items:center; gap:8px; }
+  .topic-name label { cursor:pointer; }
+  .topic-weight { display:flex; align-items:center; gap:6px; }
+  .topic-weight label { font-size:12px; color:#475569; }
+  .topic-weight input { width:80px; }
+
+  .generator-preview {
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:#f1f5f9;
+  }
+  .generator-preview h3 { margin:0 0 12px; font-size:18px; font-weight:600; }
+  .preview-count { font-size:14px; margin-bottom:10px; }
+  .chip { display:inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(226,232,240,0.2); border:1px solid rgba(226,232,240,0.3); font-size:12px; color:#f1f5f9; }
+  .chip-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .preview-table { display:grid; gap:6px; font-size:13px; }
+  .preview-table .topic-row { color:#e2e8f0; display:flex; gap:10px; }
+  .preview-table .topic-alloc { font-weight:700; }
+  .preview-note { font-size:12px; color:#cbd5f5; margin-top:12px; }
+  .preview-links { margin-top:16px; font-size:13px; }
+  .preview-links a { color:#93c5fd; text-decoration:none; }
+
+  .btn-primary {
+    background:#303f9f;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:12px 24px;
+    font-size:16px;
+    cursor:pointer;
+    transition:background .2s ease-in-out, transform .2s ease-in-out;
+  }
+  .btn-primary:hover { background:#28368a; transform: translateY(-1px); }
+
+  .form-actions { display:flex; justify-content:flex-end; margin-top:20px; gap:16px; align-items:center; }
+  .form-actions a { color:#1d4ed8; font-size:13px; text-decoration:none; }
 
   /* A4 preview container for exam show page */
-  body { background: #f0f2f5; }
   .page {
-    width: 210mm;            /* A4 width */
-    min-height: 297mm;       /* A4 height baseline; allow growth */
-    margin: 10mm auto;       /* center on screen */
+    width: 210mm;
+    min-height: 297mm;
+    margin: 10mm auto;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    padding: 25mm 20mm;      /* match @page margins */
-    box-sizing: border-box;  /* include padding in height */
+    padding: 25mm 20mm;
+    box-sizing: border-box;
   }
-
-  /* No screen-only pagination; we show a single A4 canvas per view. */
 }
 
-/* Matching - lines format */
-.matching-table { display: grid; gap: 3mm; margin-left: 12mm; }
-.matching-row { display: grid; grid-template-columns: 1fr 40mm 1fr; align-items: center; gap: 6mm; }
-.match-left { text-align: right; }
-.match-right { text-align: left; font-weight: 700; }
-.match-line { border-bottom: 1pt solid #000; height: 0; }
+/* Matching - square blocks with connection bumps */
+.matching-table { display: grid; gap: 5mm; margin-left: 12mm; }
+/* Constrain total width to prevent overflow on A4 */
+.matching-row {
+  display: grid;
+  grid-template-columns: minmax(45mm, 1fr) 18mm minmax(45mm, 1fr);
+  align-items: center;
+  gap: 8mm;
+}
+.match-gap { height: 0; border-bottom: 1pt solid transparent; }
+.match-sq {
+  width: 60mm; min-width: 60mm; max-width: 60mm;
+  height: 16mm; min-height: 16mm; max-height: 16mm;
+  border: 1.5pt solid #000; border-radius: 4px; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center; padding: 2mm 6mm; position: relative;
+}
+.match-label { font-weight: 700; margin-right: 3mm; }
+.match-text { text-align: center; line-height: 1.2; word-break: normal; font-weight: 700; }
+/* Bumps */
+.match-left .match-sq::after {
+  content: ""; position: absolute; right: -2mm; top: 50%; transform: translateY(-50%);
+  width: 4mm; height: 4mm; border: 1.5pt solid #000; background: #fff; border-radius: 999px;
+}
+.match-right .match-sq::before {
+  content: ""; position: absolute; left: -2mm; top: 50%; transform: translateY(-50%);
+  width: 4mm; height: 4mm; border: 1.5pt solid #000; background: #fff; border-radius: 999px;
+}
+.matching-hint { font-size: 9pt; color: #666; margin-top: 2mm; }
 
 /* Cloze */
 .cloze-blank { display: inline-block; min-width: 20mm; border-bottom: 1pt solid #000; height: 5mm; }
@@ -161,10 +270,12 @@ h1 {
   border-left: 3pt solid #555; /* high-contrast gutter */
   border-radius: 3px;
   padding: 4mm;
+  margin: 0 0 6mm 0; /* align vertical rhythm with other types */
   overflow: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 10pt;
 }
+.markdown-body .answer-lines { margin-left: 0; }
 /* Inline code chips (usable inside headers and body) */
 code.md-inline, .markdown-body code.md-inline {
   background: #f6f8fa;
@@ -273,7 +384,7 @@ code.md-inline, .markdown-body code.md-inline {
 }
 
 /* Composite */
-.sub-question { margin: 3mm 0; }
+.sub-question { margin: 6mm 0 10mm; margin-left: 12mm; }
 .sub-question-number { font-weight: bold; margin-right: 2mm; }
 .sub-question-marks { margin-left: 3mm; font-weight: bold; }
 .sub-answer { margin-top: 2mm; }

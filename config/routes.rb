@@ -5,6 +5,9 @@ Rails.application.routes.draw do
     member do
       get :marking_scheme
     end
+    collection do
+      get :preview_counts
+    end
   end
 
   resources :questions, only: [:index]

@@ -4,66 +4,84 @@
   <div class="alert"><%= flash[:alert] %></div>
 <% end %>
 
-<div class="form-wrapper">
-  <%= form_with url: exams_path, method: :post, local: true do |f| %>
+<div class="form-wrapper" data-controller="exam-form">
+  <%= form_with url: exams_path, method: :post, local: true, data: { action: 'change->exam-form#updatePreview input->exam-form#updatePreview' } do |f| %>
     <%= f.text_field :title, placeholder: 'Exam title (optional)', value: params[:title] %>
 
-    <fieldset>
-      <legend>Exam Settings</legend>
-      <div style="display:flex; gap:16px; align-items:end; flex-wrap: wrap;">
-        <div>
-          <label>Total Questions</label>
-          <%= f.number_field :question_count, placeholder: 'e.g. 10', min: 1, required: true, value: params[:question_count] %>
-        </div>
-        <div>
-          <label>Duration (minutes, optional)</label>
-          <%= f.number_field :duration_minutes, placeholder: 'e.g. 60', min: 1, value: params[:duration_minutes] %>
-        </div>
-        <div>
-          <label>
-            <%= check_box_tag :allow_repeats, '1', ActiveModel::Type::Boolean.new.cast(params[:allow_repeats]), id: 'allow_repeats' %>
-            Allow question repeats
+    <div class="generator-layout">
+      <div class="generator-main">
+        <fieldset>
+          <legend>Exam Settings</legend>
+          <div class="field-grid">
+            <div class="field">
+              <label>Total Questions</label>
+              <%= f.number_field :question_count, placeholder: 'e.g. 10', min: 1, required: true, value: params[:question_count], data: { 'exam-form-target': 'count' } %>
+            </div>
+            <div class="field">
+              <label>Duration (minutes, optional)</label>
+              <%= f.number_field :duration_minutes, placeholder: 'e.g. 60', min: 1, value: params[:duration_minutes] %>
+            </div>
+            <label class="toggle">
+              <%= check_box_tag :allow_repeats, '1', ActiveModel::Type::Boolean.new.cast(params[:allow_repeats]), id: 'allow_repeats' %>
+              <span>Allow question repeats</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Question Types</legend>
+          <label class="toggle">
+            <input type="checkbox" data-action="exam-form#toggleAllTypes" data-exam-form-target="typeToggle">
+            <span>Select all types</span>
           </label>
-        </div>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Question Types</legend>
-      <div class="topic-list">
-        <% selected_types = Array(params[:question_types]).presence || @question_types %>
-        <% @question_types.each do |qt| %>
-          <div class="topic-checkbox">
-            <%= check_box_tag 'question_types[]', qt, selected_types.include?(qt), id: "qt_#{qt}" %>
-            <%= label_tag "qt_#{qt}", qt.humanize %>
+          <div class="type-grid">
+            <% selected_types = Array(params[:question_types]).presence || @question_types %>
+            <% @question_types.each do |qt| %>
+              <label class="pill">
+                <%= check_box_tag 'question_types[]', qt, selected_types.include?(qt), id: "qt_#{qt}", data: { 'exam-form-target': 'typeCheckbox' } %>
+                <span><%= qt.humanize %></span>
+              </label>
+            <% end %>
           </div>
-        <% end %>
-      </div>
-    </fieldset>
+        </fieldset>
 
-    <fieldset>
-      <legend>Select Topics & Weights</legend>
-      <p style="margin: 0 0 8px; color:#555;">Optionally set weights to control distribution across topics (higher = more questions). Leave blank for equal distribution.</p>
-      <div class="topic-list">
-        <% @topics.each do |topic| %>
-          <div class="topic-checkbox" style="justify-content: space-between;">
-            <div>
-              <% checked = Array(params[:topic_ids]).map(&:to_s).include?(topic.id.to_s) %>
-              <%= check_box_tag 'topic_ids[]', topic.id, checked, id: "topic_#{topic.id}" %>
-              <%= label_tag "topic_#{topic.id}", topic.name %>
-            </div>
-            <div>
-              <label for="tw_<%= topic.id %>">Weight</label>
-              <input type="number" name="topic_weights[<%= topic.id %>]" id="tw_<%= topic.id %>" min="0" step="1" style="width:100px;" value="<%= params.dig(:topic_weights, topic.id.to_s) %>">
-            </div>
+        <fieldset>
+          <legend>Select Topics & Weights</legend>
+          <p class="help-text">Optionally set weights to control distribution across topics (higher = more questions). Leave blank for equal distribution.</p>
+          <label class="toggle">
+            <input type="checkbox" data-action="exam-form#toggleAllTopics" data-exam-form-target="topicToggle">
+            <span>Select all topics</span>
+          </label>
+          <div class="topic-list card">
+            <% @topics.each do |topic| %>
+              <div class="topic-checkbox">
+                <div class="topic-name">
+                  <% checked = Array(params[:topic_ids]).map(&:to_s).include?(topic.id.to_s) %>
+                  <%= check_box_tag 'topic_ids[]', topic.id, checked, id: "topic_#{topic.id}", data: { 'exam-form-target': 'topicCheckbox' } %>
+                  <%= label_tag "topic_#{topic.id}", topic.name %>
+                </div>
+                <div class="topic-weight">
+                  <label for="tw_<%= topic.id %>">Weight</label>
+                  <input type="number" name="topic_weights[<%= topic.id %>]" id="tw_<%= topic.id %>" min="0" step="1" value="<%= params.dig(:topic_weights, topic.id.to_s) %>" data-exam-form-target="weightInput" data-topic-id="<%= topic.id %>">
+                </div>
+              </div>
+            <% end %>
           </div>
-        <% end %>
+        </fieldset>
       </div>
-    </fieldset>
 
-    <div class="actions-bar">
-      <%= f.submit 'Generate Exam' %>
-      <%= link_to 'Browse Questions', questions_path %>
+      <aside class="generator-preview card">
+        <h3>Selection Summary</h3>
+        <p class="preview-count">Available questions: <span data-exam-form-target="availability">—</span></p>
+        <div class="chip-row" data-exam-form-target="typeList"></div>
+        <div class="preview-table" data-exam-form-target="topicTable"></div>
+        <p class="preview-note">Suggested allocation respects topic weights. Adjust counts or weights until you're happy.</p>
+        <p class="preview-links"><%= link_to 'Browse all questions →', questions_path %></p>
+      </aside>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit 'Generate Exam', class: 'btn-primary' %>
     </div>
   <% end %>
 </div>
