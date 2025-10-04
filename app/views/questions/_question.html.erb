@@ -7,6 +7,8 @@
         <% masked = ERB::Util.html_escape(question.content.to_s) %>
         <% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
         <%= raw masked %>
+      <% elsif question.question_type == 'markdown' %>
+        <%# Markdown content is rendered in the answer area to avoid duplication and to allow code blocks %>
       <% else %>
         <%= simple_format(question.content) %>
       <% end %>
