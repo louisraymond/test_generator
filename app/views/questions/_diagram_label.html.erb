@@ -1,5 +1,6 @@
 <% data = question.options.is_a?(Hash) ? question.options : {} %>
 <% labels = Array(data['labels']) %>
+<% markers = Array(data['markers']) %>
 <div class="diagram">
   <div class="diagram-image">
     <% if data['image'].present? %>
@@ -7,10 +8,15 @@
     <% else %>
       <div class="image-box"></div>
     <% end %>
+    <% markers.each_with_index do |m, i| %>
+      <div class="callout" style="left:<%= m['x'] %>%; top:<%= m['y'] %>%">
+        <span class="callout-dot"><%= i + 1 %></span>
+      </div>
+    <% end %>
   </div>
   <%# For the exam paper, do NOT show the actual labels (answers). %>
-  <%# Instead, render blank lines for each expected label. %>
-  <% expected_count = labels.presence&.size || 3 %>
+  <%# Render blank lines matching marker count if provided, otherwise label count, otherwise 3. %>
+  <% expected_count = (markers.presence&.size || labels.presence&.size || 3) %>
   <div class="diagram-labels">
     <% expected_count.times do |i| %>
       <div class="diagram-label-item">
