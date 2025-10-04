@@ -303,6 +303,7 @@ h1 {
   overflow: hidden;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 10pt;
+  white-space: pre-wrap;
 }
 .markdown-body .answer-lines { margin-left: 0; }
 /* Inline code chips (usable inside headers and body) */
