@@ -1,0 +1,41 @@
+<% parts = (question.options.is_a?(Hash) ? question.options['parts'] : nil) || [] %>
+<div class="composite">
+  <% if parts.any? %>
+    <% parts.each_with_index do |part, idx| %>
+      <div class="sub-question">
+        <span class="sub-question-number"><%= (idx + 1).to_s(26).tr('0-9a-p', 'abcdefghijklmnopqrstuvwxyz')[0] %>)</span>
+        <span class="sub-question-text"><%= part['content'] %></span>
+        <% if (pts = part['points']).present? %>
+          <span class="sub-question-marks">[<%= pts %> <%= 'mark'.pluralize(pts) %>]</span>
+        <% end %>
+        <div class="sub-answer">
+          <% case part['type'] %>
+          <% when 'multiple_choice' %>
+            <div class="mc-options">
+              <% Array(part['options']).each_with_index do |opt, i| %>
+                <div class="mc-option">
+                  <div class="mc-checkbox"></div>
+                  <span class="mc-label"><%= ('A'.ord + i).chr %></span>
+                  <span><%= opt %></span>
+                </div>
+              <% end %>
+            </div>
+          <% when 'calculation' %>
+            <div class="answer-box"></div>
+            <div class="final-answer">
+              <span class="final-answer-label"><%= part['answer_label'] || 'answer' %> =</span>
+              <div class="final-answer-line"></div>
+              <% if part['unit'].present? %>
+                <span class="final-answer-unit"><%= part['unit'] %></span>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="answer-lines answer-lines-<%= part['answer_size'] || 'short' %>"></div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="answer-lines answer-lines-medium"></div>
+  <% end %>
+</div>

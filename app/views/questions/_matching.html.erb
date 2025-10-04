@@ -1,0 +1,23 @@
+<%# Expected options: { 'left': [...], 'right': [...] } %>
+<% data = question.options.is_a?(Hash) ? question.options : {} %>
+<% left = Array(data['left']) %>
+<% right = Array(data['right']).shuffle %>
+
+<div class="matching">
+  <div class="matching-col matching-left">
+    <% left.each do |item| %>
+      <div class="matching-item">
+        <span class="matching-text"><%= item %></span>
+        <div class="matching-square"></div>
+      </div>
+    <% end %>
+  </div>
+  <div class="matching-col matching-right">
+    <% right.each do |item| %>
+      <div class="matching-item">
+        <div class="matching-square"></div>
+        <span class="matching-text"><strong><%= item %></strong></span>
+      </div>
+    <% end %>
+  </div>
+</div>

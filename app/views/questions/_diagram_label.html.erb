@@ -1,0 +1,22 @@
+<% data = question.options.is_a?(Hash) ? question.options : {} %>
+<% labels = Array(data['labels']) %>
+<div class="diagram">
+  <div class="diagram-image">
+    <% if data['image'].present? %>
+      <%= embedded_image_tag data['image'], alt: 'diagram', class: 'diagram-img' %>
+    <% else %>
+      <div class="image-box"></div>
+    <% end %>
+  </div>
+  <%# For the exam paper, do NOT show the actual labels (answers). %>
+  <%# Instead, render blank lines for each expected label. %>
+  <% expected_count = labels.presence&.size || 3 %>
+  <div class="diagram-labels">
+    <% expected_count.times do |i| %>
+      <div class="diagram-label-item">
+        <span class="diagram-label-index"><%= i + 1 %>.</span>
+        <span class="cloze-blank"></span>
+      </div>
+    <% end %>
+  </div>
+</div>

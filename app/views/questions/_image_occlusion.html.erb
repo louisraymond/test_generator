@@ -1,0 +1,36 @@
+<% data = question.options.is_a?(Hash) ? question.options : {} %>
+<% masks = Array(data['masks']).to_a %>
+<div class="image-occlusion">
+  <div class="image-occlusion-canvas">
+    <% if data['image'].present? %>
+      <%= embedded_image_tag data['image'], alt: 'diagram', class: 'image-occlusion-img' %>
+    <% else %>
+      <div class="image-box"></div>
+    <% end %>
+    <% masks.each_with_index do |mask, i| %>
+      <%# mask: {x:, y:, w:, h:} in percent (0..100) %>
+      <div class="occlusion-mask" style="left:<%= mask['x'] %>%; top:<%= mask['y'] %>%; width:<%= mask['w'] %>%; height:<%= mask['h'] %>%;">
+        <%# Number the masks to map to blanks below %>
+        <% if masks.size > 1 %>
+          <span class="mask-index"><%= i + 1 %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if masks.size > 1 %>
+    <div class="diagram-labels">
+      <% masks.size.times do |i| %>
+        <div class="diagram-label-item">
+          <span class="diagram-label-index"><%= i + 1 %>.</span>
+          <span class="cloze-blank"></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="final-answer">
+      <span class="final-answer-label">answer =</span>
+      <div class="final-answer-line"></div>
+    </div>
+  <% end %>
+</div>

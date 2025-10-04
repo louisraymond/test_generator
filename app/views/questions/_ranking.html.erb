@@ -1,0 +1,24 @@
+<% items = Array(question.options) %>
+<% scale = (1..items.length).to_a %>
+<div class="ranking">
+  <table class="ranking-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <% scale.each do |n| %>
+          <th><%= n %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% items.each do |item| %>
+        <tr>
+          <td class="ranking-item"><%= item %></td>
+          <% scale.each do |_n| %>
+            <td class="ranking-box"></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

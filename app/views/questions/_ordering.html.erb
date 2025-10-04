@@ -1,0 +1,9 @@
+<% items = Array(question.options).shuffle %>
+<div class="ordering-list">
+  <% items.each_with_index do |item, idx| %>
+    <div class="ordering-item">
+      <div class="ordering-rank-box"></div>
+      <span class="ordering-text"><%= item %></span>
+    </div>
+  <% end %>
+</div>

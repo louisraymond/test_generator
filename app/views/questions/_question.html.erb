@@ -3,7 +3,13 @@
   <div class="question-header">
     <span class="question-number"><%= number %></span>
     <div class="question-text">
-      <%= simple_format(question.content) %>
+      <% if question.question_type == 'cloze' %>
+        <% masked = ERB::Util.html_escape(question.content.to_s) %>
+        <% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
+        <%= raw masked %>
+      <% else %>
+        <%= simple_format(question.content) %>
+      <% end %>
     </div>
     <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
   </div>
@@ -13,6 +19,20 @@
       <%= render 'questions/multiple_choice', question: question %>
     <% when 'calculation' %>
       <%= render 'questions/calculation', question: question %>
+    <% when 'matching' %>
+      <%= render 'questions/matching', question: question %>
+    <% when 'cloze' %>
+      <%# Cloze content is already rendered inline in the header to avoid duplication/leaks %>
+    <% when 'ordering' %>
+      <%= render 'questions/ordering', question: question %>
+    <% when 'ranking' %>
+      <%= render 'questions/ranking', question: question %>
+    <% when 'diagram_label' %>
+      <%= render 'questions/diagram_label', question: question %>
+    <% when 'image_occlusion' %>
+      <%= render 'questions/image_occlusion', question: question %>
+    <% when 'composite' %>
+      <%= render 'questions/composite', question: question %>
     <% else %>
       <div class="answer-lines answer-lines-<%= size_class %>"></div>
     <% end %>
