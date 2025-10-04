@@ -3,8 +3,10 @@
   <% if parts.any? %>
     <% parts.each_with_index do |part, idx| %>
       <div class="sub-question">
-        <span class="sub-question-number"><%= (idx + 1).to_s(26).tr('0-9a-p', 'abcdefghijklmnopqrstuvwxyz')[0] %>)</span>
-        <span class="sub-question-text"><%= part['content'] %></span>
+        <% letter = ('a'.ord + idx).chr %>
+        <span class="sub-question-number"><%= letter %>)</span>
+        <% clean_text = part['content'].to_s.sub(/\A\s*[a-z]\)\s*/i, '') %>
+        <span class="sub-question-text"><%= clean_text %></span>
         <% if (pts = part['points']).present? %>
           <span class="sub-question-marks">[<%= pts %> <%= 'mark'.pluralize(pts) %>]</span>
         <% end %>
@@ -12,10 +14,9 @@
           <% case part['type'] %>
           <% when 'multiple_choice' %>
             <div class="mc-options">
-              <% Array(part['options']).each_with_index do |opt, i| %>
+              <% Array(part['options']).each do |opt| %>
                 <div class="mc-option">
                   <div class="mc-checkbox"></div>
-                  <span class="mc-label"><%= ('A'.ord + i).chr %></span>
                   <span><%= opt %></span>
                 </div>
               <% end %>
