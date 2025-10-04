@@ -10,7 +10,13 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :questions, only: [:index]
+  resources :questions, only: [:index] do
+    collection do
+      get :import
+      post :import_csv
+      post :import_preview
+    end
+  end
 
   if Rails.env.development?
     get '/question_types_preview', to: 'questions#types_preview'

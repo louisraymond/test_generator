@@ -1,0 +1,337 @@
+<div class="container">
+  <h1>Import Questions from CSV</h1>
+  
+  <div class="import-instructions">
+    <h2>Instructions</h2>
+    <ol>
+      <li>Download the <a href="/docs/questions_import_template.csv" download>CSV template</a></li>
+      <li>Fill in your questions following the template format</li>
+      <li>Upload your CSV file below</li>
+      <li>Preview the import to check for errors</li>
+      <li>Complete the import</li>
+    </ol>
+    
+    <h3>Supported Question Types</h3>
+    <ul>
+      <% @question_types.each do |type| %>
+        <li><strong><%= type.humanize %></strong> - <%= question_type_description(type) %></li>
+      <% end %>
+    </ul>
+    
+    <h3>Column Descriptions</h3>
+    <div class="column-descriptions">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Required</th>
+            <th>Description</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>topic</code></td>
+            <td>Yes</td>
+            <td>Topic name (will create if doesn't exist)</td>
+            <td>Physics - MOSFETs & Circuits</td>
+          </tr>
+          <tr>
+            <td><code>question_type</code></td>
+            <td>Yes</td>
+            <td>Type of question</td>
+            <td>written, multiple_choice, calculation, etc.</td>
+          </tr>
+          <tr>
+            <td><code>content</code></td>
+            <td>Yes</td>
+            <td>Question text</td>
+            <td>Explain how MOSFETs work...</td>
+          </tr>
+          <tr>
+            <td><code>answer</code></td>
+            <td>Yes</td>
+            <td>Expected answer</td>
+            <td>MOSFETs have high input impedance...</td>
+          </tr>
+          <tr>
+            <td><code>points</code></td>
+            <td>Yes</td>
+            <td>Points value (1-100)</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td><code>answer_size</code></td>
+            <td>No</td>
+            <td>Answer space size</td>
+            <td>short, medium, long</td>
+          </tr>
+          <tr>
+            <td><code>source</code></td>
+            <td>No</td>
+            <td>Source name (will create if doesn't exist)</td>
+            <td>Feynman Lectures on Physics</td>
+          </tr>
+          <tr>
+            <td><code>options</code></td>
+            <td>Conditional</td>
+            <td>Pipe-separated options for MC/ordering/ranking</td>
+            <td>Option A|Option B|Option C</td>
+          </tr>
+          <tr>
+            <td><code>left_items</code></td>
+            <td>Conditional</td>
+            <td>Left column items for matching questions</td>
+            <td>Ohm (Ω)|Farad (F)|Henry (H)</td>
+          </tr>
+          <tr>
+            <td><code>right_items</code></td>
+            <td>Conditional</td>
+            <td>Right column items for matching questions</td>
+            <td>Resistance|Capacitance|Inductance</td>
+          </tr>
+          <tr>
+            <td><code>image</code></td>
+            <td>Conditional</td>
+            <td>Image filename for diagram/image questions</td>
+            <td>MOSFET_symbol.svg</td>
+          </tr>
+          <tr>
+            <td><code>labels</code></td>
+            <td>Conditional</td>
+            <td>Pipe-separated labels for diagram questions</td>
+            <td>Gate|Source|Drain</td>
+          </tr>
+          <tr>
+            <td><code>markers</code></td>
+            <td>No</td>
+            <td>JSON array of marker coordinates</td>
+            <td>[{"x":25,"y":30},{"x":75,"y":50}]</td>
+          </tr>
+          <tr>
+            <td><code>masks</code></td>
+            <td>Conditional</td>
+            <td>JSON array of mask coordinates for image occlusion</td>
+            <td>[{"x":35,"y":30,"w":25,"h":15}]</td>
+          </tr>
+          <tr>
+            <td><code>parts</code></td>
+            <td>Conditional</td>
+            <td>JSON array of sub-questions for composite questions</td>
+            <td>[{"type":"written","content":"Part A","points":2}]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="import-form">
+    <%= form_with url: import_csv_questions_path, multipart: true, local: true do |form| %>
+      <div class="form-group">
+        <%= form.label :csv_file, "CSV File", class: "form-label" %>
+        <%= form.file_field :csv_file, accept: ".csv", required: true, class: "form-control" %>
+        <small class="form-text text-muted">Select a CSV file to import</small>
+      </div>
+      
+      <div class="form-group">
+        <div class="form-check">
+          <%= form.check_box :preview_only, { checked: true, class: "form-check-input" }, "true", "false" %>
+          <%= form.label :preview_only, "Preview only (validate without importing)", class: "form-check-label" %>
+        </div>
+        <small class="form-text text-muted">Check this to validate your data before importing</small>
+      </div>
+      
+      <div class="form-actions">
+        <%= form.submit "Import Questions", class: "btn btn-primary" %>
+        <%= link_to "Cancel", questions_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+  
+  <% if params[:preview] == 'true' %>
+    <div class="import-results">
+      <h2>Import Preview Results</h2>
+      
+      <div class="alert alert-info">
+        <strong>Questions Count:</strong> <%= params[:questions_count] %>
+      </div>
+      
+      <% if params[:errors].present? && params[:errors].any? %>
+        <div class="alert alert-danger">
+          <h4>Errors Found:</h4>
+          <ul>
+            <% params[:errors].each do |error| %>
+              <li><%= error %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <% if params[:warnings].present? && params[:warnings].any? %>
+        <div class="alert alert-warning">
+          <h4>Warnings:</h4>
+          <ul>
+            <% params[:warnings].each do |warning| %>
+              <li><%= warning %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <% if params[:errors].blank? || params[:errors].empty? %>
+        <div class="alert alert-success">
+          <h4>Validation Successful!</h4>
+          <p>Your CSV file is valid and ready for import.</p>
+          <%= form_with url: import_csv_questions_path, multipart: true, local: true do |form| %>
+            <%= form.hidden_field :csv_file, value: params[:csv_file] %>
+            <%= form.hidden_field :preview_only, value: "false" %>
+            <%= form.submit "Complete Import", class: "btn btn-success" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.import-instructions {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.column-descriptions {
+  margin-top: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+.table code {
+  background-color: #f8f9fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.import-form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.form-check-input {
+  margin-right: 8px;
+}
+
+.form-text {
+  font-size: 0.875em;
+  color: #6c757d;
+}
+
+.form-actions {
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+</style>
