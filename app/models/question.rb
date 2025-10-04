@@ -11,6 +11,7 @@ class Question < ApplicationRecord
     diagram_label
     image_occlusion
     composite
+    markdown
   ].freeze
 
   attribute :options, :json, default: []

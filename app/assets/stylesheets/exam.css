@@ -153,6 +153,26 @@ h1 {
 /* Cloze */
 .cloze-blank { display: inline-block; min-width: 20mm; border-bottom: 1pt solid #000; height: 5mm; }
 
+/* Markdown blocks */
+.markdown-body { margin-left: 12mm; }
+.markdown-body pre.md-code {
+  background: #f6f8fa;
+  border: 1pt solid #ddd;
+  border-radius: 3px;
+  padding: 4mm;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 10pt;
+}
+.markdown-body code.md-inline {
+  background: #f6f8fa;
+  border: 1pt solid #e1e4e8;
+  border-radius: 3px;
+  padding: 0 1.5mm;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 10pt;
+}
+
 /* Ordering */
 .ordering-list { display: grid; gap: 3mm; }
 .ordering-item { display: flex; align-items: center; gap: 3mm; }

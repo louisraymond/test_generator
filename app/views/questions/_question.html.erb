@@ -31,6 +31,8 @@
       <%= render 'questions/diagram_label', question: question %>
     <% when 'image_occlusion' %>
       <%= render 'questions/image_occlusion', question: question %>
+    <% when 'markdown' %>
+      <%= render 'questions/markdown', question: question %>
     <% when 'composite' %>
       <%= render 'questions/composite', question: question %>
     <% else %>
