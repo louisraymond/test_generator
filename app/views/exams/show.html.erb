@@ -3,18 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <%= stylesheet_link_tag 'exam', media: 'all' %>
-</head>
+  </head>
 <body>
-  <h1><%= @exam.title %></h1>
+  <div class="page">
+    <h1><%= @exam.title %></h1>
+    <% if @exam.duration_minutes.present? %>
+      <p style="text-align:center; margin-top:-10mm; margin-bottom:15mm; font-style: italic;">Duration: <%= @exam.duration_minutes %> minutes</p>
+    <% end %>
 
-  <% @exam.questions.each_with_index do |question, index| %>
-    <%= render 'questions/question', question: question, number: index + 1 %>
-  <% end %>
+    <% @exam.questions.each_with_index do |question, index| %>
+      <%= render 'questions/question', question: question, number: index + 1 %>
+    <% end %>
 
-  <div class="actions-bar">
-    <%= link_to 'Download Exam PDF', exam_path(@exam, format: :pdf) %>
-    <%= link_to 'Download Marking Scheme', marking_scheme_exam_path(@exam, format: :pdf) %>
-    <%= link_to 'Generate New Exam', new_exam_path %>
+    <div class="actions-bar">
+      <%= link_to 'Download Exam PDF', exam_path(@exam, format: :pdf) %>
+      <%= link_to 'Download Marking Scheme', marking_scheme_exam_path(@exam, format: :pdf) %>
+      <%= link_to 'Generate New Exam', new_exam_path %>
+    </div>
   </div>
 </body>
 </html>

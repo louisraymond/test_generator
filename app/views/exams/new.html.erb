@@ -6,25 +6,64 @@
 
 <div class="form-wrapper">
   <%= form_with url: exams_path, method: :post, local: true do |f| %>
-    <%= f.text_field :title, placeholder: 'Exam title (optional)' %>
+    <%= f.text_field :title, placeholder: 'Exam title (optional)', value: params[:title] %>
 
     <fieldset>
-      <legend>Select Topics</legend>
+      <legend>Exam Settings</legend>
+      <div style="display:flex; gap:16px; align-items:end; flex-wrap: wrap;">
+        <div>
+          <label>Total Questions</label>
+          <%= f.number_field :question_count, placeholder: 'e.g. 10', min: 1, required: true, value: params[:question_count] %>
+        </div>
+        <div>
+          <label>Duration (minutes, optional)</label>
+          <%= f.number_field :duration_minutes, placeholder: 'e.g. 60', min: 1, value: params[:duration_minutes] %>
+        </div>
+        <div>
+          <label>
+            <%= check_box_tag :allow_repeats, '1', ActiveModel::Type::Boolean.new.cast(params[:allow_repeats]), id: 'allow_repeats' %>
+            Allow question repeats
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Question Types</legend>
       <div class="topic-list">
-        <% @topics.each do |topic| %>
+        <% selected_types = Array(params[:question_types]).presence || @question_types %>
+        <% @question_types.each do |qt| %>
           <div class="topic-checkbox">
-            <%= check_box_tag 'topic_ids[]', topic.id, false, id: "topic_#{topic.id}" %>
-            <%= label_tag "topic_#{topic.id}", topic.name %>
+            <%= check_box_tag 'question_types[]', qt, selected_types.include?(qt), id: "qt_#{qt}" %>
+            <%= label_tag "qt_#{qt}", qt.humanize %>
           </div>
         <% end %>
       </div>
     </fieldset>
 
     <fieldset>
-      <legend>Number of Questions</legend>
-      <%= f.number_field :question_count, placeholder: 'Number of questions', min: 1 %>
+      <legend>Select Topics & Weights</legend>
+      <p style="margin: 0 0 8px; color:#555;">Optionally set weights to control distribution across topics (higher = more questions). Leave blank for equal distribution.</p>
+      <div class="topic-list">
+        <% @topics.each do |topic| %>
+          <div class="topic-checkbox" style="justify-content: space-between;">
+            <div>
+              <% checked = Array(params[:topic_ids]).map(&:to_s).include?(topic.id.to_s) %>
+              <%= check_box_tag 'topic_ids[]', topic.id, checked, id: "topic_#{topic.id}" %>
+              <%= label_tag "topic_#{topic.id}", topic.name %>
+            </div>
+            <div>
+              <label for="tw_<%= topic.id %>">Weight</label>
+              <input type="number" name="topic_weights[<%= topic.id %>]" id="tw_<%= topic.id %>" min="0" step="1" style="width:100px;" value="<%= params.dig(:topic_weights, topic.id.to_s) %>">
+            </div>
+          </div>
+        <% end %>
+      </div>
     </fieldset>
 
-    <%= f.submit 'Generate Exam' %>
+    <div class="actions-bar">
+      <%= f.submit 'Generate Exam' %>
+      <%= link_to 'Browse Questions', questions_path %>
+    </div>
   <% end %>
 </div>
