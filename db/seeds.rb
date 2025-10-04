@@ -726,7 +726,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain how strong parameters and type casting are applied before calling the service, and why `to_h` is not called on unpermitted params.
 
       ```ruby
@@ -756,7 +756,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Describe how weighted selection and repeats interact in the service. Include trade‑offs of `ORDER BY RANDOM()`.
 
       ```ruby
@@ -783,7 +783,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain the matching UI layout and why it improves clarity over checkboxes.
 
       ```erb
@@ -809,7 +809,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       How do diagram labeling markers affect rendering and the number of blanks?
 
       ```erb
@@ -831,7 +831,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain the CSS used to stabilize ruled line thickness and cadence in PDFs.
 
       ```css
@@ -857,7 +857,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       What options are set for PDF generation and why?
 
       ```ruby
@@ -880,7 +880,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Show the routes for exams and questions and describe each endpoint.
 
       ```ruby
@@ -901,7 +901,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Why is the markdown renderer intentionally minimal and sanitized? What tags/attributes are allowed?
 
       ```ruby
@@ -919,7 +919,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Show the `QUESTION_TYPES` constant and explain why inclusion validation helps controllers and seeds catch mistakes early.
 
       ```ruby
@@ -940,7 +940,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain the conditional validation for `multiple_choice` options and why it is placed in the model rather than controllers.
 
       ```ruby
@@ -964,7 +964,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       How does the index on `(exam_id, position)` affect ordering guarantees? What happens if two rows share the same position?
 
       ```ruby
@@ -982,7 +982,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Detail the change that allowed repeated questions in an exam and why the unique index was removed.
 
       ```ruby
@@ -1000,7 +1000,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain why `questions.options` moved to a DB default of `[]` and `NOT NULL`, in addition to the model default.
 
       ```ruby
@@ -1020,7 +1020,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       What does `base_url: request.base_url` accomplish for Grover when generating PDFs?
     MD
     answer: 'Makes relative asset and link paths resolvable by the headless browser; required for embedded CSS/images.',
@@ -1033,7 +1033,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Show the helper that embeds images as data URIs and explain why this is robust for PDF generation.
 
       ```ruby
@@ -1060,7 +1060,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Why is exam creation wrapped in a transaction in `ExamBuilder`? Provide a failure scenario it protects against.
     MD
     answer: 'Ensures exam and all exam_questions are created atomically; protects against partial exams on validation or DB errors.',
@@ -1073,7 +1073,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       What exceptions can the builder raise and how should the controller surface them to the user?
     MD
     answer: 'MissingTopicsError when no topics selected; NotEnoughQuestionsError when not enough items; controller rescues and flashes alert.',
@@ -1086,7 +1086,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Show how `questions#index` filters by topic, source, and type, and describe why it is capped to 200.
 
       ```ruby
@@ -1108,7 +1108,7 @@ ActiveRecord::Base.transaction do
     topic: codebase,
     source: project_docs,
     source_reference: 'docs/app_exam.md',
-    content: <<~MD,
+    content: <<~'MD',
       Explain the MC layout grid and why a grid is more robust than floats.
 
       ```css
