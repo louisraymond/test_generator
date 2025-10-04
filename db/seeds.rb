@@ -12,6 +12,7 @@ ActiveRecord::Base.transaction do
   toc = Topic.create!(name: 'Theory of Constraints')
   programming = Topic.create!(name: 'Ruby on Rails')
   electronics = Topic.create!(name: 'Electronics - Signal Processing')
+  codebase = Topic.create!(name: 'Codebase - Exam Generator')
 
   puts 'Creating sources...'
   feynman = Source.create!(
@@ -36,6 +37,12 @@ ActiveRecord::Base.transaction do
     name: 'Wikimedia Commons',
     source_type: 'website',
     notes: 'Public domain / Creative Commons images; see individual file pages for license and attribution.'
+  )
+
+  project_docs = Source.create!(
+    name: 'Project Documentation',
+    source_type: 'internal',
+    notes: 'docs/app_exam.md in this repository'
   )
 
   puts 'Creating questions...'
@@ -712,6 +719,199 @@ ActiveRecord::Base.transaction do
     answer_size: 'short',
     question_type: 'diagram_label',
     options: { 'image' => 'Op-amp_symbol_simplified.svg', 'labels' => ['+', '−', 'Out'], 'markers' => [ { 'x' => 26, 'y' => 35 }, { 'x' => 26, 'y' => 65 }, { 'x' => 75, 'y' => 50 } ] }
+  )
+
+  # Codebase quiz (markdown)
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain how strong parameters and type casting are applied before calling the service, and why `to_h` is not called on unpermitted params.
+
+      ```ruby
+      # app/controllers/exams_controller.rb:create
+      p = exam_params
+      title     = p[:title].presence || 'Practice Exam'
+      topic_ids = Array(p[:topic_ids]).reject(&:blank?)
+      count     = p[:question_count].to_i
+      types = Array(p[:question_types]).reject(&:blank?)
+      types &= Question::QUESTION_TYPES
+      raw_weights_params = p[:topic_weights]
+      raw_weights = raw_weights_params.is_a?(ActionController::Parameters) ? raw_weights_params.to_h : (raw_weights_params || {})
+      weights = raw_weights
+                .slice(*topic_ids.map(&:to_s))
+                .transform_values { |v| v.to_s.strip }
+                .reject { |_k, v| v.blank? || v.to_f <= 0 }
+                .transform_values(&:to_f)
+      ```
+    MD
+    answer: 'Strong params whitelist; intersection with known types prevents invalid input; Rails forbids to_h on unpermitted params; weights are sanitized and cast to floats.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Describe how weighted selection and repeats interact in the service. Include trade‑offs of `ORDER BY RANDOM()`.
+
+      ```ruby
+      # app/services/exam_builder.rb:35–50
+      final_count = allow_repeats ? requested : [requested, available].min
+      selected = if topic_weights.present?
+                   allocate_by_weights(scope, topic_ids, topic_weights, [final_count, available].min)
+                 else
+                   scope.order(Arel.sql('RANDOM()')).limit([final_count, available].min).to_a
+                 end
+      if allow_repeats && selected.size < final_count
+        needed = final_count - selected.size
+        selected += selected.cycle.take(needed)
+      end
+      ```
+    MD
+    answer: 'Weights apportion counts by topic; ORDER BY RANDOM() samples simply but can be slow; repeats pad to target by cycling.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain the matching UI layout and why it improves clarity over checkboxes.
+
+      ```erb
+      <!-- app/views/questions/_matching.html.erb -->
+      <div class="matching-table">
+        <% left.each_with_index do |l, i| %>
+          <div class="matching-row">
+            <div class="match-left"><%= l %></div>
+            <div class="match-line"></div>
+            <div class="match-right"><strong><%= right[i] %></strong></div>
+          </div>
+        <% end %>
+      </div>
+      ```
+    MD
+    answer: 'Two columns with a connecting line create an obvious affordance and uniform alignment; better than checkbox guessing.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      How do diagram labeling markers affect rendering and the number of blanks?
+
+      ```erb
+      <!-- app/views/questions/_diagram_label.html.erb -->
+      <% markers.each_with_index do |m, i| %>
+        <div class="callout" style="left:<%= m['x'] %>%; top:<%= m['y'] %>%">
+          <span class="callout-dot"><%= i + 1 %></span>
+        </div>
+      <% end %>
+      ```
+    MD
+    answer: 'Markers put visible numbered dots on the image and define the number of blanks; without markers, label count or default is used.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain the CSS used to stabilize ruled line thickness and cadence in PDFs.
+
+      ```css
+      .answer-lines {
+        background-image: repeating-linear-gradient(
+          to bottom,
+          rgba(0,0,0,0) 0,
+          rgba(0,0,0,0) 6.65mm,
+          rgba(0,0,0,0.26) 6.65mm,
+          rgba(0,0,0,0.26) 7mm
+        );
+        background-size: 100% 7mm;
+      }
+      ```
+    MD
+    answer: 'Anchoring repeat to 7mm controls cadence; slightly thicker stripe improves consistency across print engines.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      What options are set for PDF generation and why?
+
+      ```ruby
+      pdf = Grover.new(
+        html,
+        base_url: request.base_url,
+        emulate_media: 'print',
+        print_background: true,
+        prefer_css_page_size: true
+      ).to_pdf
+      ```
+    MD
+    answer: 'Apply print CSS; include backgrounds (ruled lines); obey CSS page size; base_url for asset resolution.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show the routes for exams and questions and describe each endpoint.
+
+      ```ruby
+      root 'exams#new'
+      resources :exams, only: %i[new create show] do
+        member { get :marking_scheme }
+      end
+      resources :questions, only: [:index]
+      ```
+    MD
+    answer: 'Root form; create builds exam; show renders HTML/PDF; marking_scheme returns marking PDF; questions#index is a dev browser.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Why is the markdown renderer intentionally minimal and sanitized? What tags/attributes are allowed?
+
+      ```ruby
+      sanitize(html, tags: %w[p br pre code strong em a ul ol li span], attributes: %w[class href])
+      ```
+    MD
+    answer: 'Safety and portability for print/HTML; only safe tags and attributes are allowed to avoid XSS.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
   )
 
 
