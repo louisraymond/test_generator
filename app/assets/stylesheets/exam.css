@@ -165,7 +165,8 @@ h1 {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 10pt;
 }
-.markdown-body code.md-inline {
+/* Inline code chips (usable inside headers and body) */
+code.md-inline, .markdown-body code.md-inline {
   background: #f6f8fa;
   border: 1pt solid #cfcfcf;
   border-radius: 3px;
