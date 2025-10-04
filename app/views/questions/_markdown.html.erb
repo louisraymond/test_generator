@@ -1,7 +1,6 @@
 <div class="markdown-body">
-  <%= render_markdown(question.content) %>
+  <%= render_markdown(local_assigns[:content] || question.content) %>
   <% if question.answer_size.present? %>
     <div class="answer-lines answer-lines-<%= question.answer_size %>"></div>
   <% end %>
 </div>
-

@@ -2,17 +2,20 @@
 <div class="question <%= 'question-large' if size_class == 'long' %>">
   <div class="question-header">
     <span class="question-number"><%= number %></span>
-    <div class="question-text">
-      <% if question.question_type == 'cloze' %>
-        <% masked = ERB::Util.html_escape(question.content.to_s) %>
-        <% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
-        <%= raw masked %>
-      <% elsif question.question_type == 'markdown' %>
-        <%# Markdown content is rendered in the answer area to avoid duplication and to allow code blocks %>
-      <% else %>
-        <%= simple_format(question.content) %>
-      <% end %>
-    </div>
+    <% if question.question_type == 'markdown' %>
+      <% prompt, body = markdown_split(question.content) %>
+      <div class="question-text"><%= render_markdown_inline(prompt) %></div>
+    <% else %>
+      <div class="question-text">
+        <% if question.question_type == 'cloze' %>
+          <% masked = ERB::Util.html_escape(question.content.to_s) %>
+          <% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
+          <%= raw masked %>
+        <% else %>
+          <%= simple_format(question.content) %>
+        <% end %>
+      </div>
+    <% end %>
     <span class="marks">[<%= question.points %> <%= 'mark'.pluralize(question.points) %>]</span>
   </div>
   <div class="answer-space">
@@ -34,7 +37,15 @@
     <% when 'image_occlusion' %>
       <%= render 'questions/image_occlusion', question: question %>
     <% when 'markdown' %>
-      <%= render 'questions/markdown', question: question %>
+      <% prompt, body = markdown_split(question.content) %>
+      <% if body.present? %>
+        <%= render 'questions/markdown', question: question, content: body %>
+      <% else %>
+        <%# No fenced body; just show answer lines if requested %>
+        <% if question.answer_size.present? %>
+          <div class="answer-lines answer-lines-<%= size_class %>"></div>
+        <% end %>
+      <% end %>
     <% when 'composite' %>
       <%= render 'questions/composite', question: question %>
     <% else %>

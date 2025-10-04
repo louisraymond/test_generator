@@ -50,4 +50,23 @@ module MarkdownHelper
     html = parts.join
     sanitize(html, tags: %w[p br pre code strong em a ul ol li span], attributes: %w[class href])
   end
+
+  # Split a markdown string at the first fenced code block. Returns [prompt, body].
+  def markdown_split(md)
+    lines = md.to_s.split(/\r?\n/, -1)
+    idx = lines.index { |l| l.lstrip.start_with?('```') }
+    if idx
+      [lines[0...idx].join("\n"), lines[idx..-1].join("\n")]
+    else
+      [md.to_s, '']
+    end
+  end
+
+  # Render only inline markdown (no fenced blocks) for headers/prompts.
+  def render_markdown_inline(md)
+    text = ERB::Util.html_escape(md.to_s)
+    text = text.gsub(/`([^`]+)`/) { %(<code class="md-inline">#{$1}</code>) }
+    html = text.split(/\n{2,}/).map { |para| "<p>#{para.gsub(/\n/, '<br>')}</p>" }.join
+    sanitize(html, tags: %w[p br code span], attributes: %w[class])
+  end
 end
