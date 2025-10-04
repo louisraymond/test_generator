@@ -8,7 +8,10 @@ class QuestionsController < ApplicationController
     scope = scope.where(source_id: params[:source_id]) if params[:source_id].present?
     scope = scope.where(question_type: params[:question_type]) if params[:question_type].present?
 
+    @total_count = scope.count
+    @type_counts = scope.group(:question_type).count
     @questions = scope.order(created_at: :desc).limit(200)
+    @capped = @total_count > @questions.size
   end
   def types_preview
     @random_questions = Question.order(Arel.sql('RANDOM()')).limit(15)

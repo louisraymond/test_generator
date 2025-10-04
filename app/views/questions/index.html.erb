@@ -1,50 +1,81 @@
-<h1>Browse Questions</h1>
+<h1>Question Library</h1>
+<p class="library-lead">Browse, filter, and preview the questions powering your exams. Up to 200 results are shown at a time.</p>
 
-<div class="form-wrapper">
-  <%= form_with url: questions_path, method: :get, local: true do |f| %>
-    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
-      <div>
-        <label>Topic</label>
-        <%= select_tag :topic_id, options_from_collection_for_select(@topics, :id, :name, params[:topic_id]), include_blank: 'All topics' %>
+<div class="library-grid">
+  <div class="filter-card card">
+    <%= form_with url: questions_path, method: :get, local: true, class: 'filter-form' do |f| %>
+      <div class="filter-row">
+        <div class="field">
+          <label>Topic</label>
+          <%= select_tag :topic_id, options_from_collection_for_select(@topics, :id, :name, params[:topic_id]), include_blank: 'All topics' %>
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <%= select_tag :source_id, options_from_collection_for_select(@sources, :id, :name, params[:source_id]), include_blank: 'All sources' %>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <%= select_tag :question_type, options_for_select(Question::QUESTION_TYPES.map { |t| [t.humanize, t] }, params[:question_type]), include_blank: 'All types' %>
+        </div>
+        <div class="field actions">
+          <%= f.submit 'Apply filters', class: 'btn-primary' %>
+          <%= link_to 'Reset', questions_path, class: 'link-reset' %>
+        </div>
       </div>
-      <div>
-        <label>Source</label>
-        <%= select_tag :source_id, options_from_collection_for_select(@sources, :id, :name, params[:source_id]), include_blank: 'All sources' %>
-      </div>
-      <div>
-        <label>Type</label>
-        <%= select_tag :question_type, options_for_select(Question::QUESTION_TYPES.map { |t| [t.humanize, t] }, params[:question_type]), include_blank: 'All types' %>
-      </div>
-      <div>
-        <%= f.submit 'Filter' %>
-        <%= link_to 'Clear', questions_path %>
-      </div>
+    <% end %>
+
+    <div class="filter-summary">
+      <span class="chip">Total matches: <strong><%= @total_count %></strong></span>
+      <% if @capped %>
+        <span class="chip warning">Showing latest <%= @questions.size %></span>
+      <% end %>
     </div>
+
+    <div class="filter-chips">
+      <% @type_counts.sort.each do |type, count| %>
+        <span class="chip"><%= type.humanize %> <strong><%= count %></strong></span>
+      <% end %>
+    </div>
+  </div>
+
+  <aside class="library-side card">
+    <h3>Quick Actions</h3>
+    <ul>
+      <li><%= link_to 'Generate a new exam →', new_exam_path %></li>
+      <li><%= link_to 'Preview question formats →', question_types_preview_path if Rails.env.development? %></li>
+      <li><%= link_to 'Download marking scheme example →', marking_scheme_exam_path(Exam.last, format: :pdf) if Exam.last %></li>
+    </ul>
+    <p class="muted">Need a deeper dive? Check the <%= link_to 'Onboarding guide', '/docs/app_exam.md' %> for architecture notes.</p>
+  </aside>
+</div>
+
+<div class="questions-card card">
+  <% if @questions.empty? %>
+    <p class="muted">No questions found for these filters. Try broadening your search.</p>
+  <% else %>
+    <table class="questions-table">
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th>Type</th>
+          <th>Points</th>
+          <th>Content</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @questions.each do |q| %>
+          <tr>
+            <td>
+              <div class="topic-pill"><%= q.topic.name %></div>
+            </td>
+            <td><span class="chip"><%= q.question_type.humanize %></span></td>
+            <td class="points">[<%= q.points %> <%= 'mark'.pluralize(q.points) %>]</td>
+            <td class="excerpt">
+              <%= truncate(strip_tags(q.content.to_s), length: 200) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   <% end %>
 </div>
-
-<div class="form-wrapper">
-  <table style="width:100%; border-collapse: collapse;">
-    <thead>
-      <tr>
-        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Topic</th>
-        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Type</th>
-        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Points</th>
-        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Content</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @questions.each do |q| %>
-        <tr>
-          <td style="border-bottom:1px solid #f0f0f0; padding:8px; white-space:nowrap;"><%= q.topic.name %></td>
-          <td style="border-bottom:1px solid #f0f0f0; padding:8px;"><%= q.question_type.humanize %></td>
-          <td style="border-bottom:1px solid #f0f0f0; padding:8px;">[<%= q.points %> <%= 'mark'.pluralize(q.points) %>]</td>
-          <td style="border-bottom:1px solid #f0f0f0; padding:8px; max-width:900px;">
-            <%= truncate(strip_tags(q.content.to_s), length: 180) %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
-

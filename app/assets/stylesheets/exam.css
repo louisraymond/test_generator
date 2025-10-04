@@ -230,6 +230,32 @@ h1 {
   }
 }
 
+/* Question library */
+.library-lead { color:#475569; margin:12px 0 24px; }
+.library-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; margin-bottom:24px; align-items:start; }
+.filter-card { background:#fff; border-radius:12px; border:1px solid #e2e8f0; padding:20px; }
+.library-side { background:#10182b; color:#f8fafc; border:none; }
+.library-side h3 { margin-top:0; font-size:18px; font-weight:600; }
+.library-side ul { list-style:none; padding:0; margin:0 0 12px; display:grid; gap:6px; }
+.library-side a { color:#93c5fd; text-decoration:none; }
+.library-side .muted { color:#cbd5f5; font-size:13px; margin-top:16px; }
+.muted { color:#6b7280; font-size:13px; }
+.filter-form select { width: 180px; }
+.filter-row { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; }
+.filter-summary { margin:16px 0 10px; display:flex; gap:8px; flex-wrap:wrap; }
+.filter-chips { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-chips .chip { background:#e0f2fe; color:#0c4a6e; border-color:#bae6fd; }
+.questions-card { background:#fff; border-radius:12px; border:1px solid #e2e8f0; padding:0; }
+.questions-table { width:100%; border-collapse:collapse; }
+.questions-table thead { background:#f1f5f9; }
+.questions-table th { text-align:left; padding:12px; font-weight:600; color:#1f2937; border-bottom:1px solid #e2e8f0; }
+.questions-table td { padding:12px; border-bottom:1px solid #f1f5f9; vertical-align:top; font-size:14px; color:#27272a; }
+.questions-table tr:nth-child(even) { background:#f9fafb; }
+.questions-table .topic-pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#e2e8f0; font-size:12px; }
+.questions-table .points { white-space:nowrap; color:#475569; }
+.questions-table .excerpt { max-width:720px; }
+.link-reset { margin-left:10px; font-size:13px; color:#1d4ed8; text-decoration:none; }
+
 /* Matching - square blocks with connection bumps */
 .matching-table { display: grid; gap: 5mm; margin-left: 12mm; }
 /* Constrain total width to prevent overflow on A4 */
