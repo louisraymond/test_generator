@@ -914,6 +914,371 @@ ActiveRecord::Base.transaction do
     question_type: 'markdown'
   )
 
+  # More codebase markdown questions (~20)
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show the `QUESTION_TYPES` constant and explain why inclusion validation helps controllers and seeds catch mistakes early.
+
+      ```ruby
+      # app/models/question.rb
+      QUESTION_TYPES = %w[
+        written multiple_choice calculation matching cloze ordering ranking
+        diagram_label image_occlusion composite markdown
+      ].freeze
+      ```
+    MD
+    answer: 'Single source of truth for allowed types; controllers intersect with this list; inclusion validation prevents invalid data.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain the conditional validation for `multiple_choice` options and why it is placed in the model rather than controllers.
+
+      ```ruby
+      # app/models/question.rb (excerpt)
+      validate :options_requirements_for_type
+      def options_requirements_for_type
+        case question_type
+        when 'multiple_choice'
+          errors.add(:options, 'must be a non-empty array') unless options.is_a?(Array) && options.any?
+        end
+      end
+      ```
+    MD
+    answer: 'Model-level invariant ensures any creation path (web/seed/console) enforces shape; controller-only checks are bypassable.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      How does the index on `(exam_id, position)` affect ordering guarantees? What happens if two rows share the same position?
+
+      ```ruby
+      # db/migrate/20251003210938_create_exam_questions.rb
+      add_index :exam_questions, [:exam_id, :position]
+      ```
+    MD
+    answer: 'Index supports order queries; later migration makes it unique to prevent duplicates, ensuring a stable ordering.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Detail the change that allowed repeated questions in an exam and why the unique index was removed.
+
+      ```ruby
+      # db/migrate/20251004000500_allow_repeated_questions_in_exam.rb
+      remove_index :exam_questions, name: 'index_exam_questions_on_exam_id_and_question_id'
+      ```
+    MD
+    answer: 'Removing the uniqueness constraint on (exam_id, question_id) permits intentional repeats for longer quizzes.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain why `questions.options` moved to a DB default of `[]` and `NOT NULL`, in addition to the model default.
+
+      ```ruby
+      # db/migrate/20251003223000_harden_db_constraints.rb
+      change_column_default :questions, :options, from: nil, to: []
+      execute "UPDATE questions SET options = '[]'::jsonb WHERE options IS NULL"
+      change_column_null :questions, :options, false
+      ```
+    MD
+    answer: 'Guards against NULLs from non-AR paths and simplifies JSON handling; DB becomes source of truth for default.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      What does `base_url: request.base_url` accomplish for Grover when generating PDFs?
+    MD
+    answer: 'Makes relative asset and link paths resolvable by the headless browser; required for embedded CSS/images.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show the helper that embeds images as data URIs and explain why this is robust for PDF generation.
+
+      ```ruby
+      # app/helpers/asset_embed_helper.rb (excerpt)
+      def embedded_image_tag(path, alt: '', **html_options)
+        file_path = Rails.root.join('app','assets','images', path)
+        if File.file?(file_path)
+          mime = Rack::Mime.mime_type(File.extname(file_path))
+          data = Base64.strict_encode64(File.binread(file_path))
+          image_tag("data:#{mime};base64,#{data}", alt: alt, **html_options)
+        else
+          image_tag(asset_path(path), alt: alt, **html_options)
+        end
+      end
+      ```
+    MD
+    answer: 'Avoids network fetches inside headless Chrome; PDFs become self-contained; fallback to asset pipeline when file missing.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Why is exam creation wrapped in a transaction in `ExamBuilder`? Provide a failure scenario it protects against.
+    MD
+    answer: 'Ensures exam and all exam_questions are created atomically; protects against partial exams on validation or DB errors.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      What exceptions can the builder raise and how should the controller surface them to the user?
+    MD
+    answer: 'MissingTopicsError when no topics selected; NotEnoughQuestionsError when not enough items; controller rescues and flashes alert.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show how `questions#index` filters by topic, source, and type, and describe why it is capped to 200.
+
+      ```ruby
+      # app/controllers/questions_controller.rb#index (excerpt)
+      scope = Question.includes(:topic, :source)
+      scope = scope.where(topic_id: params[:topic_id]) if params[:topic_id].present?
+      scope = scope.where(source_id: params[:source_id]) if params[:source_id].present?
+      scope = scope.where(question_type: params[:question_type]) if params[:question_type].present?
+      @questions = scope.order(created_at: :desc).limit(200)
+      ```
+    MD
+    answer: 'Simple browse/debug tool; limit prevents huge result sets in dev preview.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain the MC layout grid and why a grid is more robust than floats.
+
+      ```css
+      .mc-option {
+        display: grid;
+        grid-template-columns: 7mm 7mm auto;
+        column-gap: 4mm; align-items: center;
+      }
+      ```
+    MD
+    answer: 'Grid guarantees alignment of box, letter, and text, even when labels wrap; avoids float overlap/clearfix issues.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Why did we change the A4 screen container from fixed `height` to `min-height`?
+    MD
+    answer: 'Fixed height clipped overflow to one page; min-height lets content grow naturally while preserving A4 width preview.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show how the exam form preserves state on validation failure and why `render :new` is preferable to redirect in this case.
+    MD
+    answer: 'Controller rescues builder errors and calls render :new with flash.now; fields use params to repopulate; redirect would lose state.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Why is `exam_questions.position` 1‑based in creation? What display or ordering benefits does it have?
+    MD
+    answer: 'Matches user-facing numbering and simplifies ORDER BY position ASC without translating 0-based indexes.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Where is the RSpec configuration included and how are factories mixed in?
+
+      ```ruby
+      # spec/rails_helper.rb (excerpt)
+      config.include FactoryBot::Syntax::Methods
+      ```
+    MD
+    answer: 'In rails_helper; FactoryBot methods are available without prefix, simplifying test code.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      In the request spec for exam generation, how is topic scoping verified?
+
+      ```ruby
+      # spec/requests/exams_spec.rb (excerpt)
+      expect(Exam.last.questions.pluck(:topic_id).uniq).to eq([topic.id])
+      ```
+    MD
+    answer: 'Ensures all selected questions belong to the chosen topic; guards against leakage across topics.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      For diagram questions, why are images kept as SVGs instead of raster formats where possible?
+    MD
+    answer: 'SVGs scale crisply to print and screen without blurring; smaller payloads for line art; ideal for symbols and schematics.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Describe how the `diagram_label` blank count is determined when both `labels` and `markers` are present.
+    MD
+    answer: 'Marker count wins (ensures parity with on‑image callouts); falls back to labels count, then to a default.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Explain why `.marks` was toned down and how that helps the visual hierarchy on paper.
+    MD
+    answer: 'Marks remain visible but stop competing with the prompt; reduces noise in right-aligned header.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Show how the form allows topic weighting and explain what happens if all weights are blank.
+    MD
+    answer: 'Weights are optional; if none provided or all blank/zero, equal distribution is assumed across selected topics.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      Why do we prefer `Arel.sql('RANDOM()')` here instead of passing a raw string?
+    MD
+    answer: 'Signals intentional SQL usage to Rails to avoid automatic quoting and silence safety warnings.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+  Question.create!(
+    topic: codebase,
+    source: project_docs,
+    source_reference: 'docs/app_exam.md',
+    content: <<~MD,
+      What does `prefer_css_page_size: true` change in Grover’s PDF output compared to default page sizing?
+    MD
+    answer: 'Instructs the renderer to respect CSS @page sizes/margins (A4), not the browser default page size.',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'markdown'
+  )
+
+
 
   puts 'Seed data created successfully!'
   puts "#{Topic.count} topics"
