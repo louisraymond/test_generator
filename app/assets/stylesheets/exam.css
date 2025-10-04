@@ -300,7 +300,7 @@ h1 {
   border-radius: 3px;
   padding: 4mm;
   margin: 0 0 6mm 0; /* align vertical rhythm with other types */
-  overflow: auto;
+  overflow: hidden;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 10pt;
 }
