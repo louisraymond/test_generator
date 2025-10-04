@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# Codex CLI API Key setup helper
+# - Prompts for an API key (hidden input) and optional confirmation
+# - Sets preferred_auth_method = "apikey" in ~/.codex/config.toml
+# - Optionally persists OPENAI_API_KEY to your shell profile
+# - Runs `codex login --api-key` and shows login status
+
+set -euo pipefail
+
+header() {
+  echo "==> $1"
+}
+
+error() {
+  echo "[ERROR] $1" >&2
+}
+
+confirm() {
+  local prompt=${1:-Are you sure?}
+  read -r -p "$prompt [y/N]: " resp
+  case "$resp" in
+    [yY][eE][sS]|[yY]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+ensure_codex() {
+  if ! command -v codex >/dev/null 2>&1; then
+    error "Codex CLI not found in PATH. Please install 'codex' and retry."
+    exit 1
+  fi
+}
+
+detect_profile() {
+  # Best-effort detection of a shell profile to append exports
+  local shell_name=${SHELL##*/}
+  case "$shell_name" in
+    zsh) echo "$HOME/.zshrc" ;;
+    bash)
+      # prefer ~/.bashrc; fallback to ~/.bash_profile
+      if [ -f "$HOME/.bashrc" ] || [ ! -f "$HOME/.bash_profile" ]; then
+        echo "$HOME/.bashrc"
+      else
+        echo "$HOME/.bash_profile"
+      fi
+      ;;
+    fish) echo "$HOME/.config/fish/config.fish" ;;
+    *) echo "$HOME/.profile" ;;
+  esac
+}
+
+update_config() {
+  local cfg_dir="$HOME/.codex"
+  local cfg_file="$cfg_dir/config.toml"
+  mkdir -p "$cfg_dir"
+
+  local tmp
+  tmp=$(mktemp)
+  if [ -f "$cfg_file" ]; then
+    cp "$cfg_file" "$cfg_file.bak.$(date +%Y%m%d%H%M%S)" || true
+    # Remove any existing preferred_auth_method lines (top-level)
+    grep -Ev '^[[:space:]]*preferred_auth_method[[:space:]]*=' "$cfg_file" > "$tmp" || true
+  else
+    : > "$tmp"
+  fi
+  echo 'preferred_auth_method = "apikey"' >> "$tmp"
+  mv "$tmp" "$cfg_file"
+}
+
+persist_api_key_to_profile() {
+  local key="$1"
+  local profile="$2"
+  mkdir -p "$(dirname "$profile")"
+  touch "$profile"
+
+  # Avoid duplicate lines; remove previous OPENAI_API_KEY export if present
+  local tmp
+  tmp=$(mktemp)
+  grep -Ev '^[[:space:]]*export[[:space:]]+OPENAI_API_KEY=' "$profile" > "$tmp" || true
+  # Append new export line
+  echo "export OPENAI_API_KEY='$key'" >> "$tmp"
+  mv "$tmp" "$profile"
+}
+
+do_login() {
+  local key="$1"
+  # Pass config override to ensure method selection even before config write
+  codex -c preferred_auth_method="apikey" login --api-key "$key" >/dev/null
+  codex -c preferred_auth_method="apikey" login status || true
+}
+
+main() {
+  ensure_codex
+
+  header "Codex CLI API key setup"
+
+  # Prompt for API key (hidden)
+  local key key2
+  read -r -s -p "Enter your OpenAI API key: " key; echo
+  if [ -z "$key" ]; then
+    error "No API key entered. Aborting."
+    exit 1
+  fi
+  if confirm "Confirm by re-entering the API key?"; then
+    read -r -s -p "Re-enter API key: " key2; echo
+    if [ "$key" != "$key2" ]; then
+      error "Keys do not match. Aborting."
+      exit 1
+    fi
+  fi
+
+  header "Updating Codex config (preferred_auth_method=apikey)"
+  update_config
+
+  if confirm "Persist API key to your shell profile for convenience?"; then
+    local profile
+    profile=$(detect_profile)
+    echo "Using profile: $profile"
+    persist_api_key_to_profile "$key" "$profile"
+    echo "Appended OPENAI_API_KEY to $profile"
+  else
+    echo "Skipping profile update. Key will be stored by Codex login only."
+  fi
+
+  header "Logging in to Codex with API key"
+  do_login "$key"
+
+  # Clear sensitive variable from environment
+  unset key key2
+
+  echo "Done. You can now run: codex -c preferred_auth_method=\"apikey\" ..."
+}
+
+main "$@"
+
