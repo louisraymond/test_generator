@@ -7,6 +7,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :questions, only: [:index]
+
   if Rails.env.development?
     get '/question_types_preview', to: 'questions#types_preview'
   end

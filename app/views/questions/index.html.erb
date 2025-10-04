@@ -1,0 +1,50 @@
+<h1>Browse Questions</h1>
+
+<div class="form-wrapper">
+  <%= form_with url: questions_path, method: :get, local: true do |f| %>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+      <div>
+        <label>Topic</label>
+        <%= select_tag :topic_id, options_from_collection_for_select(@topics, :id, :name, params[:topic_id]), include_blank: 'All topics' %>
+      </div>
+      <div>
+        <label>Source</label>
+        <%= select_tag :source_id, options_from_collection_for_select(@sources, :id, :name, params[:source_id]), include_blank: 'All sources' %>
+      </div>
+      <div>
+        <label>Type</label>
+        <%= select_tag :question_type, options_for_select(Question::QUESTION_TYPES.map { |t| [t.humanize, t] }, params[:question_type]), include_blank: 'All types' %>
+      </div>
+      <div>
+        <%= f.submit 'Filter' %>
+        <%= link_to 'Clear', questions_path %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="form-wrapper">
+  <table style="width:100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Topic</th>
+        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Type</th>
+        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Points</th>
+        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Content</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @questions.each do |q| %>
+        <tr>
+          <td style="border-bottom:1px solid #f0f0f0; padding:8px; white-space:nowrap;"><%= q.topic.name %></td>
+          <td style="border-bottom:1px solid #f0f0f0; padding:8px;"><%= q.question_type.humanize %></td>
+          <td style="border-bottom:1px solid #f0f0f0; padding:8px;">[<%= q.points %> <%= 'mark'.pluralize(q.points) %>]</td>
+          <td style="border-bottom:1px solid #f0f0f0; padding:8px; max-width:900px;">
+            <%= truncate(strip_tags(q.content.to_s), length: 180) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
