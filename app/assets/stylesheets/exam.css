@@ -156,8 +156,9 @@ h1 {
 /* Markdown blocks */
 .markdown-body { margin-left: 12mm; }
 .markdown-body pre.md-code {
-  background: #f6f8fa;
-  border: 1pt solid #ddd;
+  background: #f6f8fa; /* light gray works in B/W */
+  border: 1pt solid #cfcfcf;
+  border-left: 3pt solid #555; /* high-contrast gutter */
   border-radius: 3px;
   padding: 4mm;
   overflow: auto;
@@ -166,12 +167,20 @@ h1 {
 }
 .markdown-body code.md-inline {
   background: #f6f8fa;
-  border: 1pt solid #e1e4e8;
+  border: 1pt solid #cfcfcf;
   border-radius: 3px;
   padding: 0 1.5mm;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 10pt;
 }
+
+/* Optional token classes (B/W friendly): if used, remain legible when printed */
+.tok-key { font-weight: 700; color: #111; }
+.tok-ident { color: #111; }
+.tok-const { text-decoration: underline; color: #111; }
+.tok-num { color: #111; }
+.tok-str { color: #222; font-style: normal; }
+.tok-comment { color: #555; font-style: italic; }
 
 /* Ordering */
 .ordering-list { display: grid; gap: 3mm; }

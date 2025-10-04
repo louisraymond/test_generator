@@ -110,3 +110,152 @@ end
 ---
 
 End of exam.
+
+---
+
+## Code Reading Questions (with snippets)
+
+Read each snippet and explain what it does, why it is implemented this way, and how it interacts with the rest of the app. Reference file paths and line numbers in your explanations.
+
+1) Controller parameter hardening and service call
+
+```ruby
+# app/controllers/exams_controller.rb:create
+p = exam_params
+
+title     = p[:title].presence || 'Practice Exam'
+topic_ids = Array(p[:topic_ids]).reject(&:blank?)
+count     = p[:question_count].to_i
+
+# Sanitize optional filters
+types = Array(p[:question_types]).reject(&:blank?)
+types &= Question::QUESTION_TYPES
+
+raw_weights_params = p[:topic_weights]
+raw_weights = raw_weights_params.is_a?(ActionController::Parameters) ? raw_weights_params.to_h : (raw_weights_params || {})
+weights = raw_weights
+          .slice(*topic_ids.map(&:to_s))
+          .transform_values { |v| v.to_s.strip }
+          .reject { |_k, v| v.blank? || v.to_f <= 0 }
+          .transform_values(&:to_f)
+
+duration = p[:duration_minutes].presence&.to_i
+allow_repeats = ActiveModel::Type::Boolean.new.cast(p[:allow_repeats])
+
+@exam = ExamBuilder.call(
+  topic_ids: topic_ids,
+  count: count,
+  title: title,
+  strict: true,
+  types: types.presence,
+  topic_weights: weights.presence,
+  duration_minutes: duration,
+  allow_repeats: allow_repeats
+)
+```
+
+- Explain how strong parameters are used and why `to_h` is avoided on unpermitted params.
+- Why is `types` intersected with `Question::QUESTION_TYPES`?
+- What does `allow_repeats` change in exam generation?
+
+2) Weighted selection and repeats
+
+```ruby
+# app/services/exam_builder.rb:35–50
+final_count = allow_repeats ? requested : [requested, available].min
+
+selected = if topic_weights.present?
+             allocate_by_weights(scope, topic_ids, topic_weights, [final_count, available].min)
+           else
+             scope.order(Arel.sql('RANDOM()')).limit([final_count, available].min).to_a
+           end
+
+if allow_repeats && selected.size < final_count
+  needed = final_count - selected.size
+  selected += selected.cycle.take(needed)
+end
+```
+
+- Describe how the code ensures the requested count is met with or without repeats.
+- What are the trade‑offs of using `ORDER BY RANDOM()` vs. precomputed randomness or sampling by id?
+
+3) Matching question layout (view)
+
+```erb
+# app/views/questions/_matching.html.erb
+<div class="matching-table">
+  <% left.each_with_index do |l, i| %>
+    <div class="matching-row">
+      <div class="match-left"><%= l %></div>
+      <div class="match-line"></div>
+      <div class="match-right"><strong><%= right[i] %></strong></div>
+    </div>
+  <% end %>
+</div>
+```
+
+- Explain how this layout improves clarity over checkboxes.
+- What CSS ensures the line is long enough to draw on and that the columns align consistently?
+
+4) Diagram labeling callouts
+
+```erb
+# app/views/questions/_diagram_label.html.erb
+<% markers = Array(data['markers']) %>
+...
+<% markers.each_with_index do |m, i| %>
+  <div class="callout" style="left:<%= m['x'] %>%; top:<%= m['y'] %>%">
+    <span class="callout-dot"><%= i + 1 %></span>
+  </div>
+<% end %>
+```
+
+- How do `markers` improve UX? What happens to the number of blanks if markers are omitted?
+- Why are callouts positioned with percentages rather than pixels?
+
+5) Ruled lines cadence and print fidelity
+
+```css
+/* app/assets/stylesheets/exam.css */
+.answer-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0,
+    rgba(0,0,0,0) 6.65mm,
+    rgba(0,0,0,0.26) 6.65mm,
+    rgba(0,0,0,0.26) 7mm
+  );
+  background-size: 100% 7mm;
+}
+```
+
+- Why is `background-size` set to `100% 7mm`? How does this reduce anti‑aliasing artifacts when printed to PDF?
+- Suggest an alternative if lines still look uneven on a specific printer.
+
+6) Markdown question type
+
+```erb
+# app/views/questions/_markdown.html.erb
+<div class="markdown-body">
+  <%= render_markdown(question.content) %>
+  <% if question.answer_size.present? %>
+    <div class="answer-lines answer-lines-<%= question.answer_size %>"></div>
+  <% end %>
+</div>
+```
+
+- Explain why the renderer is intentionally minimal and how the CSS makes it readable in B/W printing (mention gutter border and grayscale background).
+
+7) Routes and preview
+
+```ruby
+# config/routes.rb
+root 'exams#new'
+resources :exams, only: %i[new create show] do
+  member { get :marking_scheme }
+end
+resources :questions, only: [:index]
+```
+
+- List all reachable endpoints with their HTTP methods and what they return.
+- Why is `questions#index` useful during development?
