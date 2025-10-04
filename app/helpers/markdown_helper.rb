@@ -24,12 +24,15 @@ module MarkdownHelper
     end
 
     lines.each do |line|
-      if !in_code && line =~ /^\s*```([\w+-]*)\s*$/
+      stripped = line.lstrip
+      if !in_code && stripped.start_with?('```')
+        # Opening fence; capture language token after backticks (if any)
+        code_lang = stripped.sub(/^```/, '').strip
         in_code = true
-        code_lang = Regexp.last_match(1)
         flush_buf.call
         code_lines = []
-      elsif in_code && line =~ /^\s*```\s*$/
+      elsif in_code && stripped.start_with?('```')
+        # Closing fence
         code = ERB::Util.html_escape(code_lines.join("\n"))
         parts << %(<pre class="md-code"><code class="language-#{code_lang}">#{code}</code></pre>)
         in_code = false
