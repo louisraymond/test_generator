@@ -32,6 +32,12 @@ ActiveRecord::Base.transaction do
     notes: 'Official Rails documentation'
   )
 
+  commons = Source.create!(
+    name: 'Wikimedia Commons',
+    source_type: 'website',
+    notes: 'Public domain / Creative Commons images; see individual file pages for license and attribution.'
+  )
+
   puts 'Creating questions...'
 
   Question.create!(
@@ -257,6 +263,457 @@ ActiveRecord::Base.transaction do
     answer_size: 'medium',
     question_type: 'written'
   )
+
+  # --- Additional question types and examples ---
+
+  # Matching (electronics)
+  Question.create!(
+    topic: electronics,
+    content: 'Match each unit with its physical quantity.',
+    answer: "Ohm → Resistance; Farad → Capacitance; Henry → Inductance",
+    points: 3,
+    answer_size: 'short',
+    question_type: 'matching',
+    options: {
+      'left' => ['Ohm (Ω)', 'Farad (F)', 'Henry (H)'],
+      'right' => ['Inductance', 'Resistance', 'Capacitance']
+    }
+  )
+
+  # Matching (programming)
+  Question.create!(
+    topic: programming,
+    content: 'Match each Rails component to its responsibility.',
+    answer: "Controller → Coordinates request flow; Model → Business/data logic; View → Presentation",
+    points: 3,
+    answer_size: 'short',
+    question_type: 'matching',
+    options: {
+      'left' => ['Controller', 'Model', 'View'],
+      'right' => ['Presentation', 'Business/data logic', 'Coordinates request flow']
+    }
+  )
+
+  # Cloze (physics)
+  Question.create!(
+    topic: physics,
+    content: 'In a MOSFET, the gate is [[insulated]] from the channel by a thin layer of [[oxide]].',
+    answer: 'insulated; oxide',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'cloze'
+  )
+
+  # Cloze (TOC)
+  Question.create!(
+    topic: toc,
+    content: 'The Five Focusing Steps begin with [[identify]] the constraint and end with [[repeat]].',
+    answer: 'identify; repeat',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'cloze'
+  )
+
+  # Ordering (programming)
+  Question.create!(
+    topic: programming,
+    content: 'Place the Rails request lifecycle steps in order.',
+    answer: 'Router → Controller → View → Response',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'ordering',
+    options: ['Controller', 'View', 'Router', 'Response']
+  )
+
+  # Ordering (electronics)
+  Question.create!(
+    topic: electronics,
+    content: 'Order these EM spectrum bands from lowest to highest frequency.',
+    answer: 'Radio → Microwave → Infrared → Visible',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'ordering',
+    options: ['Visible', 'Infrared', 'Microwave', 'Radio']
+  )
+
+  # Ranking (TOC)
+  Question.create!(
+    topic: toc,
+    content: 'Rank the actions by priority when a single bottleneck is the primary constraint.',
+    answer: 'Exploit > Subordinate > Elevate (initially)',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'ranking',
+    options: ['Elevate', 'Exploit', 'Subordinate']
+  )
+
+  # Ranking (programming)
+  Question.create!(
+    topic: programming,
+    content: 'Rank caching layers by typical hit speed (fastest → slowest).',
+    answer: 'In‑memory → Redis → Database',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'ranking',
+    options: ['Database', 'In-memory', 'Redis']
+  )
+
+  # Diagram labeling (electronics)
+  Question.create!(
+    topic: electronics,
+    content: 'Label the MOSFET terminals on the diagram.',
+    answer: 'Gate, Source, Drain (positions depend on symbol orientation)',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'placeholder.svg', 'labels' => ['Gate', 'Source', 'Drain'] }
+  )
+
+  # Diagram labeling (programming)
+  Question.create!(
+    topic: programming,
+    content: 'Label MVC on the Rails architecture diagram.',
+    answer: 'Model, View, Controller',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'placeholder.svg', 'labels' => ['Model', 'View', 'Controller'] }
+  )
+
+  # Image occlusion (electronics)
+  Question.create!(
+    topic: electronics,
+    content: 'Identify the hidden component in the circuit diagram.',
+    answer: 'Operational amplifier (op‑amp)',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'image_occlusion',
+    options: { 'image' => 'placeholder.svg', 'masks' => [ { 'x' => 35, 'y' => 30, 'w' => 25, 'h' => 15 } ] }
+  )
+
+  # Image occlusion (physics)
+  Question.create!(
+    topic: physics,
+    content: 'Identify the hidden label on the transistor symbol.',
+    answer: 'Gate (for MOSFET diagram)',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'image_occlusion',
+    options: { 'image' => 'placeholder.svg', 'masks' => [ { 'x' => 20, 'y' => 55, 'w' => 20, 'h' => 12 } ] }
+  )
+
+  # Composite (TOC)
+  Question.create!(
+    topic: toc,
+    content: 'Answer the following about TOC.',
+    answer: 'a) Definition of constraint; b) Step 2 is Exploit; c) Example bottleneck: heat‑treating oven',
+    points: 5,
+    answer_size: 'medium',
+    question_type: 'composite',
+    options: {
+      'parts' => [
+        { 'type' => 'written', 'content' => 'a) Define a constraint.', 'answer_size' => 'short', 'points' => 1 },
+        { 'type' => 'multiple_choice', 'content' => 'b) What is step 2 of the Five Focusing Steps?', 'options' => ['Identify', 'Exploit', 'Elevate'], 'points' => 2 },
+        { 'type' => 'written', 'content' => 'c) Give one example of a typical manufacturing bottleneck.', 'answer_size' => 'short', 'points' => 2 }
+      ]
+    }
+  )
+
+  # Composite (programming)
+  Question.create!(
+    topic: programming,
+    content: 'Rails fundamentals composite question.',
+    answer: 'a) MVC responsibilities; b) Strong params; c) id param',
+    points: 5,
+    answer_size: 'medium',
+    question_type: 'composite',
+    options: {
+      'parts' => [
+        { 'type' => 'written', 'content' => 'a) Briefly describe MVC in Rails.', 'answer_size' => 'short', 'points' => 2 },
+        { 'type' => 'written', 'content' => 'b) What are strong parameters used for?', 'answer_size' => 'short', 'points' => 2 },
+        { 'type' => 'multiple_choice', 'content' => 'c) Which key holds the resource id by convention?', 'options' => ['id', 'uuid', 'key'], 'points' => 1 }
+      ]
+    }
+  )
+
+  # Extra: calculation
+  Question.create!(
+    topic: electronics,
+    content: 'A 10 kΩ resistor carries a current of 2 mA. Calculate the voltage across it.',
+    answer: 'V = IR = 0.002 × 10,000 = 20 V',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'calculation',
+    answer_label: 'V',
+    unit: 'V'
+  )
+
+  # Extra: written
+  Question.create!(
+    topic: programming,
+    content: 'Explain the purpose of database indexes and trade‑offs when overusing them.',
+    answer: 'Indexes speed up reads at the cost of extra writes and storage. Overuse can slow insert/update performance and increase maintenance overhead.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'written'
+  )
+
+  # Extra: multiple choice
+  Question.create!(
+    topic: physics,
+    content: 'What does the symbol Ω represent?',
+    answer: 'A - Ohms, the unit of electrical resistance',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'multiple_choice',
+    options: ['Ohms', 'Webers', 'Siemens', 'Tesla']
+  )
+
+  # Extra: written
+  Question.create!(
+    topic: toc,
+    content: 'Why can increasing local efficiency reduce system throughput?',
+    answer: 'Non‑constraints can build inventory and starve the true constraint, lowering overall throughput despite local improvements.',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'written'
+  )
+
+  # Extra: calculation
+  Question.create!(
+    topic: physics,
+    content: 'A capacitor of 10 μF is charged to 5 V. How much energy is stored?',
+    answer: 'E = 1/2 C V^2 = 0.5 × 10e‑6 × 25 = 125 μJ',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'calculation',
+    answer_label: 'E',
+    unit: 'μJ'
+  )
+
+  # Extra: multiple choice
+  Question.create!(
+    topic: electronics,
+    content: 'Which component primarily stores energy in a magnetic field?',
+    answer: 'B - Inductor',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'multiple_choice',
+    options: ['Resistor', 'Inductor', 'Capacitor', 'Diode']
+  )
+
+  # --------------------------------------------------
+  # Image-based questions (diagram_label / image_occlusion)
+  # --------------------------------------------------
+
+  # Diagram labeling: MOSFET terminals
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:MOSFET N Channel symbol.svg',
+    content: 'Label the MOSFET terminals on the diagram.',
+    answer: 'Gate, Source, Drain',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'MOSFET_N_Channel_symbol.svg', 'labels' => ['Gate', 'Source', 'Drain'] }
+  )
+
+  # Diagram labeling: Alternative MOSFET symbol
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Mosfet-wn.svg',
+    content: 'Identify the channel direction and label terminals for the MOSFET symbol.',
+    answer: 'Label: Gate (G), Drain (D), Source (S). Channel arrow indicates n-channel.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Mosfet-wn.svg', 'labels' => ['G', 'D', 'S'] }
+  )
+
+  # Diagram labeling: NPN BJT terminals
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:NPN_transistor_symbol_jp.svg',
+    content: 'Label the terminals on the NPN transistor symbol.',
+    answer: 'Collector (C), Base (B), Emitter (E).',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'NPN_transistor_symbol_jp.svg', 'labels' => ['C', 'B', 'E'] }
+  )
+
+  # Diagram labeling: NPN transistor, variant
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Transistor_symbol_npn_no_circle.svg',
+    content: 'Label the NPN transistor symbol (variant).',
+    answer: 'Collector (C), Base (B), Emitter (E).',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Transistor_symbol_npn_no_circle.svg', 'labels' => ['C', 'B', 'E'] }
+  )
+
+  # Diagram labeling: Op-amp pins
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Op-amp_symbol.svg',
+    content: 'Label the op-amp symbol with +, − inputs and output.',
+    answer: 'Non-inverting (+), Inverting (−), Output.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Op-amp_symbol.svg', 'labels' => ['+', '−', 'Out'] }
+  )
+
+  # Diagram labeling: Op-amp simplified
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Op-amp_symbol_simplified.svg',
+    content: 'Label the simplified op-amp symbol pins.',
+    answer: 'Non-inverting (+), Inverting (−), Output.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Op-amp_symbol_simplified.svg', 'labels' => ['+', '−', 'Out'] }
+  )
+
+  # Diagram labeling: Resistor symbol (American)
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Resistor_symbol_America.svg',
+    content: 'Identify the symbol and label it with R.',
+    answer: 'Resistor (R).',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Resistor_symbol_America.svg', 'labels' => ['R'] }
+  )
+
+  # Diagram labeling: Resistor symbol (European)
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Resistor_symbol_Europe.svg',
+    content: 'Identify the symbol and label it with R.',
+    answer: 'Resistor (R).',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Resistor_symbol_Europe.svg', 'labels' => ['R'] }
+  )
+
+  # Diagram labeling: RC low-pass filter
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:1st_Order_Lowpass_Filter_RC.svg',
+    content: 'Label the RC low-pass filter elements.',
+    answer: 'Input (Vin), Resistor (R), Capacitor (C), Output (Vout).',
+    points: 3,
+    answer_size: 'medium',
+    question_type: 'diagram_label',
+    options: { 'image' => '1st_Order_Lowpass_Filter_RC.svg', 'labels' => ['Vin', 'R', 'C', 'Vout'] }
+  )
+
+  # Diagram labeling: RC low-pass (variant)
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:RC_lowpass_filter.svg',
+    content: 'Label the RC low-pass filter diagram.',
+    answer: 'Input, R, C, Output.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'RC_lowpass_filter.svg', 'labels' => ['Vin', 'R', 'C', 'Vout'] }
+  )
+
+  # Converted: MOSFET terminals as labeling instead of occlusion
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:MOSFET N Channel symbol.svg',
+    content: 'Label the MOSFET symbol terminals.',
+    answer: 'G (Gate), D (Drain), S (Source).',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'MOSFET_N_Channel_symbol.svg', 'labels' => ['G', 'D', 'S'] }
+  )
+
+  # Converted: NPN terminals as labeling
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Transistor_symbol_npn_no_circle.svg',
+    content: 'Label the NPN transistor symbol terminals.',
+    answer: 'C (Collector), B (Base), E (Emitter).',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Transistor_symbol_npn_no_circle.svg', 'labels' => ['C', 'B', 'E'] }
+  )
+
+  # Converted: op-amp pins as labeling
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Op-amp_symbol.svg',
+    content: 'Label the op-amp symbol pins.',
+    answer: 'Non-inverting (+), Inverting (−), Output.',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Op-amp_symbol.svg', 'labels' => ['+', '−', 'Out'] }
+  )
+
+  # Converted: resistor symbol as labeling
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Resistor_symbol_America.svg',
+    content: 'Label this symbol with its schematic letter.',
+    answer: 'R (Resistor).',
+    points: 1,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Resistor_symbol_America.svg', 'labels' => ['R'] }
+  )
+
+  # Image occlusion: RC low-pass symbol areas (two occlusions)
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:RC_lowpass_filter.svg',
+    content: 'In the RC low-pass diagram, which components are occluded? (1 and 2)',
+    answer: '1. Capacitor (C); 2. Resistor (R).',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'image_occlusion',
+    options: { 'image' => 'RC_lowpass_filter.svg', 'masks' => [ { 'x' => 35, 'y' => 60, 'w' => 12, 'h' => 12 }, { 'x' => 63, 'y' => 23, 'w' => 10, 'h' => 18 } ] }
+  )
+
+  # Converted: op-amp simplified as labeling
+  Question.create!(
+    topic: electronics,
+    source: commons,
+    source_reference: 'File:Op-amp_symbol_simplified.svg',
+    content: 'Label the op-amp (simplified) pins.',
+    answer: 'Out, +, −',
+    points: 2,
+    answer_size: 'short',
+    question_type: 'diagram_label',
+    options: { 'image' => 'Op-amp_symbol_simplified.svg', 'labels' => ['+', '−', 'Out'] }
+  )
+
 
   puts 'Seed data created successfully!'
   puts "#{Topic.count} topics"
