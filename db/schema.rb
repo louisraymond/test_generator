@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_03_210938) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_04_000500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,7 +20,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_03_210938) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["exam_id", "position"], name: "index_exam_questions_on_exam_id_and_position"
+    t.index ["exam_id", "position"], name: "index_exam_questions_on_exam_id_and_position", unique: true
     t.index ["exam_id"], name: "index_exam_questions_on_exam_id"
     t.index ["question_id"], name: "index_exam_questions_on_question_id"
   end
@@ -29,6 +29,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_03_210938) do
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "duration_minutes"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -39,7 +40,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_03_210938) do
     t.integer "points", null: false
     t.string "answer_size"
     t.string "question_type"
-    t.jsonb "options"
+    t.jsonb "options", default: [], null: false
     t.string "source_reference"
     t.string "answer_label"
     t.string "unit"
