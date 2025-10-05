@@ -11,6 +11,26 @@
   </head>
 
   <body>
-    <%= yield %>
+    <div data-controller="menu" class="app-shell">
+      <header class="app-header">
+        <%= link_to 'Exam Generator', root_path, class: 'app-logo', data: { action: 'menu#close' } %>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" data-action="menu#toggle" data-menu-target="toggle">
+          <span class="menu-toggle__icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Toggle navigation</span>
+        </button>
+
+        <nav class="app-nav" id="primary-navigation" data-menu-target="nav">
+          <%= nav_link_to 'Exam Generator', root_path %>
+          <%= nav_link_to 'Topics', topics_path %>
+          <%= nav_link_to 'Question Bank', questions_path %>
+        </nav>
+      </header>
+
+      <main class="app-main">
+        <%= render 'shared/flash' %>
+        <%= yield %>
+      </main>
+    </div>
   </body>
 </html>
