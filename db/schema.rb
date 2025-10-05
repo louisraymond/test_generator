@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_04_000500) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,6 +30,29 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_000500) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "duration_minutes"
+  end
+
+  create_table "learning_objectives", force: :cascade do |t|
+    t.bigint "topic_id", null: false
+    t.string "category", null: false
+    t.integer "category_order", default: 0, null: false
+    t.integer "position", default: 0, null: false
+    t.text "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["topic_id", "category", "position"], name: "idx_on_topic_id_category_position_1999db334e"
+    t.index ["topic_id", "category_order"], name: "index_learning_objectives_on_topic_id_and_category_order"
+    t.index ["topic_id"], name: "index_learning_objectives_on_topic_id"
+  end
+
+  create_table "question_learning_objectives", force: :cascade do |t|
+    t.bigint "question_id", null: false
+    t.bigint "learning_objective_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["learning_objective_id"], name: "index_question_learning_objectives_on_learning_objective_id"
+    t.index ["question_id", "learning_objective_id"], name: "index_qlo_on_question_and_learning_objective", unique: true
+    t.index ["question_id"], name: "index_question_learning_objectives_on_question_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -62,10 +85,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_000500) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "epigraph_quote"
+    t.string "epigraph_attribution"
+    t.jsonb "module_aims", default: [], null: false
+    t.jsonb "learning_outcomes", default: [], null: false
+    t.jsonb "syllabus_outline", default: [], null: false
+    t.jsonb "reference_links", default: [], null: false
+    t.bigint "parent_topic_id"
+    t.index ["parent_topic_id"], name: "index_topics_on_parent_topic_id"
   end
 
   add_foreign_key "exam_questions", "exams"
   add_foreign_key "exam_questions", "questions"
+  add_foreign_key "learning_objectives", "topics"
+  add_foreign_key "question_learning_objectives", "learning_objectives"
+  add_foreign_key "question_learning_objectives", "questions"
   add_foreign_key "questions", "sources"
   add_foreign_key "questions", "topics"
+  add_foreign_key "topics", "topics", column: "parent_topic_id"
 end

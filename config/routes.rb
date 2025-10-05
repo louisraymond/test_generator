@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   end
 
   resources :questions, only: [:index]
+  resources :topics, only: %i[index show new create edit update]
 
   if Rails.env.development?
     get '/question_types_preview', to: 'questions#types_preview'

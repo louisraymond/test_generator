@@ -1,0 +1,79 @@
+<%= form_with(model: topic) do |form| %>
+  <div class="topic-form">
+    <% if topic.errors.any? %>
+      <div class="topic-form__errors">
+        <h2><%= pluralize(topic.errors.count, 'error') %> prohibited this topic from being saved:</h2>
+        <ul>
+          <% topic.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="topic-form__field">
+      <%= form.label :name, 'Topic title' %>
+      <%= form.text_field :name, class: 'topic-form__input', required: true %>
+    </div>
+
+    <div class="topic-form__field topic-form__field--split">
+      <div>
+        <%= form.label :epigraph_quote, 'Epigraph (optional)' %>
+        <%= form.text_area :epigraph_quote, rows: 3, class: 'topic-form__textarea' %>
+      </div>
+      <div>
+        <%= form.label :epigraph_attribution, 'Epigraph attribution' %>
+        <%= form.text_field :epigraph_attribution, class: 'topic-form__input' %>
+      </div>
+    </div>
+
+    <div class="topic-form__field">
+      <%= form.label :parent_topic_id, 'Parent topic (optional)' %>
+      <%= form.select :parent_topic_id,
+            options_from_collection_for_select(@parent_topics, :id, :name, topic.parent_topic_id),
+            { include_blank: 'None' },
+            class: 'topic-form__select' %>
+      <p class="topic-form__hint">Subtopics cannot themselves have subtopics; choose a root topic as parent.</p>
+    </div>
+
+    <div class="topic-form__field">
+      <label for="topic_module_aims_text">Module aims</label>
+      <p class="topic-form__hint">Enter one aim per line.</p>
+      <%= text_area_tag 'topic[module_aims_text]', list_to_text(topic.module_aim_list), rows: 6, class: 'topic-form__textarea', required: true %>
+    </div>
+
+    <div class="topic-form__field topic-form__field--objectives" data-controller="objective-list">
+      <label>Learning outcomes</label>
+      <p class="topic-form__hint">Add each outcome individually. Use the same section title to group outcomes under a heading.</p>
+
+      <div class="topic-objective-list" data-objective-list-target="list">
+        <% topic.learning_objectives.each do |objective| %>
+          <%= render 'topics/learning_objective_fields', form:, objective: objective %>
+        <% end %>
+      </div>
+
+      <template data-objective-list-target="template">
+        <%= render 'topics/learning_objective_fields', form:, objective: LearningObjective.new, child_index: 'NEW_OBJECTIVE' %>
+      </template>
+
+      <button type="button" class="topic-form__add" data-action="objective-list#add">Add outcome</button>
+    </div>
+
+    <div class="topic-form__field">
+      <label for="topic_syllabus_outline_text">Syllabus / content outline</label>
+      <p class="topic-form__hint">Use the same format as learning outcomes: section titles on a line, followed by "- " bullet lines.</p>
+      <%= text_area_tag 'topic[syllabus_outline_text]', sections_to_text(topic.syllabus_sections), rows: 16, class: 'topic-form__textarea', required: true %>
+    </div>
+
+    <div class="topic-form__field">
+      <label for="topic_reference_links_text">References &amp; linked subtopics</label>
+      <p class="topic-form__hint">Enter one reference token per line (e.g. Photoelectric effect). These will render as wiki-style links.</p>
+      <%= text_area_tag 'topic[reference_links_text]', list_to_text(topic.reference_tokens), rows: 6, class: 'topic-form__textarea' %>
+    </div>
+
+    <div class="topic-form__actions">
+      <%= form.submit class: 'topic-form__submit' %>
+      <%= link_to 'Cancel', topic.persisted? ? topic_path(topic) : topics_path, class: 'topic-form__cancel' %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,70 @@
+<div class="topic-outline">
+  <header class="topic-header">
+    <% if @topic.epigraph_quote.present? %>
+      <figure class="topic-epigraph">
+        <blockquote><%= outline_text_to_html(@topic.epigraph_quote) %></blockquote>
+        <% if @topic.epigraph_attribution.present? %>
+          <figcaption>&mdash; <%= ERB::Util.html_escape(@topic.epigraph_attribution) %></figcaption>
+        <% end %>
+      </figure>
+    <% end %>
+
+    <h1><%= ERB::Util.html_escape(@topic.name) %></h1>
+    <p class="topic-question-count"><%= pluralize(@topic.question_total_count, 'question') %></p>
+  </header>
+
+  <% if @topic.module_aim_list.any? %>
+    <section class="topic-section">
+      <h2>Module aims</h2>
+      <ul>
+        <% @topic.module_aim_list.each do |aim| %>
+          <li><%= outline_text_to_html(aim) %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if @topic.learning_outcome_sections.any? %>
+    <section class="topic-section">
+      <h2>Module learning outcomes</h2>
+      <% @topic.learning_outcome_sections_with_counts.each do |section| %>
+        <%= outline_section(section['title'], section['items'], show_counts: true) %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @topic.syllabus_sections.any? %>
+    <section class="topic-section">
+      <h2>Module content</h2>
+      <% @topic.syllabus_sections.each do |section| %>
+        <%= outline_section(section['title'], section['items']) %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @topic.reference_tokens.any? %>
+    <section class="topic-section">
+      <h2>References &amp; linked subtopics</h2>
+      <ul class="topic-references">
+        <% @topic.reference_tokens.each do |reference| %>
+          <li><%= outline_text_to_html("[[#{reference}]]") %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <% if @topic.subtopics.any? %>
+    <section class="topic-section">
+      <h2>Subtopics</h2>
+      <ul class="topic-subtopics">
+        <% @topic.subtopics.each do |subtopic| %>
+          <li><%= link_to subtopic.name, topic_path(subtopic), class: 'topic-subtopic-link' %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <div class="topic-outline__actions">
+    <%= link_to 'Edit topic', edit_topic_path(@topic), class: 'topic-outline__edit' %>
+  </div>
+</div>

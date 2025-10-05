@@ -1,0 +1,20 @@
+<% child_index = local_assigns.fetch(:child_index, nil) %>
+<%= form.fields_for :learning_objectives, objective, child_index: child_index do |lo_form| %>
+  <div class="topic-objective" data-objective-list-target="item">
+    <div class="topic-objective__grid">
+      <div class="topic-objective__col">
+        <%= lo_form.label :category, 'Section title', class: 'topic-form__sub-label' %>
+        <%= lo_form.text_field :category, class: 'topic-form__input', required: true %>
+      </div>
+      <div class="topic-objective__col">
+        <%= lo_form.label :description, 'Outcome', class: 'topic-form__sub-label' %>
+        <%= lo_form.text_area :description, rows: 2, class: 'topic-form__textarea', required: true %>
+      </div>
+    </div>
+    <div class="topic-objective__actions">
+      <%= lo_form.hidden_field :id %>
+      <%= lo_form.hidden_field :_destroy, value: '0' %>
+      <button type="button" class="topic-objective__remove" data-action="objective-list#remove">Remove</button>
+    </div>
+  </div>
+<% end %>

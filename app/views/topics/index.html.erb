@@ -1,0 +1,41 @@
+<div class="topics-index">
+  <header class="topics-index__header">
+    <h1>Topics</h1>
+    <p class="topics-index__lead">Browse available modules and drill down into detailed outlines.</p>
+    <div class="topics-index__actions">
+      <%= link_to 'Create topic', new_topic_path, class: 'topics-index__new' %>
+    </div>
+  </header>
+
+  <% if @topics.any? %>
+    <div class="topics-index__grid">
+      <% @topics.each do |topic| %>
+        <article class="topics-index__card">
+          <h2><%= link_to topic.name, topic_path(topic) %></h2>
+          <p class="topics-index__count"><%= pluralize(topic.question_total_count, 'question') %></p>
+          <% if topic.module_aim_list.any? %>
+            <ul>
+              <% topic.module_aim_list.first(3).each do |aim| %>
+                <li><%= outline_text_to_html(aim) %></li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p>No summary available yet.</p>
+          <% end %>
+          <% if topic.subtopics.any? %>
+            <div class="topics-index__subtopics">
+              <strong>Subtopics:</strong>
+              <ul>
+                <% topic.subtopics.limit(5).each do |subtopic| %>
+                  <li><%= link_to subtopic.name, topic_path(subtopic) %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="topics-index__empty">No topics have been added yet. <%= link_to 'Create the first topic', new_topic_path %>.</p>
+  <% end %>
+</div>
