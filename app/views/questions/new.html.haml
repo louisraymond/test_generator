@@ -1,0 +1,6 @@
+.form-page
+  .form-page__header
+    %h1 New question
+    %p Create a bank item, align it with the right learning outcomes, and keep exam coverage balanced.
+  = form_with(model: @question) do |form|
+    = render 'form', form: form, question: @question

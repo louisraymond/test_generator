@@ -1,0 +1,8 @@
+- option_types = %w[multiple_choice matching ordering ranking diagram_label image_occlusion composite]
+.question-type-panels
+  - Question::QUESTION_TYPES.each do |type|
+    - clears = !option_types.include?(type)
+    - classes = ['question-type-panel']
+    - classes << 'is-active' if question.question_type == type
+    %div{ class: classes.join(' '), data: { question_form_target: 'panel', type: type, clears_options: clears, action: 'question-type:activated->question-form#panelActivated' } }
+      = render "questions/types/#{type}", form: form, question: question, options_field_id: options_field_id

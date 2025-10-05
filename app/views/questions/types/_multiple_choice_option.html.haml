@@ -1,0 +1,17 @@
+- idx_string = index.to_s
+- label_text = idx_string =~ /^\d+$/ ? "Option #{idx_string.to_i + 1}" : 'New option'
+- name_base = "question[multi_choice_options][#{idx_string}]"
+- text_value = option[:text].to_s
+- checked_value = ActiveModel::Type::Boolean.new.cast(option[:correct])
+.mc-option-row{ data: { index: idx_string } }
+  .mc-option-body
+    %label.hint{ for: "mc-option-#{idx_string}" }= label_text
+    %textarea.mc-option-textarea{ id: "mc-option-#{idx_string}", name: "#{name_base}[text]", rows: 3,
+      placeholder: 'Write the option text', data: { action: 'input->multiple-choice-builder#updateOption' } }= text_value
+  .mc-option-controls
+    %input{ type: 'hidden', name: "#{name_base}[correct]", value: '0' }
+    %label.mc-option-correct
+      %input{ type: 'checkbox', name: "#{name_base}[correct]", value: '1',
+        checked: checked_value, data: { action: 'change->multiple-choice-builder#updateOption' } }
+      Correct answer
+    %button.mc-option-remove{ type: 'button', data: { action: 'multiple-choice-builder#removeOption', index: idx_string } } Remove

@@ -1,0 +1,22 @@
+- selected_ids = question.learning_objective_ids.map(&:to_i)
+- options_field_id = "#{form.object_name}_options_text"
+
+.question-form{ data: { controller: 'question-form' } }
+  - if question.errors.any?
+    .question-form__errors
+      %h2= pluralize(question.errors.count, 'error') + ' prevented this question from being saved:'
+      %ul
+        - question.errors.full_messages.each do |message|
+          %li= message
+
+  .question-form__grid
+    = render 'questions/forms/main_section', form: form, question: question, selected_ids: selected_ids
+    = render 'questions/forms/side_section', form: form, question: question
+
+  = form.hidden_field :options_text, id: options_field_id, data: { question_form_target: 'optionsField' }
+
+  = render 'questions/forms/type_panels', form: form, question: question, options_field_id: options_field_id
+
+  .question-form__actions
+    = form.submit class: 'btn-primary'
+    = link_to 'Cancel', questions_path, class: 'btn-secondary'

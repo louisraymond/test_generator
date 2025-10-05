@@ -1,0 +1,9 @@
+- items = question.options.is_a?(Array) ? question.options : []
+.type-panel-content{ data: {
+  controller: 'list-builder',
+  'list-builder-field-id-value': options_field_id,
+  'list-builder-items-value': items.to_json,
+  action: 'question-type:activated->list-builder#activate'
+} }
+  %p.hint Enter items in their correct order. Learners will rearrange them accordingly.
+  %textarea.question-form__textarea{ rows: 8, placeholder: 'One item per line', data: { 'list-builder-target': 'textarea', action: 'input->list-builder#changed' } }

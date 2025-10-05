@@ -1,0 +1,15 @@
+- options = question.options.is_a?(Hash) ? question.options : {}
+.type-panel-content{ data: {
+  controller: 'matching-builder',
+  'matching-builder-field-id-value': options_field_id,
+  'matching-builder-options-value': options.to_json,
+  action: 'question-type:activated->matching-builder#activate'
+} }
+  %p.hint Enter matching pairs. Each line on the left should correspond to a line on the right.
+  .matching-grid
+    %label
+      %span.hint Left column
+      %textarea.question-form__textarea{ rows: 8, data: { 'matching-builder-target': 'left', action: 'input->matching-builder#changed' } }
+    %label
+      %span.hint Right column
+      %textarea.question-form__textarea{ rows: 8, data: { 'matching-builder-target': 'right', action: 'input->matching-builder#changed' } }

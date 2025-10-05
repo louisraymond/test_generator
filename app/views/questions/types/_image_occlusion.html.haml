@@ -1,0 +1,14 @@
+- options = question.options.is_a?(Hash) ? question.options : {}
+.type-panel-content{ data: {
+  controller: 'image-occlusion-builder',
+  'image-occlusion-builder-field-id-value': options_field_id,
+  'image-occlusion-builder-options-value': options.to_json,
+  action: 'question-type:activated->image-occlusion-builder#activate'
+} }
+  %p.hint Provide the base image and outline each occlusion area. Structured mask coordinates can be refined later.
+  %label
+    %span.hint Image URL
+    %input.question-form__input{ type: 'text', placeholder: 'https://example.com/image.png', data: { 'image-occlusion-builder-target': 'image', action: 'input->image-occlusion-builder#changed' } }
+  %label
+    %span.hint Mask descriptors (one per line)
+    %textarea.question-form__textarea{ rows: 6, data: { 'image-occlusion-builder-target': 'masks', action: 'input->image-occlusion-builder#changed' } }

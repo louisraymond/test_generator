@@ -1,0 +1,13 @@
+- raw_options = question.options.is_a?(Array) ? question.options : []
+- options = raw_options.present? ? raw_options.map { |opt| { text: opt['text'] || opt[:text], correct: opt['correct'] || opt[:correct] } } : [{ text: '', correct: false }, { text: '', correct: false }]
+.type-panel-content{ data: {
+  controller: 'multiple-choice-builder',
+  'multiple-choice-builder-field-id-value': options_field_id
+} }
+  %p.hint Add at least two options, then mark every correct answer. You can include multiple correct options.
+  .mc-option-list{ data: { 'multiple-choice-builder-target': 'list' } }
+    - options.each_with_index do |option, index|
+      = render 'questions/types/multiple_choice_option', option: option, index: index
+  %template{ data: { 'multiple-choice-builder-target': 'template' } }
+    = render 'questions/types/multiple_choice_option', option: { text: '', correct: false }, index: 'NEW_INDEX'
+  %button.btn-small{ type: 'button', data: { action: 'multiple-choice-builder#addOption' } } Add option

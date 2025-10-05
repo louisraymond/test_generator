@@ -1,0 +1,19 @@
+- raw_options = question.options.is_a?(Array) ? question.options : []
+- options = raw_options.each_with_index.map do |item, idx|
+  - item_hash = item.is_a?(Hash) ? item : { text: item, rank: idx + 1 }
+  - text_value = (item_hash['text'] || item_hash[:text]).to_s
+  - rank_value = (item_hash['rank'] || item_hash[:rank] || idx + 1).to_i
+  - option_hash = { text: text_value, rank: rank_value }
+  - option_hash
+- options = [{ text: '', rank: 1 }, { text: '', rank: 2 }] if options.empty?
+.type-panel-content{ data: {
+  controller: 'ranking-builder',
+  'ranking-builder-field-id-value': options_field_id
+} }
+  %p.hint Provide each option and specify its correct ranking position (1 = highest priority).
+  .ranking-option-list{ data: { 'ranking-builder-target': 'list' } }
+    - options.each_with_index do |option, index|
+      = render 'questions/types/ranking_option', option: option, index: index
+  %template{ data: { 'ranking-builder-target': 'template' } }
+    = render 'questions/types/ranking_option', option: { text: '', rank: options.length + 1 }, index: 'NEW_INDEX'
+  %button.btn-small{ type: 'button', data: { action: 'ranking-builder#addOption' } } Add option

@@ -10,7 +10,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :questions, only: [:index]
+  resources :questions, only: %i[index new create edit update]
   resources :topics, only: %i[index show new create edit update]
 
   if Rails.env.development?

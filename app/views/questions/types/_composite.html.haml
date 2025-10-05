@@ -1,0 +1,3 @@
+.type-panel-content
+  %p.hint Composite questions let you embed structured sub-items. Enter a JSON payload describing each component.
+  %textarea.question-form__textarea.question-form__textarea--code{ rows: 8, data: { question_form_target: 'optionsTextarea', action: 'input->question-form#updateOptionsTextarea' } }= question.options_text.to_s

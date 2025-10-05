@@ -41,6 +41,7 @@
   <aside class="library-side card">
     <h3>Quick Actions</h3>
     <ul>
+      <li><%= link_to 'Add a new question →', new_question_path %></li>
       <li><%= link_to 'Generate a new exam →', new_exam_path %></li>
       <li><%= link_to 'Preview question formats →', question_types_preview_path if Rails.env.development? %></li>
       <li><%= link_to 'Download marking scheme example →', marking_scheme_exam_path(Exam.last, format: :pdf) if Exam.last %></li>
@@ -59,7 +60,9 @@
           <th>Topic</th>
           <th>Type</th>
           <th>Points</th>
+          <th>Learning outcomes</th>
           <th>Content</th>
+          <th class="actions">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -70,9 +73,21 @@
             </td>
             <td><span class="chip"><%= q.question_type.humanize %></span></td>
             <td class="points">[<%= q.points %> <%= 'mark'.pluralize(q.points) %>]</td>
+            <td class="outcomes">
+              <% if q.learning_objectives.any? %>
+                <ul class="outcome-list">
+                  <% q.learning_objectives.each do |lo| %>
+                    <li><span class="outcome-chip"><%= lo.description %></span></li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <span class="muted">None</span>
+              <% end %>
+            </td>
             <td class="excerpt">
               <%= truncate(strip_tags(q.content.to_s), length: 200) %>
             </td>
+            <td class="actions-cell"><%= link_to 'Edit', edit_question_path(q), class: 'link-edit' %></td>
           </tr>
         <% end %>
       </tbody>

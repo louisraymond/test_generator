@@ -1,0 +1,51 @@
+.question-form__main
+  .form-field
+    = form.label :topic_id, 'Topic'
+    = form.collection_select :topic_id, @topics_for_form, :id, :name,
+      { prompt: 'Select a topic' },
+      class: 'question-form__select',
+      data: { question_form_target: 'topicSelect', action: 'change->question-form#topicChanged' }
+
+  .form-field
+    %label Learning outcomes
+    %span.hint Link the outcomes assessed by this question.
+    .lo-group-container
+      - @topics_for_form.each do |topic|
+        - groups = topic.learning_objectives.group_by(&:category)
+        .lo-topic-group{ data: { question_form_target: 'group', topic_id: topic.id } }
+          - if groups.present?
+            - groups.each do |category, objectives|
+              %h4= category
+              .lo-category-grid
+                - objectives.each do |objective|
+                  %label.lo-checkbox
+                    = check_box_tag 'question[learning_objective_ids][]', objective.id, selected_ids.include?(objective.id),
+                      class: 'lo-checkbox__input',
+                      data: { question_form_target: 'checkbox', action: 'change->question-form#updateSummary' }
+                    %span.lo-checkbox__label= objective.description
+          - else
+            %p.lo-empty No learning outcomes for this topic yet.
+    %p.selected-outcomes{ data: { question_form_target: 'summary' } } Select a topic to view outcomes.
+
+  .form-row
+    .form-field
+      = form.label :question_type, 'Question type'
+      = form.select :question_type, Question::QUESTION_TYPES.map { |t| [t.humanize, t] }, {},
+        class: 'question-form__select',
+        data: { question_form_target: 'typeSelect', action: 'change->question-form#typeChanged' }
+    .form-field
+      = form.label :points, 'Points'
+      = form.number_field :points, min: 1, class: 'question-form__input'
+    .form-field
+      = form.label :answer_size, 'Answer space'
+      = form.select :answer_size, [['Short', 'short'], ['Medium', 'medium'], ['Long', 'long']],
+        { include_blank: 'Auto' }, class: 'question-form__select'
+
+  .form-field
+    = form.label :content, 'Question prompt'
+    = form.text_area :content, rows: 6, class: 'question-form__textarea', required: true
+
+  .form-field
+    = form.label :answer, 'Model answer'
+    %span.hint Provide the official solution or marking guidance. Required for every question type.
+    = form.text_area :answer, rows: 5, class: 'question-form__textarea', required: true

@@ -1,0 +1,20 @@
+.question-form__side
+  .form-field
+    = form.label :source_id, 'Source'
+    = form.collection_select :source_id, @sources_for_form, :id, :name,
+      { include_blank: 'None' }, class: 'question-form__select'
+
+  .form-field
+    = form.label :source_reference, 'Source reference'
+    = form.text_field :source_reference, class: 'question-form__input'
+
+  .form-field
+    = form.label :answer_label, 'Answer label'
+    = form.text_field :answer_label, class: 'question-form__input'
+
+  .question-form__tips
+    %h3 Tips
+    %ul
+      %li Markdown questions can include fenced code blocks for worked solutions.
+      %li Multiple choice options expect hashes with keys like <code>text</code> and <code>correct</code>.
+      %li Learning outcomes keep coverage reporting accurate.
