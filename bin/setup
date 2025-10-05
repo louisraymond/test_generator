@@ -14,7 +14,19 @@ FileUtils.chdir APP_ROOT do
   # Add necessary setup steps to this file.
 
   puts "== Installing dependencies =="
-  system! "gem install bundler --conservative"
+
+  bundler_version = begin
+    lockfile = File.read("Gemfile.lock")
+    match = lockfile.match(/^BUNDLED WITH\s*$\n\s+(\S+)/m)
+    match && match[1]
+  rescue Errno::ENOENT
+    nil
+  end
+
+  bundler_install = ["gem", "install", "bundler"]
+  bundler_install += ["-v", bundler_version] if bundler_version
+  bundler_install << "--conservative"
+  system!(*bundler_install)
   system("bundle check") || system!("bundle install")
 
   # puts "\n== Copying sample files =="
