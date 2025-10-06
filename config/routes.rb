@@ -9,6 +9,12 @@ Rails.application.routes.draw do
       get :preview_counts
     end
   end
+  
+  resources :exam_templates do
+    member do
+      post :generate
+    end
+  end
 
   resources :questions, only: %i[index new create edit update]
   resources :topics, only: %i[index show new create edit update]

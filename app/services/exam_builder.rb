@@ -2,6 +2,41 @@ class ExamBuilder
   class Error < StandardError; end
   class MissingTopicsError < Error; end
   class NotEnoughQuestionsError < Error; end
+  class MissingSectionsError < Error; end
+
+  # Builds an exam from a template
+  def self.from_template(template_id:, title: nil)
+    template = ExamTemplate.find(template_id)
+    raise MissingSectionsError, 'Template has no sections.' if template.exam_sections.empty?
+    
+    title ||= "#{template.name} - #{Time.current.strftime('%Y-%m-%d')}"
+    
+    ActiveRecord::Base.transaction do
+      exam = Exam.create!(
+        title: title,
+        duration_minutes: template.total_duration,
+        exam_template_id: template.id
+      )
+      
+      position = 1
+      
+      template.exam_sections.order(:position).each do |section|
+        questions = build_section_questions(section)
+        
+        questions.each do |question|
+          exam.exam_questions.create!(
+            question: question,
+            position: position,
+            section_number: section.position
+          )
+          position += 1
+        end
+      end
+      
+      template.increment_use_count!
+      exam
+    end
+  end
 
   # Builds an exam using random selection within the given topics.
   # Params
@@ -101,5 +136,70 @@ class ExamBuilder
     end
 
     picked
+  end
+  
+  # Build questions for a specific section based on its rules
+  def self.build_section_questions(section)
+    questions = []
+    
+    # First, add all force-included questions (with repeats if specified)
+    section.section_question_rules.force_includes.each do |rule|
+      rule.repeat_count.times do
+        questions << rule.question
+      end
+    end
+    
+    # Calculate how many more questions we need
+    remaining_count = section.question_count - questions.size
+    
+    if remaining_count > 0
+      # Get available questions from source rules
+      available = section.available_questions
+      
+      # Apply weighted selection if multiple source rules
+      if section.section_source_rules.size > 1
+        selected = select_by_source_weights(section, available, remaining_count)
+      else
+        selected = available.order(Arel.sql('RANDOM()')).limit(remaining_count).to_a
+      end
+      
+      questions.concat(selected)
+    end
+    
+    # Shuffle to mix force-included with randomly selected
+    questions.shuffle
+  end
+  
+  # Select questions using weighted distribution across source rules
+  def self.select_by_source_weights(section, available_scope, needed)
+    rules = section.section_source_rules.to_a
+    total_weight = rules.sum(&:weight).to_f
+    
+    selected = []
+    rules.each do |rule|
+      # Calculate allocation for this source
+      share = (needed * (rule.weight / total_weight)).round
+      
+      # Override with explicit count if specified
+      allocation = rule.question_count_override || share
+      allocation = [allocation, needed - selected.size].min
+      
+      next if allocation <= 0
+      
+      # Get questions from this specific source
+      source_questions = case rule.source_type
+      when 'Topic'
+        available_scope.where(topic_id: rule.source_id)
+      when 'TopicModule'
+        available_scope.where(topic_module_id: rule.source_id)
+      when 'LearningObjective'
+        available_scope.joins(:question_learning_objectives)
+                      .where(question_learning_objectives: { learning_objective_id: rule.source_id })
+      end
+      
+      selected.concat(source_questions.order(Arel.sql('RANDOM()')).limit(allocation).to_a)
+    end
+    
+    selected
   end
 end
