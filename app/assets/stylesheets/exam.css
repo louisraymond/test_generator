@@ -660,17 +660,6 @@ h1 {
 
 /* Sub-questions */
 
-.sub-question {
-    margin: 6mm 0 10mm;
-    margin-left: 12mm;
-}
-
-.sub-question-number {
-    font-weight: bold;
-    font-size: calc(var(--exam-font-size) * 1.1);
-    display: inline-block;
-    min-width: 40px;
-}
 
 
 /* Screen-only: new exam form */
@@ -1464,6 +1453,9 @@ code.md-inline,
 
 .sub-question-number {
     font-weight: bold;
+    font-size: calc(var(--exam-font-size) * 1.1);
+    display: inline-block;
+    min-width: 40px;
     margin-right: 2mm;
 }
 
