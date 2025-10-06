@@ -41,7 +41,7 @@ export default class extends Controller {
         const urlParams = new URLSearchParams(window.location.search)
         const urlFontSize = urlParams.get('font_size')
         const urlSpacing = urlParams.get('question_spacing')
-        
+
         if (urlFontSize || urlSpacing) {
             // Apply URL parameters
             if (urlFontSize) {
@@ -52,6 +52,8 @@ export default class extends Controller {
                 this.applyCustomSpacing(`${urlSpacing}pt`)
                 this.updateSliderAndInput('spacing', urlSpacing)
             }
+            // Update PDF link with URL parameters
+            this.updatePdfLink()
         } else {
             // Load saved preference from localStorage
             const saved = localStorage.getItem('examDisplayPreset')
@@ -204,13 +206,31 @@ export default class extends Controller {
         const pdfLink = document.getElementById('pdf-link')
         if (!pdfLink) return
 
-        const currentFontSize = document.body.style.getPropertyValue('--exam-font-size') || '14pt'
-        const currentSpacing = document.body.style.getPropertyValue('--exam-question-margin') || '18pt'
+        // Get current values from URL parameters or from the first page element
+        const urlParams = new URLSearchParams(window.location.search)
+        const urlFontSize = urlParams.get('font_size')
+        const urlSpacing = urlParams.get('question_spacing')
         
+        let currentFontSize, currentSpacing
+        
+        if (urlFontSize) {
+            currentFontSize = `${urlFontSize}pt`
+        } else {
+            const firstPage = document.querySelector('.page')
+            currentFontSize = firstPage ? firstPage.style.getPropertyValue('--exam-font-size') || '14pt' : '14pt'
+        }
+        
+        if (urlSpacing) {
+            currentSpacing = `${urlSpacing}pt`
+        } else {
+            const firstPage = document.querySelector('.page')
+            currentSpacing = firstPage ? firstPage.style.getPropertyValue('--exam-question-margin') || '18pt' : '18pt'
+        }
+
         // Extract font size number (e.g., "9pt" -> "9")
         const fontSizeNumber = currentFontSize.replace('pt', '')
         const spacingNumber = currentSpacing.replace('pt', '')
-        
+
         // Update the href with current parameters
         const url = new URL(pdfLink.href)
         url.searchParams.set('font_size', fontSizeNumber)
