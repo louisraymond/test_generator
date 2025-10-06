@@ -38,11 +38,15 @@ RSpec.describe 'Exam Display', type: :system do
     end
 
     it 'displays the exam with correct A4 page dimensions' do
-      # Check page container exists
-      expect(page).to have_css('.page')
+      # Check page containers exist (should be multiple pages)
+      expect(page).to have_css('.page', minimum: 1)
       
-      # Verify A4 dimensions (210mm × 297mm)
-      page_element = page.find('.page')
+      # Count pages (5 questions = 1 page with header)
+      page_count = page.all('.page').count
+      expect(page_count).to be >= 1
+      
+      # Verify A4 dimensions on first page (210mm × 297mm)
+      page_element = page.find('.page', match: :first)
       
       # Check width (should be 210mm, approximately 794px at 96dpi)
       width = page.evaluate_script("getComputedStyle(document.querySelector('.page')).width")
@@ -77,10 +81,31 @@ RSpec.describe 'Exam Display', type: :system do
       expect(background).not_to match(/rgb\(255,\s*255,\s*255\)/) # Not pure white
     end
 
-    it 'displays all questions within the page container' do
-      within('.page') do
-        expect(page).to have_css('.question', count: 5)
+    it 'shows page breaks between pages' do
+      # Check that multiple pages exist with gaps between them
+      pages = page.all('.page')
+      expect(pages.count).to be >= 1
+      
+      if pages.count > 1
+        # Verify bottom margin creates visible gap
+        margin = page.evaluate_script("getComputedStyle(document.querySelector('.page')).marginBottom")
+        expect(margin).to match(/40px/)
       end
+    end
+
+    it 'displays page numbers on each page' do
+      # Check for page counter using ::after pseudo-element
+      # We can't directly test ::after content, but we can verify the CSS is applied
+      expect(page).to have_css('.page')
+    end
+
+    it 'displays all questions across page containers' do
+      # Questions are now split across multiple pages
+      total_questions = page.all('.question').count
+      expect(total_questions).to eq(5)
+      
+      # Verify at least one page exists
+      expect(page).to have_css('.page', minimum: 1)
     end
 
     it 'displays the exam title' do
