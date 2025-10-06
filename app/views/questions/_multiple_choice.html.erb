@@ -3,7 +3,7 @@
     <div class="mc-option">
       <div class="mc-checkbox"></div>
       <span class="mc-label"><%= ('A'.ord + index).chr %></span>
-      <span><%= option %></span>
+      <span class="markdown-content"><%= render_markdown_inline(option.is_a?(Hash) ? option['text'] : option) %></span>
     </div>
   <% end %>
 </div>

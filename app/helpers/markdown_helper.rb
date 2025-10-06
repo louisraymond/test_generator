@@ -1,54 +1,37 @@
 module MarkdownHelper
-  # Very small, safe markdown renderer supporting inline code and fenced code blocks.
-  # We deliberately avoid adding a gem here; expand later if needed.
-  def render_markdown(md)
-    src = md.to_s
+  require 'redcarpet'
+  require 'rouge'
+  require 'rouge/plugins/redcarpet'
 
-    lines = src.split(/\r?\n/, -1)
-    parts = []
-    buf = []
-    in_code = false
-    code_lang = ''
-    code_lines = []
+  # Custom renderer with Rouge syntax highlighting
+  class RougeRenderer < Redcarpet::Render::HTML
+    include Rouge::Plugins::Redcarpet
+  end
 
-    flush_buf = lambda do
-      return if buf.empty?
-      text = buf.join("\n")
-      # Inline code first
-      text = text.gsub(/`([^`]+)`/) { %(<code class="md-inline">#{ERB::Util.html_escape($1)}</code>) }
-      # Paragraphize by blank lines
-      text.split(/\n{2,}/).each do |para|
-        parts << "<p>#{para.gsub(/\n/, '<br>')}</p>"
-      end
-      buf.clear
-    end
+  # Render full markdown with LaTeX support
+  # LaTeX delimiters: $...$ for inline, $$...$$ for display
+  def render_markdown(text)
+    return '' if text.blank?
 
-    lines.each do |line|
-      stripped = line.lstrip
-      if !in_code && stripped.start_with?('```')
-        # Opening fence; capture language token after backticks (if any)
-        code_lang = stripped.sub(/^```/, '').strip
-        in_code = true
-        flush_buf.call
-        code_lines = []
-      elsif in_code && stripped.start_with?('```')
-        # Closing fence
-        code = ERB::Util.html_escape(code_lines.join("\n"))
-        parts << %(<pre class="md-code"><code class="language-#{code_lang}">#{code}</code></pre>)
-        in_code = false
-        code_lang = ''
-      else
-        if in_code
-          code_lines << line
-        else
-          buf << ERB::Util.html_escape(line)
-        end
-      end
-    end
-    flush_buf.call
+    renderer = RougeRenderer.new(
+      hard_wrap: true,
+      safe_links_only: true,
+      with_toc_data: false
+    )
 
-    html = parts.join
-    sanitize(html, tags: %w[p br pre code strong em a ul ol li span], attributes: %w[class href])
+    markdown = Redcarpet::Markdown.new(renderer,
+      autolink: true,
+      tables: true,
+      fenced_code_blocks: true,
+      strikethrough: true,
+      superscript: true,
+      no_intra_emphasis: true,
+      space_after_headers: true
+    )
+
+    # Render markdown and mark as html_safe
+    # LaTeX will be rendered client-side by KaTeX
+    markdown.render(text).html_safe
   end
 
   # Split a markdown string at the first fenced code block. Returns [prompt, body].
@@ -62,11 +45,24 @@ module MarkdownHelper
     end
   end
 
-  # Render only inline markdown (no fenced blocks) for headers/prompts.
-  def render_markdown_inline(md)
-    text = ERB::Util.html_escape(md.to_s)
-    text = text.gsub(/`([^`]+)`/) { %(<code class="md-inline">#{$1}</code>) }
-    html = text.split(/\n{2,}/).map { |para| "<p>#{para.gsub(/\n/, '<br>')}</p>" }.join
-    sanitize(html, tags: %w[p br code span], attributes: %w[class])
+  # Render only inline markdown (no block elements) for simple formatting
+  def render_markdown_inline(text)
+    return '' if text.blank?
+
+    # For inline, we just do simple replacements
+    html = ERB::Util.html_escape(text)
+    
+    # Inline code
+    html = html.gsub(/`([^`]+)`/) { %(<code class="md-inline">#{$1}</code>) }
+    
+    # Bold
+    html = html.gsub(/\*\*([^\*]+)\*\*/) { %(<strong>#{$1}</strong>) }
+    html = html.gsub(/__([^_]+)__/) { %(<strong>#{$1}</strong>) }
+    
+    # Italic
+    html = html.gsub(/\*([^\*]+)\*/) { %(<em>#{$1}</em>) }
+    html = html.gsub(/_([^_]+)_/) { %(<em>#{$1}</em>) }
+    
+    html.html_safe
   end
 end

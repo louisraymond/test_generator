@@ -14,6 +14,77 @@
       margin: 0;
       padding: 20mm;
     }
+
+    .marking-scheme-header {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, #7c2d12, #991b1b);
+      border-bottom: 3px solid #991b1b;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      z-index: 100;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin: -20mm -20mm 20mm -20mm;
+    }
+
+    .marking-scheme-header h2 {
+      color: white;
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .marking-scheme-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .marking-scheme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .marking-scheme-btn--primary {
+      background: #dc2626;
+      color: white;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+    }
+
+    .marking-scheme-btn--primary:hover {
+      background: #b91c1c;
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .marking-scheme-btn--ghost {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .marking-scheme-btn--ghost:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .marking-scheme-icon {
+      width: 18px;
+      height: 18px;
+    }
     
     .header {
       text-align: center;
@@ -73,10 +144,50 @@
       body {
         padding: 0;
       }
+
+      .marking-scheme-header {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .marking-scheme-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+      }
+
+      .marking-scheme-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .marking-scheme-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .marking-scheme-header h2 {
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="marking-scheme-header">
+    <h2>Marking Scheme</h2>
+    <div class="marking-scheme-buttons">
+      <%= link_to marking_scheme_exam_path(@exam, format: :pdf), class: 'marking-scheme-btn marking-scheme-btn--primary' do %>
+        <svg class="marking-scheme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Download PDF</span>
+      <% end %>
+      <%= link_to exam_path(@exam), class: 'marking-scheme-btn marking-scheme-btn--ghost' do %>
+        <svg class="marking-scheme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <span>Back to Exam</span>
+      <% end %>
+    </div>
+  </div>
+
   <div class="header">MARK SCHEME – <%= @exam.title %></div>
   <div class="subtitle">Success criteria are detailed to guide consistent marking. Accept equivalent phrasing where meaning is preserved.</div>
   
@@ -91,11 +202,11 @@
     </thead>
     <tbody>
       <% @exam.questions.each_with_index do |question, index| %>
-        <tr>
+        <tr data-controller="math">
           <td class="question-col"><%= index + 1 %></td>
-          <td class="answers-col"><%= simple_format(question.answer) %></td>
-          <td class="guidance-col">
-            Award <%= question.points %> <%= 'mark'.pluralize(question.points) %> for <%= question.content.truncate(100) %>
+          <td class="answers-col markdown-content"><%= render_markdown(question.answer) %></td>
+          <td class="guidance-col markdown-content">
+            Award <%= question.points %> <%= 'mark'.pluralize(question.points) %> for <%= render_markdown_inline(question.content.truncate(100)) %>
           </td>
           <td class="mark-col"><%= question.points %></td>
         </tr>

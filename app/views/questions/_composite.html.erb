@@ -6,7 +6,7 @@
         <% letter = ('a'.ord + idx).chr %>
         <span class="sub-question-number"><%= letter %>)</span>
         <% clean_text = part['content'].to_s.sub(/\A\s*[a-z]\)\s*/i, '') %>
-        <span class="sub-question-text"><%= clean_text %></span>
+        <span class="sub-question-text markdown-content"><%= render_markdown_inline(clean_text) %></span>
         <% if (pts = part['points']).present? %>
           <span class="sub-question-marks">[<%= pts %> <%= 'mark'.pluralize(pts) %>]</span>
         <% end %>

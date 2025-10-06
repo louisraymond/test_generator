@@ -1,18 +1,18 @@
 <% size_class = question.answer_size.presence || 'short' %>
-<div class="question <%= 'question-large' if size_class == 'long' %>">
+<div class="question <%= 'question-large' if size_class == 'long' %>" data-controller="math">
   <div class="question-header">
     <span class="question-number"><%= number %></span>
     <% if question.question_type == 'markdown' %>
       <% prompt, body = markdown_split(question.content) %>
-      <div class="question-text"><%= render_markdown_inline(prompt) %></div>
+      <div class="question-text markdown-content"><%= render_markdown_inline(prompt) %></div>
     <% else %>
-      <div class="question-text">
+      <div class="question-text markdown-content">
         <% if question.question_type == 'cloze' %>
           <% masked = ERB::Util.html_escape(question.content.to_s) %>
           <% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
           <%= raw masked %>
         <% else %>
-          <%= simple_format(question.content) %>
+          <%= render_markdown(question.content) %>
         <% end %>
       </div>
     <% end %>

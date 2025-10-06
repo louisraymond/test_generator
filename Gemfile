@@ -28,6 +28,8 @@ gem "jbuilder"
 
 gem "grover"
 gem "haml-rails"
+gem "redcarpet"  # Markdown parsing
+gem "rouge"      # Syntax highlighting for code blocks
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"

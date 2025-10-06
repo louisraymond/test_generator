@@ -2,9 +2,32 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  
+  <!-- KaTeX for LaTeX rendering in PDFs -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  
   <style>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
   </style>
+  
+  <script>
+    // Render math when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ],
+        throwOnError: false,
+        ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      });
+    });
+  </script>
 </head>
 <body>
   <%= yield %>
