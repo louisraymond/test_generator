@@ -206,14 +206,18 @@ main {
     transform: scale(1.05);
 }
 
+
 /* Premium Page Wrapper for detail pages */
+
 .premium-page-wrapper {
     background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
     min-height: 100vh;
     padding: 2rem;
 }
 
+
 /* Topic Detail Title Row */
+
 .topic-detail__title-row {
     display: flex;
     align-items: center;
@@ -247,7 +251,9 @@ main {
     font-style: italic;
 }
 
+
 /* Form Wrapper for Exam Generation */
+
 .form-wrapper {
     max-width: 1400px;
     margin: 0 auto;
@@ -267,6 +273,167 @@ main {
     font-weight: 700;
     color: #0f172a;
     padding: 0 1rem;
+}
+
+/* Topic Form Styling */
+.topic-form {
+    max-width: 1200px;
+}
+
+.topic-form__field {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.topic-form__field:hover {
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.1), 0 4px 10px rgba(0, 0, 0, 0.06);
+    border-color: #93c5fd;
+}
+
+.topic-form__field label {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+}
+
+.topic-form__hint {
+    color: #64748b;
+    font-size: 0.9375rem;
+    margin: 0.5rem 0 1rem 0;
+    font-style: italic;
+}
+
+.topic-form__input,
+.topic-form__textarea,
+.topic-form__select {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.topic-form__input:focus,
+.topic-form__textarea:focus,
+.topic-form__select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.topic-form__textarea {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.topic-form__field--split {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.topic-form__field--split > div label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.topic-form__add {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.topic-form__add:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.topic-form__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    padding-top: 2rem;
+}
+
+.topic-form__submit {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.topic-form__submit:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.topic-form__cancel {
+    padding: 1rem 2rem;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.topic-form__cancel:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.topic-form__errors {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 2px solid #fca5a5;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+}
+
+.topic-form__errors h2 {
+    color: #991b1b;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+}
+
+.topic-form__errors ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #b91c1c;
+}
+
+.topic-form__errors li {
+    margin-bottom: 0.5rem;
 }
 
 @media (max-width: 1024px) {

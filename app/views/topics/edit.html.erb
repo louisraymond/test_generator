@@ -1,8 +1,23 @@
-<div class="topics-form-page">
-  <header class="topics-form-page__header">
-    <h1>Edit topic</h1>
-    <p>Update the module summary, learning outcomes and syllabus outline.</p>
-  </header>
+<div class="premium-page-wrapper topic-detail">
+  <div class="topic-detail__back">
+    <%= link_to topic_path(@topic), class: 'link-back' do %>
+      ← Back to <%= @topic.name %>
+    <% end %>
+  </div>
 
-  <%= render 'form', topic: @topic %>
+  <div class="premium-page-header">
+    <div class="premium-page-header__content">
+      <div class="topic-detail__title-row">
+        <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <div>
+          <h1 class="premium-title">Edit <%= @topic.name %></h1>
+          <p class="premium-subtitle">Update the topic summary, learning outcomes, and syllabus outline</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-detail__content">
+    <%= render 'form', topic: @topic %>
+  </div>
 </div>
