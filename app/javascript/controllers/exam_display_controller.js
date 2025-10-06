@@ -210,16 +210,16 @@ export default class extends Controller {
         const urlParams = new URLSearchParams(window.location.search)
         const urlFontSize = urlParams.get('font_size')
         const urlSpacing = urlParams.get('question_spacing')
-        
+
         let currentFontSize, currentSpacing
-        
+
         if (urlFontSize) {
             currentFontSize = `${urlFontSize}pt`
         } else {
             const firstPage = document.querySelector('.page')
             currentFontSize = firstPage ? firstPage.style.getPropertyValue('--exam-font-size') || '14pt' : '14pt'
         }
-        
+
         if (urlSpacing) {
             currentSpacing = `${urlSpacing}pt`
         } else {

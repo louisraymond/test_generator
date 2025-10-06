@@ -51,6 +51,6 @@ class Api::LearningObjectivesController < Api::BaseController
   end
 
   def learning_objective_params
-    params.require(:learning_objective).permit(:description, :category)
+    params.require(:learning_objective).permit(:description, :category, :topic_module_id)
   end
 end

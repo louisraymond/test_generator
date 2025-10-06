@@ -61,6 +61,14 @@
         <% end %>
       </div>
 
+      <div class="section-header">
+        <h2 class="topic-detail__section-title" style="margin: 0;">Add Another Module</h2>
+        <%= link_to new_topic_path, class: 'add-module-btn', style: 'text-decoration: none;' do %>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Module
+        <% end %>
+      </div>
+
       <h2 class="topic-detail__section-title" style="margin-top: 3rem;">Learning Outcomes by Module</h2>
     <% else %>
       <h2 class="topic-detail__section-title">Learning Outcomes</h2>
@@ -122,6 +130,12 @@
                 </div>
               </div>
             <% end %>
+            
+            <!-- Add Category Button for this Module -->
+            <button type="button" class="btn-add-category" data-action="click->topic-detail#startAddCategory" data-topic-detail-target="addCategoryButton" data-module-id="<%= mod.id %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add New Category</span>
+            </button>
           </div>
         <% end %>
       <% else %>

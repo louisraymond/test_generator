@@ -91,7 +91,16 @@ export default class extends Controller {
             return
         }
 
+        // Get module_id from the module section
+        const moduleSection = categoryCard.closest('.module-section')
+        const moduleId = moduleSection ? moduleSection.dataset.moduleId : null
+
         try {
+            const loData = { description, category }
+            if (moduleId) {
+                loData.topic_module_id = moduleId
+            }
+
             const response = await fetch(`/api/topics/${this.topicIdValue}/learning_objectives`, {
                 method: 'POST',
                 headers: {
@@ -99,7 +108,7 @@ export default class extends Controller {
                     'X-CSRF-Token': this.csrfToken
                 },
                 body: JSON.stringify({
-                    learning_objective: { description, category }
+                    learning_objective: loData
                 })
             })
 
@@ -150,7 +159,12 @@ export default class extends Controller {
     }
 
     startAddCategory(event) {
-        const addButton = this.addCategoryButtonTarget
+        const addButton = event.currentTarget
+        const moduleSection = addButton.closest('.module-section')
+        
+        // Store the module_id if we're in a module section
+        this.currentModuleId = moduleSection ? moduleSection.dataset.moduleId : null
+        
         const addForm = this.addCategoryFormTarget
 
         addButton.style.display = 'none'
@@ -199,6 +213,16 @@ export default class extends Controller {
         }
 
         try {
+            const loData = {
+                description: description,
+                category: categoryName
+            }
+            
+            // Include module_id if we're adding to a module
+            if (this.currentModuleId) {
+                loData.topic_module_id = this.currentModuleId
+            }
+
             const response = await fetch(`/api/topics/${this.topicIdValue}/learning_objectives`, {
                 method: 'POST',
                 headers: {
@@ -206,10 +230,7 @@ export default class extends Controller {
                     'X-CSRF-Token': this.csrfToken
                 },
                 body: JSON.stringify({
-                    learning_objective: {
-                        description: description,
-                        category: categoryName
-                    }
+                    learning_objective: loData
                 })
             })
 
