@@ -90,19 +90,31 @@ class TopicsController < ApplicationController
       :module_aims_text,
       :syllabus_outline_text,
       :reference_links_text,
-      learning_objectives_attributes: %i[id category description _destroy]
+      learning_objectives_attributes: %i[id category description _destroy],
+      topic_modules_attributes: %i[id name description _destroy]
     )
 
-    {
+    result = {
       name: raw[:name],
       epigraph_quote: raw[:epigraph_quote],
       epigraph_attribution: raw[:epigraph_attribution],
       parent_topic_id: raw[:parent_topic_id].presence,
       module_aims: parse_list(raw[:module_aims_text]),
       syllabus_outline: parse_sections(raw[:syllabus_outline_text]),
-      reference_links: parse_list(raw[:reference_links_text]),
-      learning_objectives_attributes: raw[:learning_objectives_attributes]
+      reference_links: parse_list(raw[:reference_links_text])
     }
+    
+    # Only include learning_objectives_attributes if present
+    if raw[:learning_objectives_attributes].present?
+      result[:learning_objectives_attributes] = raw[:learning_objectives_attributes]
+    end
+    
+    # Only include topic_modules_attributes if present
+    if raw[:topic_modules_attributes].present?
+      result[:topic_modules_attributes] = raw[:topic_modules_attributes]
+    end
+    
+    result
   end
 
   def parse_list(text)
