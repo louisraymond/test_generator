@@ -11,11 +11,6 @@
 /* Page container for on-screen preview - matches A4 dimensions exactly (210mm × 297mm) */
 
 .page {
-    /* CSS Variables for dynamic sizing */
-    --exam-font-size: 14pt;
-    --exam-line-height: 1.6;
-    --exam-question-margin: 18pt;
-    --exam-title-size: 18pt;
     /* A4 paper dimensions */
     width: 210mm;
     min-height: 297mm;
