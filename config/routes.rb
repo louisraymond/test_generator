@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   namespace :api do
     resources :topics, only: [] do
       resources :learning_objectives, only: %i[create update destroy]
+      resources :topic_modules, only: %i[create]
     end
   end
 

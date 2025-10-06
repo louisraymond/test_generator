@@ -161,10 +161,10 @@ export default class extends Controller {
     startAddCategory(event) {
         const addButton = event.currentTarget
         const moduleSection = addButton.closest('.module-section')
-        
+
         // Store the module_id if we're in a module section
         this.currentModuleId = moduleSection ? moduleSection.dataset.moduleId : null
-        
+
         const addForm = this.addCategoryFormTarget
 
         addButton.style.display = 'none'
@@ -217,7 +217,7 @@ export default class extends Controller {
                 description: description,
                 category: categoryName
             }
-            
+
             // Include module_id if we're adding to a module
             if (this.currentModuleId) {
                 loData.topic_module_id = this.currentModuleId
@@ -245,6 +245,43 @@ export default class extends Controller {
         } catch (error) {
             console.error('Error adding category:', error)
             alert('Failed to add category')
+        }
+    }
+
+    async addModule(event) {
+        const moduleName = prompt('Enter module name:')
+        
+        if (!moduleName || moduleName.trim() === '') {
+            return
+        }
+
+        const moduleDescription = prompt('Enter module description (optional):')
+
+        try {
+            const response = await fetch(`/api/topics/${this.topicIdValue}/topic_modules`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': this.csrfToken
+                },
+                body: JSON.stringify({
+                    topic_module: {
+                        name: moduleName.trim(),
+                        description: moduleDescription ? moduleDescription.trim() : ''
+                    }
+                })
+            })
+
+            if (response.ok) {
+                this.showFlash('Module added successfully!')
+                setTimeout(() => window.location.reload(), 500)
+            } else {
+                const data = await response.json()
+                alert(data.errors ? data.errors.join(', ') : 'Failed to add module')
+            }
+        } catch (error) {
+            console.error('Error adding module:', error)
+            alert('Failed to add module')
         }
     }
 
