@@ -83,6 +83,14 @@ body {
         box-shadow: none;
         /* No shadow in PDF */
         background: white;
+        page-break-after: always;
+        /* Force page break after each .page div */
+        page-break-inside: avoid;
+        /* Prevent breaking inside .page div */
+    }
+    .page:last-child {
+        page-break-after: auto;
+        /* Don't force break after last page */
     }
     .page::after {
         display: none;
