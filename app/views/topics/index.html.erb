@@ -72,9 +72,9 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th>Code</th>
             <th>Categories</th>
             <th>Learning Outcomes</th>
+            <th>Modules</th>
             <th>Description</th>
             <th class="actions">Actions</th>
           </tr>
@@ -85,15 +85,9 @@
               <td>
                 <div class="topic-pill"><%= topic.name %></div>
               </td>
-              <td>
-                <% if topic.code.present? %>
-                  <span class="chip"><%= topic.code %></span>
-                <% else %>
-                  <span class="muted">No code</span>
-                <% end %>
-              </td>
               <td class="points">[<%= topic.learning_outcome_sections.size %> <%= 'category'.pluralize(topic.learning_outcome_sections.size) %>]</td>
               <td class="points">[<%= topic.learning_objectives.count %> <%= 'outcome'.pluralize(topic.learning_objectives.count) %>]</td>
+              <td class="points">[<%= topic.topic_modules.count %> <%= 'module'.pluralize(topic.topic_modules.count) %>]</td>
               <td class="excerpt">
                 <% if topic.epigraph_quote.present? %>
                   <%= truncate(strip_tags(topic.epigraph_quote), length: 200) %>
