@@ -237,7 +237,7 @@
     <div class="display-controls-sidebar__buttons">
       <button class="preset-btn-sidebar" data-preset="compact" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
         <span class="preset-btn-sidebar__label">Compact</span>
-        <span class="preset-btn-sidebar__size">12pt</span>
+        <span class="preset-btn-sidebar__size">11pt</span>
       </button>
       <button class="preset-btn-sidebar is-active" data-preset="normal" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
         <span class="preset-btn-sidebar__label">Normal</span>
@@ -251,6 +251,32 @@
         <span class="preset-btn-sidebar__label">Large Print</span>
         <span class="preset-btn-sidebar__size">18pt</span>
       </button>
+    </div>
+    
+    <div class="custom-controls">
+      <div class="control-group">
+        <label for="font-size-slider">Font Size: <span data-exam-display-target="fontSizeValue">14pt</span></label>
+        <div class="slider-container">
+          <input type="range" id="font-size-slider" min="8" max="24" value="14" 
+                 data-exam-display-target="fontSizeSlider" 
+                 data-action="input->exam-display#updateFontSize">
+          <input type="number" id="font-size-input" min="8" max="24" value="14" 
+                 data-exam-display-target="fontSizeInput" 
+                 data-action="input->exam-display#updateFontSize">
+        </div>
+      </div>
+      
+      <div class="control-group">
+        <label for="spacing-slider">Question Spacing: <span data-exam-display-target="spacingValue">18pt</span></label>
+        <div class="slider-container">
+          <input type="range" id="spacing-slider" min="8" max="40" value="18" 
+                 data-exam-display-target="spacingSlider" 
+                 data-action="input->exam-display#updateSpacing">
+          <input type="number" id="spacing-input" min="8" max="40" value="18" 
+                 data-exam-display-target="spacingInput" 
+                 data-action="input->exam-display#updateSpacing">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -282,10 +308,15 @@
     <% pages.each_with_index do |page_questions, page_index| %>
       <div class="page" data-exam-display-target="page">
         <% if page_index == 0 %>
-          <h1><%= @exam.title %></h1>
-          <% if @exam.duration_minutes.present? %>
-            <p style="text-align:center; margin-top:-10mm; margin-bottom:15mm; font-style: italic;">Duration: <%= @exam.duration_minutes %> minutes</p>
-          <% end %>
+          <div class="exam-header">
+            <h1 class="exam-title"><%= @exam.title %></h1>
+            <div class="exam-meta">
+              <span class="exam-date"><%= @exam.created_at.strftime("%d/%m/%Y") %></span>
+              <% if @exam.duration_minutes.present? %>
+                <span class="exam-duration">Duration: <%= @exam.duration_minutes %> minutes</span>
+              <% end %>
+            </div>
+          </div>
         <% end %>
 
         <% page_questions.each do |question| %>
@@ -297,10 +328,15 @@
   <% else %>
     <%# For PDF: Single page div, let browser handle page breaks %>
     <div class="page">
-      <h1><%= @exam.title %></h1>
-      <% if @exam.duration_minutes.present? %>
-        <p style="text-align:center; margin-top:-10mm; margin-bottom:15mm; font-style: italic;">Duration: <%= @exam.duration_minutes %> minutes</p>
-      <% end %>
+      <div class="exam-header">
+        <h1 class="exam-title"><%= @exam.title %></h1>
+        <div class="exam-meta">
+          <span class="exam-date"><%= @exam.created_at.strftime("%d/%m/%Y") %></span>
+          <% if @exam.duration_minutes.present? %>
+            <span class="exam-duration">Duration: <%= @exam.duration_minutes %> minutes</span>
+          <% end %>
+        </div>
+      </div>
 
       <% @exam.questions.each_with_index do |question, index| %>
         <%= render 'questions/question', question: question, number: index + 1, seed: "#{@exam.id}-#{index + 1}" %>

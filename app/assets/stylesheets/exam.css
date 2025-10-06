@@ -77,30 +77,192 @@ body {
         page-break-inside: auto;
     }
     .page {
-        width: auto;
+        width: 210mm; /* Match HTML width exactly */
+        min-height: 297mm; /* Match HTML height exactly */
         margin: 0; /* Remove margins for PDF */
-        padding: 0; /* Let @page margins handle spacing */
+        padding: 25mm 20mm; /* Match HTML padding exactly */
         box-shadow: none; /* No shadow in PDF */
         background: white;
     }
     .page::after {
-        display: none; /* Hide page counter in print */
+        display: none;
+        /* Hide page counter in print */
     }
     .exam-actions-header,
     .display-controls-sidebar {
-        display: none !important; /* Hide UI elements in print */
+        display: none !important;
+        /* Hide UI elements in print */
     }
 }
 
 
-/* Titles */
+/* Exam Header */
 
+.exam-header {
+    margin-bottom: 15pt;
+    text-align: center;
+}
+
+.exam-title {
+    font-size: var(--exam-title-size);
+    font-weight: bold;
+    margin: 0 0 8pt 0;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.exam-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: calc(var(--exam-font-size) * 0.9);
+    color: #666;
+    margin: 0;
+}
+
+.exam-date {
+    font-weight: 500;
+}
+
+.exam-duration {
+    font-style: italic;
+}
+
+/* Legacy h1 support */
 h1 {
     font-size: var(--exam-title-size);
     font-weight: bold;
     text-align: center;
     margin: 0 0 30mm 0;
     padding-top: 10mm;
+}
+
+/* Display Controls Sidebar */
+
+.display-controls-sidebar {
+    position: fixed;
+    top: 120px;
+    right: 20px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.display-controls-sidebar__title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.display-controls-sidebar__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.preset-btn-sidebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.preset-btn-sidebar:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+
+.preset-btn-sidebar.is-active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.preset-btn-sidebar__label {
+    font-weight: 500;
+}
+
+.preset-btn-sidebar__size {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+/* Custom Controls */
+
+.custom-controls {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+}
+
+.control-group {
+    margin-bottom: 16px;
+}
+
+.control-group:last-child {
+    margin-bottom: 0;
+}
+
+.control-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slider-container input[type="range"] {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #e5e7eb;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+}
+
+.slider-container input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: none;
+}
+
+.slider-container input[type="number"] {
+    width: 50px;
+    padding: 4px 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
 }
 
 
