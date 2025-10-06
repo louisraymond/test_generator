@@ -524,6 +524,30 @@ h1 {
     color: white;
 }
 
+/* Action buttons in exam index table */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.action-buttons .link-edit {
+    font-size: 0.875rem;
+    padding: 2px 6px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #e9ecef;
+    border-radius: 3px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.action-buttons .link-edit:hover {
+    background: #e9ecef;
+    color: #0056b3;
+    border-color: #007bff;
+}
+
 
 /* Question block */
 
