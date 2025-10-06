@@ -1,110 +1,107 @@
 <div data-controller="view-toggle">
-  <h1>Topics</h1>
-  <p class="library-lead">Manage your course topics and learning outcomes. Up to 200 results are shown at a time.</p>
-
-<div class="library-grid">
-  <div class="filter-card card">
-    <div class="filter-summary">
-      <span class="chip">Total topics: <strong><%= @topics.count %></strong></span>
-    </div>
-    
-    <div class="view-toggle">
-      <button class="view-toggle-btn active" data-view-toggle-target="cardBtn" data-action="click->view-toggle#switchToCard">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        Cards
-      </button>
-      <button class="view-toggle-btn" data-view-toggle-target="tableBtn" data-action="click->view-toggle#switchToTable">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0-18h10a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4m6 6h10a2 2 0 0 0 2-2v-4M3 9h18M3 15h18"></path>
-        </svg>
-        Table
-      </button>
-    </div>
-  </div>
-
-  <aside class="library-side card">
-    <h3>Quick Actions</h3>
-    <ul>
-      <li><%= link_to 'Add a new topic →', new_topic_path %></li>
-      <li><%= link_to 'Question Bank →', questions_path %></li>
-      <li><%= link_to 'Exam History →', exams_path %></li>
-    </ul>
-  </aside>
-</div>
-
-<div class="questions-card card">
-  <% if @topics.empty? %>
-    <p class="muted">No topics have been added yet. <%= link_to 'Create the first topic', new_topic_path %> to get started!</p>
-  <% else %>
-    <!-- Card View -->
-    <div id="card-view" class="topic-grid" data-view-toggle-target="cardView">
-      <% @topics.each do |topic| %>
-        <%= link_to topic_path(topic), class: 'topic-card' do %>
-          <div class="topic-card__content">
-            <div class="topic-card__header">
-              <svg class="topic-card__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-              <h3><%= topic.name %></h3>
-            </div>
-            <% if topic.epigraph_quote.present? %>
-              <p class="topic-card__description"><%= truncate(strip_tags(topic.epigraph_quote), length: 150) %></p>
-            <% end %>
-            <div class="topic-card__meta">
-              <span class="topic-card__meta-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                <%= pluralize(topic.learning_outcome_sections.size, 'category') %>
-              </span>
-              <span class="topic-card__meta-divider">·</span>
-              <span class="topic-card__meta-item"><%= pluralize(topic.learning_objectives.count, 'learning outcome') %></span>
-            </div>
-          </div>
+  <div class="topic-list">
+    <div class="topic-list__header">
+      <div>
+        <h1>Topics</h1>
+        <p class="topic-list__subtitle">Manage your course topics and learning outcomes</p>
+      </div>
+      <div class="topic-list__header-actions">
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" data-view-toggle-target="cardBtn" data-action="click->view-toggle#switchToCard">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Cards
+          </button>
+          <button class="view-toggle-btn" data-view-toggle-target="tableBtn" data-action="click->view-toggle#switchToTable">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0-18h10a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4m6 6h10a2 2 0 0 0 2-2v-4M3 9h18M3 15h18"></path>
+            </svg>
+            Table
+          </button>
+        </div>
+        <%= link_to new_topic_path, class: 'btn btn--primary' do %>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Topic</span>
         <% end %>
-      <% end %>
+      </div>
     </div>
 
-    <!-- Table View -->
-    <div id="table-view" class="table-view" style="display: none;" data-view-toggle-target="tableView">
-      <table class="questions-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Categories</th>
-            <th>Learning Outcomes</th>
-            <th>Modules</th>
-            <th>Description</th>
-            <th class="actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @topics.each do |topic| %>
-            <tr>
-              <td>
-                <div class="topic-pill"><%= topic.name %></div>
-              </td>
-              <td class="points">[<%= topic.learning_outcome_sections.size %> <%= 'category'.pluralize(topic.learning_outcome_sections.size) %>]</td>
-              <td class="points">[<%= topic.learning_objectives.count %> <%= 'outcome'.pluralize(topic.learning_objectives.count) %>]</td>
-              <td class="points">[<%= topic.topic_modules.count %> <%= 'module'.pluralize(topic.topic_modules.count) %>]</td>
-              <td class="excerpt">
-                <% if topic.epigraph_quote.present? %>
-                  <%= truncate(strip_tags(topic.epigraph_quote), length: 200) %>
-                <% else %>
-                  <span class="muted">No description</span>
-                <% end %>
-              </td>
-              <td class="actions-cell">
-                <%= link_to 'View', topic_path(topic), class: 'link-edit' %>
-                <br>
-                <%= link_to 'Edit', edit_topic_path(topic), class: 'link-edit' %>
-              </td>
-            </tr>
+    <% if @topics.any? %>
+      <!-- Card View -->
+      <div id="card-view" class="topic-grid" data-view-toggle-target="cardView">
+        <% @topics.each do |topic| %>
+          <%= link_to topic_path(topic), class: 'topic-card' do %>
+            <div class="topic-card__content">
+              <div class="topic-card__header">
+                <svg class="topic-card__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <h3><%= topic.name %></h3>
+              </div>
+              <% if topic.epigraph_quote.present? %>
+                <p class="topic-card__description"><%= truncate(strip_tags(topic.epigraph_quote), length: 150) %></p>
+              <% end %>
+              <div class="topic-card__meta">
+                <span class="topic-card__meta-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                  <%= pluralize(topic.learning_outcome_sections.size, 'category') %>
+                </span>
+                <span class="topic-card__meta-divider">·</span>
+                <span class="topic-card__meta-item"><%= pluralize(topic.learning_objectives.count, 'learning outcome') %></span>
+              </div>
+            </div>
           <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% end %>
-</div>
+        <% end %>
+      </div>
+
+      <!-- Table View -->
+      <div id="table-view" class="table-view" style="display: none;" data-view-toggle-target="tableView">
+        <div class="questions-card card">
+          <table class="questions-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Categories</th>
+                <th>Learning Outcomes</th>
+                <th>Modules</th>
+                <th>Description</th>
+                <th class="actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @topics.each do |topic| %>
+                <tr>
+                  <td>
+                    <div class="topic-pill"><%= topic.name %></div>
+                  </td>
+                  <td class="points">[<%= topic.learning_outcome_sections.size %> <%= 'category'.pluralize(topic.learning_outcome_sections.size) %>]</td>
+                  <td class="points">[<%= topic.learning_objectives.count %> <%= 'outcome'.pluralize(topic.learning_objectives.count) %>]</td>
+                  <td class="points">[<%= topic.topic_modules.count %> <%= 'module'.pluralize(topic.topic_modules.count) %>]</td>
+                  <td class="excerpt">
+                    <% if topic.epigraph_quote.present? %>
+                      <%= truncate(strip_tags(topic.epigraph_quote), length: 200) %>
+                    <% else %>
+                      <span class="muted">No description</span>
+                    <% end %>
+                  </td>
+                  <td class="actions-cell">
+                    <%= link_to 'View', topic_path(topic), class: 'link-edit' %>
+                    <br>
+                    <%= link_to 'Edit', edit_topic_path(topic), class: 'link-edit' %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% else %>
+      <div class="topic-empty">
+        <p>No topics have been added yet.</p>
+        <%= link_to 'Create the first topic', new_topic_path, class: 'btn btn--primary' %>
+      </div>
+    <% end %>
+  </div>
 </div>
