@@ -1,58 +1,58 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [
-    "sectionsContainer",
-    "sectionTemplate",
-    "sectionCard",
-    "sourceRuleField",
-    "questionRuleField"
-  ]
+    static targets = [
+        "sectionsContainer",
+        "sectionTemplate",
+        "sectionCard",
+        "sourceRuleField",
+        "questionRuleField"
+    ]
 
-  connect() {
-    this.sectionIndex = this.sectionCardTargets.length
-  }
-
-  addSection(event) {
-    event.preventDefault()
-    
-    const content = this.sectionTemplateTarget.innerHTML
-    const newSection = content.replace(/NEW_SECTION_RECORD/g, new Date().getTime())
-    
-    const wrapper = document.createElement('div')
-    wrapper.innerHTML = newSection
-    
-    // Update position field
-    const positionInput = wrapper.querySelector('input[name*="[position]"]')
-    if (positionInput) {
-      positionInput.value = this.sectionIndex
+    connect() {
+        this.sectionIndex = this.sectionCardTargets.length
     }
-    
-    this.sectionsContainerTarget.insertAdjacentHTML('beforeend', wrapper.innerHTML)
-    this.sectionIndex++
-  }
 
-  removeSection(event) {
-    event.preventDefault()
-    const card = event.target.closest('.section-card')
-    const destroyField = card.querySelector('input[name*="[_destroy]"]')
-    
-    if (destroyField) {
-      destroyField.value = '1'
-      card.style.display = 'none'
-    } else {
-      card.remove()
+    addSection(event) {
+        event.preventDefault()
+
+        const content = this.sectionTemplateTarget.innerHTML
+        const newSection = content.replace(/NEW_SECTION_RECORD/g, new Date().getTime())
+
+        const wrapper = document.createElement('div')
+        wrapper.innerHTML = newSection
+
+        // Update position field
+        const positionInput = wrapper.querySelector('input[name*="[position]"]')
+        if (positionInput) {
+            positionInput.value = this.sectionIndex
+        }
+
+        this.sectionsContainerTarget.insertAdjacentHTML('beforeend', wrapper.innerHTML)
+        this.sectionIndex++
     }
-  }
 
-  addSourceRule(event) {
-    event.preventDefault()
-    const button = event.target.closest('button')
-    const sectionIndex = button.dataset.sectionIndex
-    const container = button.previousElementSibling
-    
-    const newId = new Date().getTime()
-    const template = `
+    removeSection(event) {
+        event.preventDefault()
+        const card = event.target.closest('.section-card')
+        const destroyField = card.querySelector('input[name*="[_destroy]"]')
+
+        if (destroyField) {
+            destroyField.value = '1'
+            card.style.display = 'none'
+        } else {
+            card.remove()
+        }
+    }
+
+    addSourceRule(event) {
+        event.preventDefault()
+        const button = event.target.closest('button')
+        const sectionIndex = button.dataset.sectionIndex
+        const container = button.previousElementSibling
+
+        const newId = new Date().getTime()
+        const template = `
       <div class="rule-field" data-template-form-target="sourceRuleField">
         <input type="hidden" name="exam_template[exam_sections_attributes][${sectionIndex}][section_source_rules_attributes][${newId}][_destroy]" value="false">
         
@@ -90,31 +90,31 @@ export default class extends Controller {
         </div>
       </div>
     `
-    
-    container.insertAdjacentHTML('beforeend', template)
-  }
 
-  removeSourceRule(event) {
-    event.preventDefault()
-    const field = event.target.closest('.rule-field')
-    const destroyField = field.querySelector('input[name*="[_destroy]"]')
-    
-    if (destroyField && destroyField.value !== 'false') {
-      destroyField.value = '1'
-      field.style.display = 'none'
-    } else {
-      field.remove()
+        container.insertAdjacentHTML('beforeend', template)
     }
-  }
 
-  addQuestionRule(event) {
-    event.preventDefault()
-    const button = event.target.closest('button')
-    const sectionIndex = button.dataset.sectionIndex
-    const container = button.previousElementSibling
-    
-    const newId = new Date().getTime()
-    const template = `
+    removeSourceRule(event) {
+        event.preventDefault()
+        const field = event.target.closest('.rule-field')
+        const destroyField = field.querySelector('input[name*="[_destroy]"]')
+
+        if (destroyField && destroyField.value !== 'false') {
+            destroyField.value = '1'
+            field.style.display = 'none'
+        } else {
+            field.remove()
+        }
+    }
+
+    addQuestionRule(event) {
+        event.preventDefault()
+        const button = event.target.closest('button')
+        const sectionIndex = button.dataset.sectionIndex
+        const container = button.previousElementSibling
+
+        const newId = new Date().getTime()
+        const template = `
       <div class="rule-field" data-template-form-target="questionRuleField">
         <input type="hidden" name="exam_template[exam_sections_attributes][${sectionIndex}][section_question_rules_attributes][${newId}][_destroy]" value="false">
         
@@ -146,21 +146,20 @@ export default class extends Controller {
         </div>
       </div>
     `
-    
-    container.insertAdjacentHTML('beforeend', template)
-  }
 
-  removeQuestionRule(event) {
-    event.preventDefault()
-    const field = event.target.closest('.rule-field')
-    const destroyField = field.querySelector('input[name*="[_destroy]"]')
-    
-    if (destroyField && destroyField.value !== 'false') {
-      destroyField.value = '1'
-      field.style.display = 'none'
-    } else {
-      field.remove()
+        container.insertAdjacentHTML('beforeend', template)
     }
-  }
-}
 
+    removeQuestionRule(event) {
+        event.preventDefault()
+        const field = event.target.closest('.rule-field')
+        const destroyField = field.querySelector('input[name*="[_destroy]"]')
+
+        if (destroyField && destroyField.value !== 'false') {
+            destroyField.value = '1'
+            field.style.display = 'none'
+        } else {
+            field.remove()
+        }
+    }
+}

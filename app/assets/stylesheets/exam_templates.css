@@ -1,0 +1,350 @@
+/* Exam Templates Styles */
+
+/* Template Form */
+.template-form {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.template-form__card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.template-form__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.template-form__section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.template-form__field {
+  margin-bottom: 1.5rem;
+}
+
+.template-form__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.template-form__input,
+.template-form__textarea,
+.template-form__select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.15s;
+}
+
+.template-form__input:focus,
+.template-form__textarea:focus,
+.template-form__select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.template-form__hint {
+  display: block;
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+.template-form__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* Section Card */
+.section-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #cbd5e0;
+}
+
+.section-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.section-card__title svg {
+  color: #667eea;
+}
+
+.section-card__row {
+  display: grid;
+  grid-template-columns: 1fr 150px 150px;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-card__field {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-card__field--small {
+  grid-column: span 1;
+}
+
+.section-card__label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.section-card__input,
+.section-card__select {
+  padding: 0.75rem;
+  border: 2px solid #cbd5e0;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.15s;
+}
+
+.section-card__input:focus,
+.section-card__select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.section-card__subsection {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.section-card__subtitle {
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+}
+
+.section-card__details {
+  margin-top: 1rem;
+}
+
+.section-card__summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #667eea;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+.section-card__summary:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.source-rules,
+.question-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Rule Fields */
+.rule-field {
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.rule-field__row {
+  display: grid;
+  grid-template-columns: 150px 1fr 100px 120px 40px;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.rule-field__select-group,
+.rule-field__input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.rule-field__label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rule-field__select,
+.rule-field__input {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.rule-field__remove {
+  margin-bottom: 0;
+}
+
+/* Alert Styles */
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.alert--error {
+  background: #fed7d7;
+  border: 2px solid #fc8181;
+  color: #742a2a;
+}
+
+.alert h3 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+/* Templates Index Table */
+.templates-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.templates-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.templates-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.templates-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.templates-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.15s;
+}
+
+.templates-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.templates-table td {
+  padding: 1rem;
+}
+
+.template-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.template-name-link {
+  font-weight: 600;
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.template-name-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.template-description {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.count-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.use-count {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+  color: white;
+}
+
+.btn--danger:hover {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+}
+
