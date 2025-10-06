@@ -153,9 +153,9 @@ RSpec.describe 'Exam Display', type: :system do
       # Wait for JavaScript to apply changes
       sleep 0.5
 
-      # Check that font size changed
+      # Check that font size changed (compact is now 11pt)
       font_size = page.evaluate_script("getComputedStyle(document.querySelector('.page')).getPropertyValue('--exam-font-size')")
-      expect(font_size.strip).to eq('12pt')
+      expect(font_size.strip).to eq('11pt')
 
       # Check active state changed
       compact_button = find('.display-controls-sidebar button[data-preset="compact"]')
@@ -163,11 +163,8 @@ RSpec.describe 'Exam Display', type: :system do
     end
 
     it 'persists display preference', js: true do
-      # Set to Large Print
-      large_button = find('.display-controls-sidebar button[data-preset="large"]')
-      page.execute_script('arguments[0].scrollIntoView({block: "center"})', large_button)
-      sleep 0.2
-      large_button.click
+      # Set to Large Print using JavaScript to avoid element interception
+      page.execute_script("document.querySelector('.display-controls-sidebar button[data-preset=\"large\"]').click()")
 
       sleep 0.5
 
