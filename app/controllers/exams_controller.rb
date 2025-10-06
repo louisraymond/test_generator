@@ -1,4 +1,8 @@
 class ExamsController < ApplicationController
+  def index
+    @exams = Exam.includes(exam_questions: :question).order(created_at: :desc)
+  end
+
   def new
     @topics = Topic.order(:name)
     @question_types = Question::QUESTION_TYPES
