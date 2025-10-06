@@ -38,18 +38,12 @@
         <% @exams.each do |exam| %>
           <tr>
             <td>
-              <div class="exam-title">
-                <strong><%= exam.title %></strong>
-              </div>
+              <div class="topic-pill"><%= exam.title %></div>
             </td>
             <td>
-              <span class="exam-date">
-                <%= exam.created_at.strftime("%d/%m/%Y") %>
-              </span>
+              <span class="chip"><%= exam.created_at.strftime("%d/%m/%Y") %></span>
               <br>
-              <span class="muted">
-                <%= exam.created_at.strftime("%H:%M") %>
-              </span>
+              <span class="muted"><%= exam.created_at.strftime("%H:%M") %></span>
             </td>
             <td>
               <% if exam.duration_minutes.present? %>
@@ -58,12 +52,8 @@
                 <span class="muted">Not set</span>
               <% end %>
             </td>
-            <td class="points">
-              <span class="chip"><%= exam.questions.count %></span>
-            </td>
-            <td class="points">
-              <span class="chip"><%= exam.questions.sum(:points) || 0 %></span>
-            </td>
+            <td class="points">[<%= exam.questions.count %> questions]</td>
+            <td class="points">[<%= exam.questions.sum(:points) || 0 %> <%= 'mark'.pluralize(exam.questions.sum(:points) || 0) %>]</td>
             <td class="outcomes">
               <% topics = exam.questions.map(&:topic).uniq %>
               <% if topics.any? %>
@@ -77,12 +67,13 @@
               <% end %>
             </td>
             <td class="actions-cell">
-              <div class="action-buttons">
-                <%= link_to 'View', exam_path(exam), class: 'link-edit' %>
-                <%= link_to 'Marking Scheme', marking_scheme_exam_path(exam), class: 'link-edit' %>
-                <%= link_to 'PDF', exam_path(exam, format: :pdf), class: 'link-edit', target: '_blank' %>
-                <%= link_to 'MS PDF', marking_scheme_exam_path(exam, format: :pdf), class: 'link-edit', target: '_blank' %>
-              </div>
+              <%= link_to 'View', exam_path(exam), class: 'link-edit' %>
+              <br>
+              <%= link_to 'Marking Scheme', marking_scheme_exam_path(exam), class: 'link-edit' %>
+              <br>
+              <%= link_to 'PDF', exam_path(exam, format: :pdf), class: 'link-edit', target: '_blank' %>
+              <br>
+              <%= link_to 'MS PDF', marking_scheme_exam_path(exam, format: :pdf), class: 'link-edit', target: '_blank' %>
             </td>
           </tr>
         <% end %>
