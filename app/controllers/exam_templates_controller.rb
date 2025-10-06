@@ -109,13 +109,15 @@ class ExamTemplatesController < ApplicationController
     end.to_json
     
     @learning_objectives_json = LearningObjective.includes(topic_module: :topic)
+      .where.not(topic_module_id: nil)
       .order('topics.name, topic_modules.name, learning_objectives.category').map do |lo|
+        next unless lo.topic_module && lo.topic_module.topic
         { 
           id: lo.id, 
           description: lo.description,
           module_path: "#{lo.topic_module.topic.name} → #{lo.topic_module.name}"
         }
-      end.to_json
+      end.compact.to_json
   end
 end
 
