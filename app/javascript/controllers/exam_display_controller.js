@@ -37,13 +37,30 @@ export default class extends Controller {
     }
 
     connect() {
-        // Load saved preference from localStorage
-        const saved = localStorage.getItem('examDisplayPreset')
-        const preset = saved || 'normal'
-        this.applyPreset(preset, false)
+        // Check for URL parameters first
+        const urlParams = new URLSearchParams(window.location.search)
+        const urlFontSize = urlParams.get('font_size')
+        const urlSpacing = urlParams.get('question_spacing')
+        
+        if (urlFontSize || urlSpacing) {
+            // Apply URL parameters
+            if (urlFontSize) {
+                this.applyCustomFontSize(`${urlFontSize}pt`)
+                this.updateSliderAndInput('fontSize', urlFontSize)
+            }
+            if (urlSpacing) {
+                this.applyCustomSpacing(`${urlSpacing}pt`)
+                this.updateSliderAndInput('spacing', urlSpacing)
+            }
+        } else {
+            // Load saved preference from localStorage
+            const saved = localStorage.getItem('examDisplayPreset')
+            const preset = saved || 'normal'
+            this.applyPreset(preset, false)
 
-        // Load custom values from localStorage
-        this.loadCustomValues()
+            // Load custom values from localStorage
+            this.loadCustomValues()
+        }
     }
 
     applyPreset(presetName, save = true) {
@@ -142,7 +159,7 @@ export default class extends Controller {
             page.style.setProperty('--exam-font-size', fontSize)
         })
         document.body.style.setProperty('--exam-font-size', fontSize)
-        
+
         // Update PDF link with current font size
         this.updatePdfLink()
     }
@@ -155,7 +172,7 @@ export default class extends Controller {
         pages.forEach(page => {
             page.style.setProperty('--exam-question-margin', spacing)
         })
-        
+
         // Update PDF link with current spacing
         this.updatePdfLink()
     }
@@ -199,5 +216,30 @@ export default class extends Controller {
         url.searchParams.set('font_size', fontSizeNumber)
         url.searchParams.set('question_spacing', spacingNumber)
         pdfLink.href = url.toString()
+    }
+
+    // Update slider and input values
+    updateSliderAndInput(type, value) {
+        if (type === 'fontSize') {
+            if (this.hasFontSizeSliderTarget) {
+                this.fontSizeSliderTarget.value = value
+            }
+            if (this.hasFontSizeInputTarget) {
+                this.fontSizeInputTarget.value = value
+            }
+            if (this.hasFontSizeValueTarget) {
+                this.fontSizeValueTarget.textContent = `${value}pt`
+            }
+        } else if (type === 'spacing') {
+            if (this.hasSpacingSliderTarget) {
+                this.spacingSliderTarget.value = value
+            }
+            if (this.hasSpacingInputTarget) {
+                this.spacingInputTarget.value = value
+            }
+            if (this.hasSpacingValueTarget) {
+                this.spacingValueTarget.textContent = `${value}pt`
+            }
+        }
     }
 }
