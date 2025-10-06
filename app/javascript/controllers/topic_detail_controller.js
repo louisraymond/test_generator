@@ -4,7 +4,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
     static targets = [
         "categoryCard", "categoryBody", "chevron", "addLoForm", "loInput",
-        "addCategoryForm", "categoryNameInput", "firstLoInput", "addCategoryButton"
+        "addCategoryForm", "categoryNameInput", "firstLoInput", "addCategoryButton",
+        "addModuleBtn", "wipModuleCard", "wipModuleName", "wipModuleDescription"
     ]
     static values = {
         topicId: Number
@@ -248,14 +249,39 @@ export default class extends Controller {
         }
     }
 
-    async addModule(event) {
-        const moduleName = prompt('Enter module name:')
+    startAddModule(event) {
+        this.addModuleBtnTarget.style.display = 'none'
+        this.wipModuleCardTarget.style.display = 'block'
+        this.wipModuleNameTarget.focus()
+    }
+
+    cancelAddModule(event) {
+        this.wipModuleCardTarget.style.display = 'none'
+        this.addModuleBtnTarget.style.display = 'flex'
+        this.wipModuleNameTarget.value = ''
+        this.wipModuleDescriptionTarget.value = ''
+    }
+
+    handleModuleNameKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            this.saveModule()
+        } else if (event.key === 'Escape') {
+            event.preventDefault()
+            this.cancelAddModule()
+        }
+    }
+
+    async saveModule(event) {
+        const moduleName = this.wipModuleNameTarget.value.trim()
         
-        if (!moduleName || moduleName.trim() === '') {
+        if (!moduleName) {
+            alert('Module name is required')
+            this.wipModuleNameTarget.focus()
             return
         }
 
-        const moduleDescription = prompt('Enter module description (optional):')
+        const moduleDescription = this.wipModuleDescriptionTarget.value.trim()
 
         try {
             const response = await fetch(`/api/topics/${this.topicIdValue}/topic_modules`, {
@@ -266,8 +292,8 @@ export default class extends Controller {
                 },
                 body: JSON.stringify({
                     topic_module: {
-                        name: moduleName.trim(),
-                        description: moduleDescription ? moduleDescription.trim() : ''
+                        name: moduleName,
+                        description: moduleDescription
                     }
                 })
             })

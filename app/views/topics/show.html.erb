@@ -63,10 +63,43 @@
 
       <div class="section-header">
         <h2 class="topic-detail__section-title" style="margin: 0;">Add Another Module</h2>
-        <button type="button" class="add-module-btn" data-action="click->topic-detail#addModule">
+        <button type="button" class="add-module-btn" data-action="click->topic-detail#startAddModule" data-topic-detail-target="addModuleBtn">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           Add Module
         </button>
+      </div>
+
+      <!-- WIP Module Card -->
+      <div class="module-card module-card--wip" style="display: none; margin-bottom: 2rem;" data-topic-detail-target="wipModuleCard">
+        <div class="module-card__header">
+          <div class="module-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <div class="module-card__title-editor" style="flex: 1;">
+            <input type="text" 
+                   class="module-title-input" 
+                   placeholder="Enter module name" 
+                   data-topic-detail-target="wipModuleName"
+                   data-action="keydown->topic-detail#handleModuleNameKeydown">
+          </div>
+        </div>
+        
+        <div class="module-card__description-editor">
+          <textarea class="module-description-input" 
+                    placeholder="Enter module description (optional)" 
+                    rows="2"
+                    data-topic-detail-target="wipModuleDescription"></textarea>
+        </div>
+        
+        <div class="wip-module-actions">
+          <button type="button" class="btn btn--small btn--primary" data-action="click->topic-detail#saveModule">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Save Module
+          </button>
+          <button type="button" class="btn btn--small btn--secondary" data-action="click->topic-detail#cancelAddModule">
+            Cancel
+          </button>
+        </div>
       </div>
 
       <h2 class="topic-detail__section-title" style="margin-top: 3rem;">Learning Outcomes by Module</h2>
