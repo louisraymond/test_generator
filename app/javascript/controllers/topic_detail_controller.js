@@ -274,7 +274,7 @@ export default class extends Controller {
 
     async saveModule(event) {
         const moduleName = this.wipModuleNameTarget.value.trim()
-        
+
         if (!moduleName) {
             alert('Module name is required')
             this.wipModuleNameTarget.focus()

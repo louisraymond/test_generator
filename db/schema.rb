@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_06_231401) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,9 +20,37 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "section_number"
     t.index ["exam_id", "position"], name: "index_exam_questions_on_exam_id_and_position", unique: true
     t.index ["exam_id"], name: "index_exam_questions_on_exam_id"
     t.index ["question_id"], name: "index_exam_questions_on_question_id"
+  end
+
+  create_table "exam_sections", force: :cascade do |t|
+    t.bigint "exam_template_id", null: false
+    t.integer "position", default: 0, null: false
+    t.string "name", null: false
+    t.integer "duration_minutes"
+    t.integer "question_count", null: false
+    t.integer "min_points"
+    t.integer "max_points"
+    t.jsonb "question_type_filter", default: []
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_template_id", "position"], name: "index_exam_sections_on_exam_template_id_and_position"
+    t.index ["exam_template_id"], name: "index_exam_sections_on_exam_template_id"
+  end
+
+  create_table "exam_templates", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.integer "duration_minutes"
+    t.integer "use_count", default: 0, null: false
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_used_at"], name: "index_exam_templates_on_last_used_at"
+    t.index ["name"], name: "index_exam_templates_on_name"
   end
 
   create_table "exams", force: :cascade do |t|
@@ -30,6 +58,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "duration_minutes"
+    t.bigint "exam_template_id"
+    t.index ["exam_template_id"], name: "index_exams_on_exam_template_id"
   end
 
   create_table "learning_objectives", force: :cascade do |t|
@@ -77,6 +107,30 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
     t.index ["topic_module_id"], name: "index_questions_on_topic_module_id"
   end
 
+  create_table "section_question_rules", force: :cascade do |t|
+    t.bigint "exam_section_id", null: false
+    t.bigint "question_id", null: false
+    t.string "rule_type", null: false
+    t.integer "repeat_count", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_section_id", "question_id", "rule_type"], name: "index_section_question_rules_on_section_question_type"
+    t.index ["exam_section_id"], name: "index_section_question_rules_on_exam_section_id"
+    t.index ["question_id"], name: "index_section_question_rules_on_question_id"
+  end
+
+  create_table "section_source_rules", force: :cascade do |t|
+    t.bigint "exam_section_id", null: false
+    t.string "source_type", null: false
+    t.integer "source_id", null: false
+    t.integer "weight", default: 1
+    t.integer "question_count_override"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_section_id"], name: "index_section_source_rules_on_exam_section_id"
+    t.index ["source_type", "source_id"], name: "index_section_source_rules_on_source_type_and_source_id"
+  end
+
   create_table "sources", force: :cascade do |t|
     t.string "name"
     t.string "source_type"
@@ -111,6 +165,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
 
   add_foreign_key "exam_questions", "exams"
   add_foreign_key "exam_questions", "questions"
+  add_foreign_key "exam_sections", "exam_templates"
+  add_foreign_key "exams", "exam_templates"
   add_foreign_key "learning_objectives", "topic_modules"
   add_foreign_key "learning_objectives", "topics"
   add_foreign_key "question_learning_objectives", "learning_objectives"
@@ -118,6 +174,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
   add_foreign_key "questions", "sources"
   add_foreign_key "questions", "topic_modules"
   add_foreign_key "questions", "topics"
+  add_foreign_key "section_question_rules", "exam_sections"
+  add_foreign_key "section_question_rules", "questions"
+  add_foreign_key "section_source_rules", "exam_sections"
   add_foreign_key "topic_modules", "topics"
   add_foreign_key "topics", "topics", column: "parent_topic_id"
 end
