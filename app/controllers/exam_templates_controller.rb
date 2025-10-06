@@ -100,6 +100,22 @@ class ExamTemplatesController < ApplicationController
     @topics = Topic.includes(:topic_modules, :learning_objectives).order(:name)
     @questions = Question.includes(:topic).order('topics.name, questions.id')
     @question_types = Question.distinct.pluck(:question_type).compact.sort
+    
+    # Prepare JSON data for JavaScript
+    @topics_json = @topics.map { |t| { id: t.id, name: t.name } }.to_json
+    
+    @modules_json = TopicModule.includes(:topic).order('topics.name, topic_modules.name').map do |m|
+      { id: m.id, name: m.name, topic_name: m.topic.name }
+    end.to_json
+    
+    @learning_objectives_json = LearningObjective.includes(topic_module: :topic)
+      .order('topics.name, topic_modules.name, learning_objectives.category').map do |lo|
+        { 
+          id: lo.id, 
+          description: lo.description,
+          module_path: "#{lo.topic_module.topic.name} → #{lo.topic_module.name}"
+        }
+      end.to_json
   end
 end
 
