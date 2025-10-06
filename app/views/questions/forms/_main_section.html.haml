@@ -8,24 +8,26 @@
 
   .form-field
     %label Learning outcomes
-    %span.hint Link the outcomes assessed by this question.
-    .lo-group-container
-      - @topics_for_form.each do |topic|
-        - groups = topic.learning_objectives.group_by(&:category)
-        .lo-topic-group{ data: { question_form_target: 'group', topic_id: topic.id } }
-          - if groups.present?
-            - groups.each do |category, objectives|
-              %h4= category
-              .lo-category-grid
-                - objectives.each do |objective|
-                  %label.lo-checkbox
-                    = check_box_tag 'question[learning_objective_ids][]', objective.id, selected_ids.include?(objective.id),
-                      class: 'lo-checkbox__input',
-                      data: { question_form_target: 'checkbox', action: 'change->question-form#updateSummary' }
-                    %span.lo-checkbox__label= objective.description
-          - else
-            %p.lo-empty No learning outcomes for this topic yet.
-    %p.selected-outcomes{ data: { question_form_target: 'summary' } } Select a topic to view outcomes.
+    %span.hint Link the outcomes assessed by this question (type to search).
+    - @topics_for_form.each do |topic|
+      - groups = topic.learning_objectives.group_by(&:category)
+      .lo-topic-group{ data: { question_form_target: 'group', topic_id: topic.id } }
+        - if groups.present?
+          .lo-dropdown{ data: { question_form_target: 'dropdown' } }
+            .lo-dropdown__trigger{ data: { action: 'click->question-form#toggleDropdown' } }
+              %input.lo-dropdown__input{ type: 'text', placeholder: 'Type to search or click to browse...', data: { question_form_target: 'loSearch', action: 'input->question-form#filterLos click->question-form#openDropdown' }, autocomplete: 'off' }
+              .lo-dropdown__selected{ data: { question_form_target: 'selectedCount' } } 0 selected
+            .lo-dropdown__menu{ data: { question_form_target: 'dropdownMenu' } }
+              - groups.sort_by { |cat, _| cat }.each do |category, objectives|
+                .lo-category
+                  .lo-category__title= category
+                  .lo-category__items
+                    - objectives.sort_by(&:position).each do |objective|
+                      %label.lo-item{ data: { lo_id: objective.id, lo_text: objective.description.downcase } }
+                        %input.lo-item__checkbox{ type: 'checkbox', name: 'question[learning_objective_ids][]', value: objective.id, checked: selected_ids.include?(objective.id), data: { action: 'change->question-form#updateCount' } }
+                        %span.lo-item__text= truncate(objective.description, length: 120)
+        - else
+          %p.lo-empty No learning outcomes for this topic yet.
 
   .form-row
     .form-field
@@ -36,10 +38,10 @@
     .form-field
       = form.label :points, 'Points'
       = form.number_field :points, min: 1, class: 'question-form__input'
-    .form-field
-      = form.label :answer_size, 'Answer space'
-      = form.select :answer_size, [['Short', 'short'], ['Medium', 'medium'], ['Long', 'long']],
-        { include_blank: 'Auto' }, class: 'question-form__select'
+  .form-field
+    = form.label :answer_size, 'Answer space'
+    = form.select :answer_size, [['Auto', nil], ['Short', 'short'], ['Medium', 'medium'], ['Long', 'long']],
+      {}, class: 'question-form__select'
 
   .form-field
     = form.label :content, 'Question prompt'

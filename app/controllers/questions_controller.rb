@@ -18,6 +18,15 @@ class QuestionsController < ApplicationController
   def new
     @question = Question.new(points: 1, question_type: 'written')
     @question.options_text = ''
+    
+    # Pre-populate from learning objective if provided
+    if params[:learning_objective_id].present?
+      @learning_objective = LearningObjective.includes(:topic).find_by(id: params[:learning_objective_id])
+      if @learning_objective
+        @question.topic = @learning_objective.topic
+        @question.learning_objective_ids = [@learning_objective.id]
+      end
+    end
   end
 
   def create
@@ -100,6 +109,7 @@ class QuestionsController < ApplicationController
     )
 
     permitted[:source_id] = permitted[:source_id].presence
+    permitted[:answer_size] = permitted[:answer_size].presence
     permitted[:learning_objective_ids] = Array(permitted[:learning_objective_ids]).reject(&:blank?)
 
     case permitted[:question_type]

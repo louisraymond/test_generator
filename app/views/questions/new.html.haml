@@ -1,6 +1,30 @@
 .form-page
+  - if @learning_objective
+    .form-page__back
+      = link_to topic_path(@learning_objective.topic), class: 'link-back' do
+        ← Back to Learning Outcomes
+  
   .form-page__header
-    %h1 New question
-    %p Create a bank item, align it with the right learning outcomes, and keep exam coverage balanced.
+    %h1 Create Assessment Question
+    %p
+      - if @learning_objective
+        Generate a question linked to a specific learning outcome
+      - else
+        Create a bank item, align it with the right learning outcomes, and keep exam coverage balanced.
+
+  - if @learning_objective
+    .question-context
+      %h3.question-context__title Question Context
+      .question-context__content
+        .question-context__field
+          %label.question-context__label Topic
+          .question-context__value= @learning_objective.topic.name
+        .question-context__field
+          %label.question-context__label Category
+          .question-context__value= @learning_objective.category
+        .question-context__field
+          %label.question-context__label Learning Outcome
+          .question-context__value= @learning_objective.description
+
   = form_with(model: @question) do |form|
     = render 'form', form: form, question: @question
