@@ -77,11 +77,16 @@ body {
         page-break-inside: auto;
     }
     .page {
-        width: 210mm; /* Match HTML width exactly */
-        min-height: 297mm; /* Match HTML height exactly */
-        margin: 0; /* Remove margins for PDF */
-        padding: 25mm 20mm; /* Match HTML padding exactly */
-        box-shadow: none; /* No shadow in PDF */
+        width: 210mm;
+        /* Match HTML width exactly */
+        min-height: 297mm;
+        /* Match HTML height exactly */
+        margin: 0;
+        /* Remove margins for PDF */
+        padding: 25mm 20mm;
+        /* Match HTML padding exactly */
+        box-shadow: none;
+        /* No shadow in PDF */
         background: white;
     }
     .page::after {
@@ -128,7 +133,9 @@ body {
     font-style: italic;
 }
 
+
 /* Legacy h1 support */
+
 h1 {
     font-size: var(--exam-title-size);
     font-weight: bold;
@@ -136,6 +143,7 @@ h1 {
     margin: 0 0 30mm 0;
     padding-top: 10mm;
 }
+
 
 /* Display Controls Sidebar */
 
@@ -199,6 +207,7 @@ h1 {
     color: #6b7280;
     font-size: 12px;
 }
+
 
 /* Custom Controls */
 

@@ -41,7 +41,7 @@ export default class extends Controller {
         const saved = localStorage.getItem('examDisplayPreset')
         const preset = saved || 'normal'
         this.applyPreset(preset, false)
-        
+
         // Load custom values from localStorage
         this.loadCustomValues()
     }
@@ -88,20 +88,20 @@ export default class extends Controller {
     updateFontSize(event) {
         const value = parseInt(event.target.value)
         const fontSize = `${value}pt`
-        
+
         // Update both slider and input
         if (event.target === this.fontSizeSliderTarget) {
             this.fontSizeInputTarget.value = value
         } else {
             this.fontSizeSliderTarget.value = value
         }
-        
+
         // Update display
         this.fontSizeValueTarget.textContent = fontSize
-        
+
         // Apply to page
         this.applyCustomFontSize(fontSize)
-        
+
         // Save to localStorage
         localStorage.setItem('examDisplayFontSize', fontSize)
     }
@@ -110,20 +110,20 @@ export default class extends Controller {
     updateSpacing(event) {
         const value = parseInt(event.target.value)
         const spacing = `${value}pt`
-        
+
         // Update both slider and input
         if (event.target === this.spacingSliderTarget) {
             this.spacingInputTarget.value = value
         } else {
             this.spacingSliderTarget.value = value
         }
-        
+
         // Update display
         this.spacingValueTarget.textContent = spacing
-        
+
         // Apply to page
         this.applyCustomSpacing(spacing)
-        
+
         // Save to localStorage
         localStorage.setItem('examDisplaySpacing', spacing)
     }
@@ -149,7 +149,7 @@ export default class extends Controller {
     loadCustomValues() {
         const savedFontSize = localStorage.getItem('examDisplayFontSize')
         const savedSpacing = localStorage.getItem('examDisplaySpacing')
-        
+
         if (savedFontSize) {
             const fontSize = parseInt(savedFontSize.replace('pt', ''))
             this.fontSizeSliderTarget.value = fontSize
@@ -157,7 +157,7 @@ export default class extends Controller {
             this.fontSizeValueTarget.textContent = savedFontSize
             this.applyCustomFontSize(savedFontSize)
         }
-        
+
         if (savedSpacing) {
             const spacing = parseInt(savedSpacing.replace('pt', ''))
             this.spacingSliderTarget.value = spacing
