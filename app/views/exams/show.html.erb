@@ -284,7 +284,7 @@
     # Calculate questions per page based on font size
     # Smaller font = more questions per page
     # Use the same logic for both HTML and PDF to ensure consistency
-    font_size = request.format.pdf? ? @font_size : 14 # Default to 14pt for HTML if not set
+    font_size = request.format.pdf? ? @font_size : (params[:font_size]&.to_i || 14) # Use URL param for HTML, fallback to 14pt
     
     # Adjust questions per page based on font size
     # At 14pt: 5 first page, 7 rest
