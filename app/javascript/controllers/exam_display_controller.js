@@ -50,15 +50,17 @@ export default class extends Controller {
         const preset = this.presets[presetName]
         if (!preset) return
 
-        // Find the page element (it's a sibling of the header)
-        const page = document.querySelector('.page')
-        if (!page) return
+        // Find all page elements
+        const pages = document.querySelectorAll('.page')
+        if (pages.length === 0) return
 
-        // Apply CSS custom properties to the page
-        page.style.setProperty('--exam-font-size', preset.fontSize)
-        page.style.setProperty('--exam-line-height', preset.lineHeight)
-        page.style.setProperty('--exam-question-margin', preset.questionMargin)
-        page.style.setProperty('--exam-title-size', preset.titleSize)
+        // Apply CSS custom properties to all pages
+        pages.forEach(page => {
+            page.style.setProperty('--exam-font-size', preset.fontSize)
+            page.style.setProperty('--exam-line-height', preset.lineHeight)
+            page.style.setProperty('--exam-question-margin', preset.questionMargin)
+            page.style.setProperty('--exam-title-size', preset.titleSize)
+        })
 
         // Also apply to body for global effect
         document.body.style.setProperty('--exam-font-size', preset.fontSize)
@@ -130,19 +132,23 @@ export default class extends Controller {
 
     // Apply custom font size
     applyCustomFontSize(fontSize) {
-        const page = document.querySelector('.page')
-        if (!page) return
+        const pages = document.querySelectorAll('.page')
+        if (pages.length === 0) return
 
-        page.style.setProperty('--exam-font-size', fontSize)
+        pages.forEach(page => {
+            page.style.setProperty('--exam-font-size', fontSize)
+        })
         document.body.style.setProperty('--exam-font-size', fontSize)
     }
 
     // Apply custom spacing
     applyCustomSpacing(spacing) {
-        const page = document.querySelector('.page')
-        if (!page) return
+        const pages = document.querySelectorAll('.page')
+        if (pages.length === 0) return
 
-        page.style.setProperty('--exam-question-margin', spacing)
+        pages.forEach(page => {
+            page.style.setProperty('--exam-question-margin', spacing)
+        })
     }
 
     // Load custom values from localStorage
