@@ -90,49 +90,83 @@
       .exam-actions-header {
         display: none;
       }
+      .display-controls-sidebar {
+        display: none;
+      }
     }
 
-    /* Display Presets */
-    .display-presets {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.5rem;
-      border-radius: 8px;
+    /* Floating Display Controls Sidebar */
+    .display-controls-sidebar {
+      position: fixed;
+      top: 120px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      padding: 1.25rem;
+      z-index: 50;
+      min-width: 180px;
     }
 
-    .display-presets__label {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.75rem;
-      font-weight: 600;
+    .display-controls-sidebar__title {
+      margin: 0 0 1rem 0;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #1e3a8a;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0.5rem;
     }
 
-    .preset-btn {
-      padding: 0.375rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    .display-controls-sidebar__buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .preset-btn-sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background: #f9fafb;
+      border: 2px solid transparent;
       cursor: pointer;
       transition: all 0.2s ease;
-      white-space: nowrap;
+      text-align: left;
     }
 
-    .preset-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.4);
+    .preset-btn-sidebar:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
     }
 
-    .preset-btn.is-active {
-      background: white;
-      color: #1e3a8a;
-      border-color: white;
+    .preset-btn-sidebar.is-active {
+      background: #eef2ff;
+      border-color: #6366f1;
+    }
+
+    .preset-btn-sidebar__label {
+      font-size: 0.875rem;
       font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.125rem;
+    }
+
+    .preset-btn-sidebar.is-active .preset-btn-sidebar__label {
+      color: #4f46e5;
+    }
+
+    .preset-btn-sidebar__size {
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .preset-btn-sidebar.is-active .preset-btn-sidebar__size {
+      color: #6366f1;
     }
 
     @media (max-width: 768px) {
@@ -157,13 +191,23 @@
         text-align: center;
       }
 
-      .display-presets {
-        width: 100%;
-        justify-content: center;
+      .display-controls-sidebar {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+        left: 10px;
+        max-width: 300px;
+        margin: 0 auto;
       }
 
-      .preset-btn {
-        flex: 1;
+      .display-controls-sidebar__buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .preset-btn-sidebar {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 120px;
       }
     }
   </style>
@@ -172,13 +216,6 @@
   <div class="exam-actions-header">
     <h2><%= @exam.title %></h2>
     <div class="exam-actions-buttons">
-      <div class="display-presets" data-controller="exam-display">
-        <span class="display-presets__label">Display:</span>
-        <button class="preset-btn" data-preset="compact" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">Compact</button>
-        <button class="preset-btn is-active" data-preset="normal" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">Normal</button>
-        <button class="preset-btn" data-preset="comfortable" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">Comfortable</button>
-        <button class="preset-btn" data-preset="large" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">Large</button>
-      </div>
       <%= link_to marking_scheme_exam_path(@exam), target: '_blank', class: 'exam-action-btn exam-action-btn--secondary' do %>
         <svg class="exam-action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         <span>Marking Scheme</span>
@@ -191,6 +228,29 @@
         <svg class="exam-action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span>New</span>
       <% end %>
+    </div>
+  </div>
+
+  <!-- Floating Display Controls -->
+  <div class="display-controls-sidebar" data-controller="exam-display">
+    <h3 class="display-controls-sidebar__title">Display Size</h3>
+    <div class="display-controls-sidebar__buttons">
+      <button class="preset-btn-sidebar" data-preset="compact" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
+        <span class="preset-btn-sidebar__label">Compact</span>
+        <span class="preset-btn-sidebar__size">12pt</span>
+      </button>
+      <button class="preset-btn-sidebar is-active" data-preset="normal" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
+        <span class="preset-btn-sidebar__label">Normal</span>
+        <span class="preset-btn-sidebar__size">14pt</span>
+      </button>
+      <button class="preset-btn-sidebar" data-preset="comfortable" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
+        <span class="preset-btn-sidebar__label">Comfortable</span>
+        <span class="preset-btn-sidebar__size">16pt</span>
+      </button>
+      <button class="preset-btn-sidebar" data-preset="large" data-action="click->exam-display#selectPreset" data-exam-display-target="presetButtons">
+        <span class="preset-btn-sidebar__label">Large Print</span>
+        <span class="preset-btn-sidebar__size">18pt</span>
+      </button>
     </div>
   </div>
 
