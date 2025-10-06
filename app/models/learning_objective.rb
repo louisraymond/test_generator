@@ -1,5 +1,6 @@
 class LearningObjective < ApplicationRecord
   belongs_to :topic
+  belongs_to :topic_module, optional: true
 
   has_many :question_learning_objectives, dependent: :destroy
   has_many :questions, through: :question_learning_objectives

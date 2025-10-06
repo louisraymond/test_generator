@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_05_233243) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,9 +40,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
     t.text "description", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "topic_module_id"
     t.index ["topic_id", "category", "position"], name: "idx_on_topic_id_category_position_1999db334e"
     t.index ["topic_id", "category_order"], name: "index_learning_objectives_on_topic_id_and_category_order"
     t.index ["topic_id"], name: "index_learning_objectives_on_topic_id"
+    t.index ["topic_module_id"], name: "index_learning_objectives_on_topic_module_id"
   end
 
   create_table "question_learning_objectives", force: :cascade do |t|
@@ -69,8 +71,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
     t.string "unit"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "topic_module_id"
     t.index ["source_id"], name: "index_questions_on_source_id"
     t.index ["topic_id"], name: "index_questions_on_topic_id"
+    t.index ["topic_module_id"], name: "index_questions_on_topic_module_id"
   end
 
   create_table "sources", force: :cascade do |t|
@@ -79,6 +83,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "topic_modules", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.bigint "topic_id", null: false
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["topic_id"], name: "index_topic_modules_on_topic_id"
   end
 
   create_table "topics", force: :cascade do |t|
@@ -97,10 +111,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_04_021500) do
 
   add_foreign_key "exam_questions", "exams"
   add_foreign_key "exam_questions", "questions"
+  add_foreign_key "learning_objectives", "topic_modules"
   add_foreign_key "learning_objectives", "topics"
   add_foreign_key "question_learning_objectives", "learning_objectives"
   add_foreign_key "question_learning_objectives", "questions"
   add_foreign_key "questions", "sources"
+  add_foreign_key "questions", "topic_modules"
   add_foreign_key "questions", "topics"
+  add_foreign_key "topic_modules", "topics"
   add_foreign_key "topics", "topics", column: "parent_topic_id"
 end

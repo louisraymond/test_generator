@@ -40,7 +40,14 @@ class TopicsController < ApplicationController
 
   def set_topic
     scope = Topic.all
-    scope = scope.includes(:subtopics, { learning_objectives: :questions }, :questions) if action_name == 'show'
+    if action_name == 'show'
+      scope = scope.includes(
+        :subtopics,
+        { topic_modules: { learning_objectives: :questions } },
+        { learning_objectives: :questions },
+        :questions
+      )
+    end
     @topic = scope.find(params[:id])
   end
 

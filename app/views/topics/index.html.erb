@@ -1,41 +1,45 @@
-<div class="topics-index">
-  <header class="topics-index__header">
-    <h1>Topics</h1>
-    <p class="topics-index__lead">Browse available modules and drill down into detailed outlines.</p>
-    <div class="topics-index__actions">
-      <%= link_to 'Create topic', new_topic_path, class: 'topics-index__new' %>
+<div class="topic-list">
+  <div class="topic-list__header">
+    <div>
+      <h1>Topics</h1>
+      <p class="topic-list__subtitle">Manage your course topics and learning outcomes</p>
     </div>
-  </header>
+    <div class="topic-list__header-actions">
+      <%= link_to new_topic_path, class: 'btn btn--primary' do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>New Topic</span>
+      <% end %>
+    </div>
+  </div>
 
   <% if @topics.any? %>
-    <div class="topics-index__grid">
+    <div class="topic-grid">
       <% @topics.each do |topic| %>
-        <article class="topics-index__card">
-          <h2><%= link_to topic.name, topic_path(topic) %></h2>
-          <p class="topics-index__count"><%= pluralize(topic.question_total_count, 'question') %></p>
-          <% if topic.module_aim_list.any? %>
-            <ul>
-              <% topic.module_aim_list.first(3).each do |aim| %>
-                <li><%= outline_text_to_html(aim) %></li>
-              <% end %>
-            </ul>
-          <% else %>
-            <p>No summary available yet.</p>
-          <% end %>
-          <% if topic.subtopics.any? %>
-            <div class="topics-index__subtopics">
-              <strong>Subtopics:</strong>
-              <ul>
-                <% topic.subtopics.limit(5).each do |subtopic| %>
-                  <li><%= link_to subtopic.name, topic_path(subtopic) %></li>
-                <% end %>
-              </ul>
+        <%= link_to topic_path(topic), class: 'topic-card' do %>
+          <div class="topic-card__content">
+            <div class="topic-card__header">
+              <svg class="topic-card__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <h3><%= topic.name %></h3>
             </div>
-          <% end %>
-        </article>
+            <% if topic.epigraph_quote.present? %>
+              <p class="topic-card__description"><%= truncate(strip_tags(topic.epigraph_quote), length: 150) %></p>
+            <% end %>
+            <div class="topic-card__meta">
+              <span class="topic-card__meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                <%= pluralize(topic.learning_outcome_sections.size, 'category') %>
+              </span>
+              <span class="topic-card__meta-divider">·</span>
+              <span class="topic-card__meta-item"><%= pluralize(topic.learning_objectives.count, 'learning outcome') %></span>
+            </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   <% else %>
-    <p class="topics-index__empty">No topics have been added yet. <%= link_to 'Create the first topic', new_topic_path %>.</p>
+    <div class="topic-empty">
+      <p>No topics have been added yet.</p>
+      <%= link_to 'Create the first topic', new_topic_path, class: 'btn btn--primary' %>
+    </div>
   <% end %>
 </div>

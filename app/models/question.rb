@@ -18,6 +18,7 @@ class Question < ApplicationRecord
   attr_accessor :options_text
 
   belongs_to :topic
+  belongs_to :topic_module, optional: true
   belongs_to :source, optional: true
 
   has_many :exam_questions, dependent: :destroy
