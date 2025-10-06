@@ -1,0 +1,313 @@
+<div class="premium-page-header">
+  <div class="premium-page-header__content">
+    <h1 class="premium-title"><%= @exam_template.name %></h1>
+    <% if @exam_template.description.present? %>
+      <p class="premium-subtitle"><%= @exam_template.description %></p>
+    <% end %>
+  </div>
+  <div class="header-actions">
+    <%= button_to generate_exam_template_path(@exam_template), class: "btn btn--primary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Generate Exam
+    <% end %>
+    <%= link_to edit_exam_template_path(@exam_template), class: "btn btn--secondary" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      Edit
+    <% end %>
+  </div>
+</div>
+
+<main class="premium-page-wrapper">
+  <div class="template-show">
+    <div class="template-stats">
+      <div class="stat-card">
+        <div class="stat-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value"><%= @exam_template.exam_sections.count %></div>
+          <div class="stat-card__label">Sections</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value"><%= @exam_template.total_questions %></div>
+          <div class="stat-card__label">Total Questions</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value"><%= @exam_template.total_duration || "—" %></div>
+          <div class="stat-card__label">Minutes</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="stat-card__content">
+          <div class="stat-card__value"><%= @exam_template.use_count %></div>
+          <div class="stat-card__label">Times Used</div>
+        </div>
+      </div>
+    </div>
+
+    <% @exam_template.exam_sections.order(:position).each do |section| %>
+      <div class="section-detail-card">
+        <div class="section-detail-card__header">
+          <h3 class="section-detail-card__title"><%= section.name %></h3>
+          <div class="section-detail-card__meta">
+            <span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <%= section.question_count %> questions
+            </span>
+            <% if section.duration_minutes %>
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <%= section.duration_minutes %> min
+              </span>
+            <% end %>
+            <% if section.min_points || section.max_points %>
+              <span class="meta-item">
+                Points: <%= section.min_points || 0 %>-<%= section.max_points || "∞" %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <% if section.question_types.any? %>
+          <div class="section-detail-card__block">
+            <h4 class="block-title">Question Types</h4>
+            <div class="chip-list">
+              <% section.question_types.each do |type| %>
+                <span class="chip"><%= type.humanize %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if section.section_source_rules.any? %>
+          <div class="section-detail-card__block">
+            <h4 class="block-title">Source Rules</h4>
+            <div class="rule-list">
+              <% section.section_source_rules.each do |rule| %>
+                <div class="rule-item">
+                  <span class="rule-item__type"><%= rule.source_type.humanize %></span>
+                  <span class="rule-item__name"><%= rule.source_name %></span>
+                  <span class="rule-item__weight">Weight: <%= rule.weight %></span>
+                  <% if rule.question_count_override %>
+                    <span class="rule-item__override">Exact: <%= rule.question_count_override %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% forced = section.section_question_rules.force_includes %>
+        <% if forced.any? %>
+          <div class="section-detail-card__block">
+            <h4 class="block-title">Force-Included Questions</h4>
+            <div class="rule-list">
+              <% forced.each do |rule| %>
+                <div class="rule-item">
+                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.question_stem&.truncate(60) || rule.question.question_type %></span>
+                  <% if rule.repeat_count > 1 %>
+                    <span class="rule-item__repeat">×<%= rule.repeat_count %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% excluded = section.section_question_rules.excludes %>
+        <% if excluded.any? %>
+          <div class="section-detail-card__block">
+            <h4 class="block-title">Excluded Questions</h4>
+            <div class="rule-list">
+              <% excluded.each do |rule| %>
+                <div class="rule-item">
+                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.question_stem&.truncate(60) || rule.question.question_type %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</main>
+
+<style>
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.template-show {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.template-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-card__icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card__label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-detail-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.section-detail-card__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.section-detail-card__meta {
+  display: flex;
+  gap: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.section-detail-card__block {
+  margin-bottom: 1.5rem;
+}
+
+.section-detail-card__block:last-child {
+  margin-bottom: 0;
+}
+
+.block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 0.75rem 0;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.rule-item__type {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rule-item__name {
+  flex: 1;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.rule-item__weight,
+.rule-item__override,
+.rule-item__repeat {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 600;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+</style>
+

@@ -1,0 +1,98 @@
+<div class="rule-field" data-template-form-target="sourceRuleField">
+  <%= form.hidden_field :_destroy %>
+  
+  <div class="rule-field__row">
+    <div class="rule-field__select-group">
+      <%= form.label :source_type, "Type", class: "rule-field__label" %>
+      <%= form.select :source_type, 
+          options_for_select([['Topic', 'Topic'], ['Module', 'TopicModule'], ['Learning Objective', 'LearningObjective']], form.object.source_type),
+          { include_blank: 'Select type' },
+          { class: "rule-field__select", data: { action: "change->template-form#updateSourceOptions" } } %>
+    </div>
+
+    <div class="rule-field__select-group">
+      <%= form.label :source_id, "Source", class: "rule-field__label" %>
+      <%= form.select :source_id, 
+          build_source_options(topics, form.object.source_type, form.object.source_id),
+          { include_blank: 'Select source' },
+          { class: "rule-field__select" } %>
+    </div>
+
+    <div class="rule-field__input-group">
+      <%= form.label :weight, "Weight", class: "rule-field__label" %>
+      <%= form.number_field :weight, class: "rule-field__input", min: 1, value: form.object.weight || 1 %>
+    </div>
+
+    <div class="rule-field__input-group">
+      <%= form.label :question_count_override, "Exact Count", class: "rule-field__label" %>
+      <%= form.number_field :question_count_override, class: "rule-field__input", min: 0, placeholder: "Optional" %>
+    </div>
+
+    <button type="button" class="btn btn--small btn--danger rule-field__remove" data-action="click->template-form#removeSourceRule">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+</div>
+
+<% 
+# Helper to build source options based on type
+def build_source_options(topics, source_type, selected_id = nil)
+  case source_type
+  when 'Topic'
+    options_from_collection_for_select(topics, :id, :name, selected_id)
+  when 'TopicModule'
+    modules = TopicModule.includes(:topic).order('topics.name, topic_modules.name')
+    options_from_collection_for_select(modules, :id, ->(m) { "#{m.topic.name} → #{m.name}" }, selected_id)
+  when 'LearningObjective'
+    los = LearningObjective.includes(topic_module: :topic).order('topics.name, topic_modules.name, learning_objectives.category')
+    options_from_collection_for_select(los, :id, ->(lo) { "#{lo.topic_module.topic.name} → #{lo.topic_module.name} → #{lo.description.truncate(50)}" }, selected_id)
+  else
+    []
+  end
+end
+%>
+
+<style>
+.rule-field {
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.rule-field__row {
+  display: grid;
+  grid-template-columns: 150px 1fr 100px 120px 40px;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.rule-field__select-group,
+.rule-field__input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.rule-field__label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rule-field__select,
+.rule-field__input {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.rule-field__remove {
+  margin-bottom: 0;
+}
+</style>
+

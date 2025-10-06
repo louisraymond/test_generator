@@ -302,6 +302,10 @@
     questions_per_page_first = [questions_per_page_first, 1].max
     questions_per_page_rest = [questions_per_page_rest, 1].max
     
+    # Group exam questions by section if template was used
+    exam_questions = @exam.exam_questions.includes(:question).to_a
+    sections_data = exam_questions.group_by(&:section_number).sort_by { |k, v| k || 0 }
+    
     all_questions = @exam.questions.to_a
     pages = []
     
@@ -314,6 +318,7 @@
     end
     
     question_counter = 0
+    current_section = nil
   %>
 
   <% pages.each_with_index do |page_questions, page_index| %>
@@ -331,6 +336,31 @@
       <% end %>
 
       <% page_questions.each do |question| %>
+        <% 
+          # Get the exam_question to check section_number
+          exam_question = exam_questions.find { |eq| eq.question_id == question.id && eq.position == question_counter + 1 }
+          section_num = exam_question&.section_number
+          
+          # Show section header if section changed
+          if @exam.exam_template && section_num && section_num != current_section
+            section_info = @exam.section_info(section_num)
+            current_section = section_num
+        %>
+          <div class="section-break">
+            <h2 class="section-title"><%= section_info&.name || "Section #{section_num + 1}" %></h2>
+            <% if section_info %>
+              <div class="section-meta">
+                <% if section_info.duration_minutes %>
+                  <span>Suggested time: <%= section_info.duration_minutes %> minutes</span>
+                <% end %>
+                <% if section_info.min_points || section_info.max_points %>
+                  <span>Points: <%= section_info.min_points || 0 %>-<%= section_info.max_points || "∞" %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        
         <%= render 'questions/question', question: question, number: question_counter + 1, seed: "#{@exam.id}-#{question_counter + 1}" %>
         <% question_counter += 1 %>
       <% end %>

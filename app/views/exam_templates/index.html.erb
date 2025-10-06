@@ -1,0 +1,182 @@
+<div class="premium-page-header">
+  <div class="premium-page-header__content">
+    <h1 class="premium-title">Exam Templates</h1>
+    <p class="premium-subtitle">Reusable exam configurations with sections and rules</p>
+  </div>
+  <%= link_to new_exam_template_path, class: "btn btn--primary" do %>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    New Template
+  <% end %>
+</div>
+
+<main class="premium-page-wrapper">
+  <% if @exam_templates.any? %>
+    <div class="templates-table-container">
+      <table class="templates-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Sections</th>
+            <th>Questions</th>
+            <th>Duration</th>
+            <th>Times Used</th>
+            <th>Last Used</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @exam_templates.each do |template| %>
+            <tr>
+              <td>
+                <div class="template-name-cell">
+                  <%= link_to template.name, template, class: "template-name-link" %>
+                  <% if template.description.present? %>
+                    <p class="template-description"><%= truncate(template.description, length: 80) %></p>
+                  <% end %>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="count-badge"><%= template.exam_sections.count %></span>
+              </td>
+              <td class="text-center">
+                <span class="count-badge"><%= template.total_questions %></span>
+              </td>
+              <td class="text-center">
+                <%= template.total_duration ? "#{template.total_duration} min" : "—" %>
+              </td>
+              <td class="text-center">
+                <span class="use-count"><%= template.use_count %></span>
+              </td>
+              <td>
+                <%= template.last_used_at ? template.last_used_at.strftime('%d/%m/%Y') : "—" %>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <%= button_to generate_exam_template_path(template), class: "btn btn--small btn--primary", title: "Generate Exam" do %>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    Generate
+                  <% end %>
+                  <%= link_to edit_exam_template_path(template), class: "btn btn--small btn--secondary", title: "Edit" do %>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    Edit
+                  <% end %>
+                  <%= button_to exam_template_path(template), method: :delete, data: { confirm: "Are you sure? This will not delete exams generated from this template." }, class: "btn btn--small btn--danger", title: "Delete" do %>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      <h2>No Exam Templates Yet</h2>
+      <p>Create reusable exam templates with custom sections, source rules, and question filters.</p>
+      <%= link_to "Create Your First Template", new_exam_template_path, class: "btn btn--primary" %>
+    </div>
+  <% end %>
+</main>
+
+<style>
+.templates-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.templates-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.templates-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.templates-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.templates-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.15s;
+}
+
+.templates-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.templates-table td {
+  padding: 1rem;
+}
+
+.template-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.template-name-link {
+  font-weight: 600;
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.template-name-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.template-description {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.count-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.use-count {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+  color: white;
+}
+
+.btn--danger:hover {
+  background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+}
+</style>
+

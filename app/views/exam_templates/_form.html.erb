@@ -1,0 +1,160 @@
+<%= form_with(model: exam_template, class: "template-form", data: { controller: "template-form" }) do |form| %>
+  <% if exam_template.errors.any? %>
+    <div class="alert alert--error">
+      <h3><%= pluralize(exam_template.errors.count, "error") %> prevented this template from being saved:</h3>
+      <ul>
+        <% exam_template.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="template-form__card">
+    <h2 class="template-form__section-title">Template Details</h2>
+    
+    <div class="template-form__field">
+      <%= form.label :name, class: "template-form__label" %>
+      <%= form.text_field :name, class: "template-form__input", placeholder: "e.g., Advanced Database Midterm" %>
+    </div>
+
+    <div class="template-form__field">
+      <%= form.label :description, class: "template-form__label" %>
+      <%= form.text_area :description, rows: 3, class: "template-form__textarea", placeholder: "Optional description of this template..." %>
+    </div>
+
+    <div class="template-form__field">
+      <%= form.label :duration_minutes, "Total Duration (minutes)", class: "template-form__label" %>
+      <%= form.number_field :duration_minutes, class: "template-form__input", placeholder: "Optional: leave blank to sum section durations" %>
+      <span class="template-form__hint">Leave blank to automatically sum section durations</span>
+    </div>
+  </div>
+
+  <div class="template-form__card">
+    <div class="template-form__section-header">
+      <h2 class="template-form__section-title">Exam Sections</h2>
+      <button type="button" class="btn btn--small btn--secondary" data-action="click->template-form#addSection">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Add Section
+      </button>
+    </div>
+
+    <div data-template-form-target="sectionsContainer">
+      <%= form.fields_for :exam_sections do |section_form| %>
+        <%= render 'section_fields', form: section_form, topics: @topics, question_types: @question_types, questions: @questions %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="template-form__actions">
+    <%= form.submit exam_template.new_record? ? "Create Template" : "Update Template", class: "btn btn--primary btn--large" %>
+    <%= link_to "Cancel", exam_templates_path, class: "btn btn--secondary btn--large" %>
+  </div>
+<% end %>
+
+<template data-template-form-target="sectionTemplate">
+  <%= form_with(model: exam_template, class: "template-form") do |form| %>
+    <%= form.fields_for :exam_sections, ExamSection.new, child_index: 'NEW_SECTION_RECORD' do |section_form| %>
+      <%= render 'section_fields', form: section_form, topics: @topics, question_types: @question_types, questions: @questions %>
+    <% end %>
+  <% end %>
+</template>
+
+<style>
+.template-form {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.template-form__card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.template-form__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.template-form__section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.template-form__field {
+  margin-bottom: 1.5rem;
+}
+
+.template-form__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.template-form__input,
+.template-form__textarea,
+.template-form__select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.15s;
+}
+
+.template-form__input:focus,
+.template-form__textarea:focus,
+.template-form__select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.template-form__hint {
+  display: block;
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+.template-form__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.alert--error {
+  background: #fed7d7;
+  border: 2px solid #fc8181;
+  color: #742a2a;
+}
+
+.alert h3 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+</style>
+

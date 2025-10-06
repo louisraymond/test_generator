@@ -1,0 +1,191 @@
+<div class="section-card" data-template-form-target="sectionCard">
+  <div class="section-card__header">
+    <h3 class="section-card__title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Section
+    </h3>
+    <button type="button" class="btn btn--small btn--danger" data-action="click->template-form#removeSection">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      Remove
+    </button>
+  </div>
+
+  <%= form.hidden_field :_destroy %>
+  <%= form.hidden_field :position %>
+
+  <div class="section-card__row">
+    <div class="section-card__field">
+      <%= form.label :name, "Section Name", class: "section-card__label" %>
+      <%= form.text_field :name, class: "section-card__input", placeholder: "e.g., Section A: Multiple Choice" %>
+    </div>
+
+    <div class="section-card__field section-card__field--small">
+      <%= form.label :question_count, "Questions", class: "section-card__label" %>
+      <%= form.number_field :question_count, class: "section-card__input", min: 1 %>
+    </div>
+
+    <div class="section-card__field section-card__field--small">
+      <%= form.label :duration_minutes, "Duration (min)", class: "section-card__label" %>
+      <%= form.number_field :duration_minutes, class: "section-card__input", placeholder: "Optional" %>
+    </div>
+  </div>
+
+  <div class="section-card__row">
+    <div class="section-card__field section-card__field--small">
+      <%= form.label :min_points, "Min Points", class: "section-card__label" %>
+      <%= form.number_field :min_points, class: "section-card__input", placeholder: "Optional" %>
+    </div>
+
+    <div class="section-card__field section-card__field--small">
+      <%= form.label :max_points, "Max Points", class: "section-card__label" %>
+      <%= form.number_field :max_points, class: "section-card__input", placeholder: "Optional" %>
+    </div>
+
+    <div class="section-card__field">
+      <%= form.label :question_type_filter, "Question Types (leave blank for all)", class: "section-card__label" %>
+      <%= form.select :question_type_filter, options_for_select(question_types, form.object.question_types), 
+          { include_blank: false }, 
+          { multiple: true, class: "section-card__select" } %>
+    </div>
+  </div>
+
+  <div class="section-card__subsection">
+    <h4 class="section-card__subtitle">Source Rules (where to pull questions from)</h4>
+    <div class="source-rules">
+      <%= form.fields_for :section_source_rules do |source_form| %>
+        <%= render 'source_rule_fields', form: source_form, topics: topics %>
+      <% end %>
+    </div>
+    <button type="button" class="btn btn--small btn--secondary" data-action="click->template-form#addSourceRule" data-section-index="<%= form.index %>">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add Source Rule
+    </button>
+  </div>
+
+  <details class="section-card__details">
+    <summary class="section-card__summary">Advanced: Force Include/Exclude Questions</summary>
+    <div class="section-card__subsection">
+      <h4 class="section-card__subtitle">Question Rules</h4>
+      <div class="question-rules">
+        <%= form.fields_for :section_question_rules do |question_form| %>
+          <%= render 'question_rule_fields', form: question_form, questions: questions %>
+        <% end %>
+      </div>
+      <button type="button" class="btn btn--small btn--secondary" data-action="click->template-form#addQuestionRule" data-section-index="<%= form.index %>">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Add Question Rule
+      </button>
+    </div>
+  </details>
+</div>
+
+<style>
+.section-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #cbd5e0;
+}
+
+.section-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+}
+
+.section-card__title svg {
+  color: #667eea;
+}
+
+.section-card__row {
+  display: grid;
+  grid-template-columns: 1fr 150px 150px;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-card__field {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-card__field--small {
+  grid-column: span 1;
+}
+
+.section-card__label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.section-card__input,
+.section-card__select {
+  padding: 0.75rem;
+  border: 2px solid #cbd5e0;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.15s;
+}
+
+.section-card__input:focus,
+.section-card__select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.section-card__subsection {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.section-card__subtitle {
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+}
+
+.section-card__details {
+  margin-top: 1rem;
+}
+
+.section-card__summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #667eea;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+.section-card__summary:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.source-rules,
+.question-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+</style>
+

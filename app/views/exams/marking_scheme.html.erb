@@ -140,6 +140,31 @@
       font-size: 10pt;
     }
     
+    .section-break-row {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+    
+    .section-header-cell {
+      padding: 15px 10px !important;
+    }
+    
+    .section-header h3 {
+      margin: 0 0 5px 0;
+      font-size: 13pt;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .section-info {
+      display: flex;
+      gap: 15px;
+      font-size: 9pt;
+      color: #555;
+      font-style: italic;
+    }
+    
     @media print {
       body {
         padding: 0;
@@ -147,6 +172,11 @@
 
       .marking-scheme-header {
         display: none;
+      }
+      
+      .section-break-row {
+        page-break-before: auto;
+        page-break-after: avoid;
       }
     }
 
@@ -201,7 +231,40 @@
       </tr>
     </thead>
     <tbody>
+      <% 
+        current_section = nil
+        exam_questions = @exam.exam_questions.includes(:question).to_a
+      %>
       <% @exam.questions.each_with_index do |question, index| %>
+        <% 
+          # Get the exam_question to check section_number
+          exam_question = exam_questions.find { |eq| eq.question_id == question.id && eq.position == index + 1 }
+          section_num = exam_question&.section_number
+          
+          # Show section header if section changed
+          if @exam.exam_template && section_num && section_num != current_section
+            section_info = @exam.section_info(section_num)
+            current_section = section_num
+        %>
+          <tr class="section-break-row">
+            <td colspan="4" class="section-header-cell">
+              <div class="section-header">
+                <h3><%= section_info&.name || "Section #{section_num + 1}" %></h3>
+                <% if section_info %>
+                  <div class="section-info">
+                    <% if section_info.duration_minutes %>
+                      <span>Time: <%= section_info.duration_minutes %> min</span>
+                    <% end %>
+                    <% if section_info.min_points || section_info.max_points %>
+                      <span>Points: <%= section_info.min_points || 0 %>-<%= section_info.max_points || "∞" %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        
         <tr data-controller="math">
           <td class="question-col"><%= index + 1 %></td>
           <td class="answers-col markdown-content"><%= render_markdown(question.answer) %></td>

@@ -31,10 +31,10 @@
       <nav class="app-nav" id="primary-navigation" data-menu-target="nav">
         <%= nav_link_to 'Exam Generator', root_path %>
         <%= nav_link_to 'Exam History', exams_path %>
+        <%= nav_link_to 'Exam Templates', exam_templates_path %>
         <%= nav_link_to 'Topics', topics_path %>
         <%= nav_link_to 'Question Bank', questions_path %>
       </nav>
-
       <main class="app-main">
         <%= render 'shared/flash' %>
         <%= yield %>

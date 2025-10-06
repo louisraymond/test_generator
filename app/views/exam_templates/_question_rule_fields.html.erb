@@ -1,0 +1,40 @@
+<div class="rule-field" data-template-form-target="questionRuleField">
+  <%= form.hidden_field :_destroy %>
+  
+  <div class="rule-field__row">
+    <div class="rule-field__select-group">
+      <%= form.label :rule_type, "Rule Type", class: "rule-field__label" %>
+      <%= form.select :rule_type, 
+          options_for_select([['Force Include', 'force_include'], ['Exclude', 'exclude']], form.object.rule_type),
+          { include_blank: 'Select type' },
+          { class: "rule-field__select" } %>
+    </div>
+
+    <div class="rule-field__select-group" style="grid-column: span 2;">
+      <%= form.label :question_id, "Question", class: "rule-field__label" %>
+      <%= form.select :question_id, 
+          grouped_options_for_select(group_questions_by_topic(questions), form.object.question_id),
+          { include_blank: 'Select question' },
+          { class: "rule-field__select" } %>
+    </div>
+
+    <div class="rule-field__input-group">
+      <%= form.label :repeat_count, "Repeats", class: "rule-field__label" %>
+      <%= form.number_field :repeat_count, class: "rule-field__input", min: 1, value: form.object.repeat_count || 1 %>
+    </div>
+
+    <button type="button" class="btn btn--small btn--danger rule-field__remove" data-action="click->template-form#removeQuestionRule">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+</div>
+
+<% 
+# Helper to group questions by topic for optgroups
+def group_questions_by_topic(questions)
+  questions.group_by { |q| q.topic.name }.map do |topic_name, qs|
+    [topic_name, qs.map { |q| ["Q#{q.id}: #{q.question_type} - #{q.question_stem&.truncate(50) || 'No stem'}", q.id] }]
+  end
+end
+%>
+
