@@ -1,23 +1,126 @@
-<div class="premium-page-wrapper topic-detail">
+<div class="topic-detail premium-page-wrapper" data-controller="topic-builder" data-topic-builder-persisted-value="false">
   <div class="topic-detail__back">
     <%= link_to topics_path, class: 'link-back' do %>
       ← Back to Topics
     <% end %>
   </div>
 
-  <div class="premium-page-header">
-    <div class="premium-page-header__content">
-      <div class="topic-detail__title-row">
-        <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-        <div>
-          <h1 class="premium-title">Create New Topic</h1>
-          <p class="premium-subtitle">Build a comprehensive topic with modules, learning outcomes, and references</p>
+  <%= form_with(model: @topic, data: { topic_builder_target: 'form' }) do |form| %>
+    <div class="premium-page-header">
+      <div class="premium-page-header__content">
+        <div class="topic-detail__title-row">
+          <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          
+          <div class="topic-title-editor">
+            <h1 class="premium-title" 
+                data-topic-builder-target="titleDisplay"
+                data-action="click->topic-builder#editTitle"
+                style="cursor: pointer;">
+              <span data-topic-builder-target="titleText">Untitled Topic</span>
+              <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </h1>
+            <%= form.text_field :name, 
+                placeholder: 'Enter topic name',
+                class: 'topic-title-input',
+                data: { 
+                  topic_builder_target: 'titleInput',
+                  action: 'blur->topic-builder#saveTitleOnBlur keydown->topic-builder#handleTitleKeydown'
+                },
+                style: 'display: none;' %>
+          </div>
         </div>
+
+        <div class="topic-detail__overview" 
+             data-topic-builder-target="overviewDisplay"
+             data-action="click->topic-builder#editOverview"
+             style="cursor: pointer; min-height: 60px;">
+          <div class="topic-detail__overview-content" data-topic-builder-target="overviewText">
+            <em style="color: #9ca3af;">Click to add topic overview/description...</em>
+          </div>
+        </div>
+        <%= form.text_area :epigraph_quote,
+            class: 'topic-overview-input',
+            rows: 3,
+            placeholder: 'Enter topic overview or description',
+            data: { 
+              topic_builder_target: 'overviewInput',
+              action: 'blur->topic-builder#saveOverviewOnBlur'
+            },
+            style: 'display: none;' %>
+      </div>
+    </div>
+
+    <div class="topic-detail__content">
+      <div class="section-header">
+        <h2 class="topic-detail__section-title">Modules</h2>
+        <button type="button" 
+                class="add-module-btn"
+                data-action="click->topic-builder#addModule">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Module
+        </button>
+      </div>
+      
+      <div class="modules-grid" data-topic-builder-target="modulesGrid">
+        <!-- Modules will be added here dynamically -->
+      </div>
+
+      <div class="empty-state" data-topic-builder-target="emptyState">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <h3>No modules yet</h3>
+        <p>Click "Add Module" to create your first module and start building this topic.</p>
+      </div>
+
+      <div class="form-actions" style="margin-top: 3rem;">
+        <%= form.submit 'Create Topic', class: 'topic-form__submit', data: { action: 'click->topic-builder#prepareSubmit' } %>
+        <%= link_to 'Cancel', topics_path, class: 'topic-form__cancel' %>
+      </div>
+    </div>
+
+    <!-- Hidden fields for modules data -->
+    <div data-topic-builder-target="hiddenFields"></div>
+
+    <!-- Module Card Template -->
+    <template data-topic-builder-target="moduleTemplate">
+  <div class="module-card module-card--editable" data-module-index="INDEX">
+    <div class="module-card__header">
+      <div class="module-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      </div>
+      <div class="module-card__title-editor">
+        <h3 class="module-card__title" data-action="click->topic-builder#editModuleTitle">
+          <span class="module-title-text">Module Name</span>
+          <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </h3>
+        <input type="text" class="module-title-input" placeholder="Enter module name" style="display: none;" data-action="blur->topic-builder#saveModuleTitle keydown->topic-builder#handleModuleTitleKeydown">
+      </div>
+      <button type="button" class="remove-module-btn" data-action="click->topic-builder#removeModule">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    
+    <div class="module-card__description-editor">
+      <p class="module-card__description" data-action="click->topic-builder#editModuleDescription">
+        <span class="module-description-text"><em style="color: #9ca3af;">Click to add description...</em></span>
+      </p>
+      <textarea class="module-description-input" placeholder="Enter module description" rows="2" style="display: none;" data-action="blur->topic-builder#saveModuleDescription"></textarea>
+</div>
+    
+    <div class="module-card__stats">
+      <div class="module-card__stat">
+        <span class="module-card__stat-label">Categories</span>
+        <span class="module-card__stat-value">0</span>
+      </div>
+      <div class="module-card__stat">
+        <span class="module-card__stat-label">Learning Objectives</span>
+        <span class="module-card__stat-value">0</span>
+      </div>
+      <div class="module-card__stat">
+        <span class="module-card__stat-label">Questions</span>
+        <span class="module-card__stat-value">0</span>
       </div>
     </div>
   </div>
-
-  <div class="topic-detail__content">
-    <%= render 'form', topic: @topic %>
-  </div>
+</template>
+  <% end %>
 </div>

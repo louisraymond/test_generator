@@ -12,6 +12,7 @@ class Topic < ApplicationRecord
   has_many :learning_objectives, -> { order(:category_order, :position, :id) }, dependent: :destroy
 
   accepts_nested_attributes_for :learning_objectives, allow_destroy: true
+  accepts_nested_attributes_for :topic_modules, allow_destroy: true
 
   validates :name, presence: true
   validate :outline_shapes
