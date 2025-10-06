@@ -19,14 +19,17 @@
     /* A4 paper dimensions */
     width: 210mm;
     min-height: 297mm;
-    margin: 20px auto 40px auto; /* 40px bottom margin for page separation */
+    margin: 20px auto 40px auto;
+    /* 40px bottom margin for page separation */
     padding: 25mm 20mm;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     background: white;
     position: relative;
 }
 
+
 /* Add "Page X" indicator at bottom of each page in preview */
+
 .page::after {
     content: "Page " counter(page);
     counter-increment: page;
@@ -38,6 +41,7 @@
     display: block;
 }
 
+
 /* Base (shared) - body with page counter reset */
 
 body {
@@ -46,7 +50,8 @@ body {
     line-height: var(--exam-line-height);
     margin: 0;
     background: #f5f5f5;
-    counter-reset: page; /* Reset page counter for page numbering */
+    counter-reset: page;
+    /* Reset page counter for page numbering */
 }
 
 
@@ -63,6 +68,7 @@ body {
     }
     body {
         padding: 0;
+        background: white;
     }
     .question {
         page-break-inside: avoid;
@@ -72,18 +78,17 @@ body {
     }
     .page {
         width: auto;
+        margin: 0; /* Remove margins for PDF */
+        padding: 0; /* Let @page margins handle spacing */
+        box-shadow: none; /* No shadow in PDF */
+        background: white;
     }
     .page::after {
         display: none; /* Hide page counter in print */
     }
     .exam-actions-header,
     .display-controls-sidebar {
-        display: none; /* Hide UI elements in print */
-        min-height: auto;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
-        background: transparent;
+        display: none !important; /* Hide UI elements in print */
     }
 }
 
