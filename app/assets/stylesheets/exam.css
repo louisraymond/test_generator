@@ -274,6 +274,7 @@ h1 {
     text-align: center;
 }
 
+
 /* Exam Index */
 
 .exam-index {
@@ -666,6 +667,7 @@ h1 {
 
 .sub-question-number {
     font-weight: bold;
+    font-size: calc(var(--exam-font-size) * 1.1);
     display: inline-block;
     min-width: 40px;
 }
@@ -1468,6 +1470,8 @@ code.md-inline,
 .sub-question-marks {
     margin-left: 3mm;
     font-weight: bold;
+    font-size: var(--exam-font-size);
+    color: #555;
 }
 
 .sub-answer {
