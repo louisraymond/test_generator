@@ -14,7 +14,9 @@
  *= require_self
  */
 
+
 /* Premium Page Header Styling */
+
 main {
     background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
     min-height: 100vh;
@@ -50,7 +52,9 @@ main {
     font-weight: 500;
 }
 
+
 /* Enhanced Library Grid */
+
 .library-grid {
     max-width: 1400px;
     margin: 0 auto 2rem;
@@ -59,7 +63,9 @@ main {
     gap: 2rem;
 }
 
+
 /* Enhanced Cards */
+
 .card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
@@ -83,7 +89,9 @@ main {
     margin: 0 0 1.5rem 0;
 }
 
+
 /* Enhanced Chips */
+
 .chip {
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     color: #1e40af;
@@ -107,7 +115,9 @@ main {
     color: #1e40af;
 }
 
+
 /* Enhanced Questions Card */
+
 .questions-card {
     max-width: 1400px;
     margin: 0 auto;
@@ -118,7 +128,9 @@ main {
     overflow: hidden;
 }
 
+
 /* Enhanced Table */
+
 .questions-table {
     width: 100%;
     border-collapse: separate;
@@ -161,7 +173,9 @@ main {
     border-bottom: 1px solid #f1f5f9;
 }
 
+
 /* Enhanced Topic Pills */
+
 .topic-pill {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
@@ -173,7 +187,9 @@ main {
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
+
 /* Enhanced Outcome Chips */
+
 .outcome-chip {
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     color: #166534;
@@ -190,11 +206,73 @@ main {
     transform: scale(1.05);
 }
 
+/* Premium Page Wrapper for detail pages */
+.premium-page-wrapper {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Topic Detail Title Row */
+.topic-detail__title-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.topic-detail__icon {
+    width: 56px;
+    height: 56px;
+    padding: 12px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-radius: 16px;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.topic-detail__overview {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 16px;
+    border-left: 4px solid #22c55e;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.topic-detail__overview-content {
+    color: #166534;
+    font-size: 1rem;
+    line-height: 1.7;
+    font-style: italic;
+}
+
+/* Form Wrapper for Exam Generation */
+.form-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.form-wrapper fieldset {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.form-wrapper legend {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    padding: 0 1rem;
+}
+
 @media (max-width: 1024px) {
     .library-grid {
         grid-template-columns: 1fr;
     }
-    
     .premium-title {
         font-size: 2.25rem;
     }

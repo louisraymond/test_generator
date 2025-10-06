@@ -1,24 +1,25 @@
-<div class="topic-detail" data-controller="topic-detail module-focus" data-topic-detail-topic-id-value="<%= @topic.id %>" data-action="click@window->module-focus#handleBackgroundClick">
+<div class="topic-detail premium-page-wrapper" data-controller="topic-detail module-focus" data-topic-detail-topic-id-value="<%= @topic.id %>" data-action="click@window->module-focus#handleBackgroundClick">
   <div class="topic-detail__back">
     <%= link_to topics_path, class: 'link-back' do %>
       ← Back to Topics
     <% end %>
   </div>
 
-  <div class="topic-detail__header">
-    <div class="topic-detail__title-row">
-      <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-      <h1><%= @topic.name %></h1>
-    </div>
-
-    <% if @topic.epigraph_quote.present? %>
-      <div class="topic-detail__overview">
-        <h3>Topic Overview</h3>
-        <div class="topic-detail__overview-content">
-          <%= outline_text_to_html(@topic.epigraph_quote) %>
-        </div>
+  <div class="premium-page-header">
+    <div class="premium-page-header__content">
+      <div class="topic-detail__title-row">
+        <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <h1 class="premium-title"><%= @topic.name %></h1>
       </div>
-    <% end %>
+
+      <% if @topic.epigraph_quote.present? %>
+        <div class="topic-detail__overview">
+          <div class="topic-detail__overview-content">
+            <%= outline_text_to_html(@topic.epigraph_quote) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <div class="topic-detail__content">
