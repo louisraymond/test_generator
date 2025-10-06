@@ -73,6 +73,7 @@ class ExamsController < ApplicationController
     @exam = Exam.includes(exam_questions: :question).find(params[:id])
 
     respond_to do |format|
+      format.html
       format.pdf do
         html = render_to_string(template: 'exams/marking_scheme', layout: false, formats: [:html])
         pdf = Grover.new(
@@ -87,20 +88,6 @@ class ExamsController < ApplicationController
         send_data pdf, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
-  end
-
-  private
-
-  def exam_params
-    params.permit(
-      :title,
-      :question_count,
-      :duration_minutes,
-      :allow_repeats,
-      topic_ids: [],
-      question_types: [],
-      topic_weights: {}
-    )
   end
 
   # Lightweight JSON endpoint to preview availability and allocation
@@ -134,5 +121,19 @@ class ExamsController < ApplicationController
       per_topic: per_topic,
       suggested_allocation: allocation
     }
+  end
+
+  private
+
+  def exam_params
+    params.permit(
+      :title,
+      :question_count,
+      :duration_minutes,
+      :allow_repeats,
+      topic_ids: [],
+      question_types: [],
+      topic_weights: {}
+    )
   end
 end

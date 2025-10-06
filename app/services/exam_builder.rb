@@ -1,6 +1,4 @@
 class ExamBuilder
-  MAX_QUESTIONS = 50
-
   class Error < StandardError; end
   class MissingTopicsError < Error; end
   class NotEnoughQuestionsError < Error; end
@@ -21,7 +19,6 @@ class ExamBuilder
 
     requested = count.to_i
     requested = 1 if requested < 1
-    requested = MAX_QUESTIONS if requested > MAX_QUESTIONS
 
     scope = Question.where(topic_id: topic_ids)
     scope = scope.where(question_type: Array(types)) if types.present?

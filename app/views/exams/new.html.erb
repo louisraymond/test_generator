@@ -5,7 +5,7 @@
 <% end %>
 
 <div class="form-wrapper" data-controller="exam-form">
-  <%= form_with url: exams_path, method: :post, local: true, data: { action: 'change->exam-form#updatePreview input->exam-form#updatePreview' } do |f| %>
+  <%= form_with url: exams_path, method: :post, local: true, target: '_blank', data: { action: 'change->exam-form#updatePreview input->exam-form#updatePreview' } do |f| %>
     <%= f.text_field :title, placeholder: 'Exam title (optional)', value: params[:title] %>
 
     <div class="generator-layout">
