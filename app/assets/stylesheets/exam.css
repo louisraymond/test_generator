@@ -1,8 +1,16 @@
+/* CSS Custom Properties for dynamic display settings */
+:root, .page {
+  --exam-font-size: 14pt;
+  --exam-line-height: 1.6;
+  --exam-question-margin: 18pt;
+  --exam-title-size: 18pt;
+}
+
 /* Base (shared) */
 body {
   font-family: Arial, sans-serif;
-  font-size: 11pt;
-  line-height: 1.5;
+  font-size: var(--exam-font-size);
+  line-height: var(--exam-line-height);
   margin: 0;
   background: #fff;
 }
@@ -22,7 +30,7 @@ body {
 
 /* Titles */
 h1 {
-  font-size: 18pt;
+  font-size: var(--exam-title-size);
   font-weight: bold;
   text-align: center;
   margin: 0 0 30mm 0;
@@ -30,8 +38,8 @@ h1 {
 }
 
 /* Question block */
-.question { margin-bottom: 28mm; }
-.question-large { margin-bottom: 25mm; }
+.question { margin-bottom: calc(var(--exam-question-margin) * 1.5); }
+.question-large { margin-bottom: calc(var(--exam-question-margin) * 1.4); }
 
 .question-header {
   display: flex;
@@ -40,8 +48,15 @@ h1 {
   margin-bottom: 8mm;
 }
 
-.question-number { font-weight: bold; font-size: 12pt; }
-.marks { font-weight: 600; font-size: 11pt; color: #555; }
+.question-number { 
+  font-weight: bold; 
+  font-size: calc(var(--exam-font-size) * 1.1); 
+}
+.marks { 
+  font-weight: 600; 
+  font-size: var(--exam-font-size); 
+  color: #555; 
+}
 
 .question-text { flex: 1; margin: 0 6mm 0 4mm; }
 .question-text p { margin: 0; }
