@@ -662,3 +662,42 @@
         padding: 1rem;
     }
 }
+
+/* View toggle styles */
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+}
+
+.view-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #e9ecef;
+    background: #f8f9fa;
+    color: #6c757d;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+    border-color: #dee2e6;
+}
+
+.view-toggle-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.view-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+}
