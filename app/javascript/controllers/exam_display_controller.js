@@ -66,6 +66,9 @@ export default class extends Controller {
         document.body.style.setProperty('--exam-font-size', preset.fontSize)
         document.body.style.setProperty('--exam-line-height', preset.lineHeight)
 
+        // Update PDF link with current font size
+        this.updatePdfLink()
+
         // Update active button
         this.presetButtonsTargets.forEach(button => {
             if (button.dataset.preset === presetName) {
@@ -139,6 +142,9 @@ export default class extends Controller {
             page.style.setProperty('--exam-font-size', fontSize)
         })
         document.body.style.setProperty('--exam-font-size', fontSize)
+        
+        // Update PDF link with current font size
+        this.updatePdfLink()
     }
 
     // Apply custom spacing
@@ -149,6 +155,9 @@ export default class extends Controller {
         pages.forEach(page => {
             page.style.setProperty('--exam-question-margin', spacing)
         })
+        
+        // Update PDF link with current spacing
+        this.updatePdfLink()
     }
 
     // Load custom values from localStorage
@@ -171,5 +180,24 @@ export default class extends Controller {
             this.spacingValueTarget.textContent = savedSpacing
             this.applyCustomSpacing(savedSpacing)
         }
+    }
+
+    // Update PDF link with current font size and spacing
+    updatePdfLink() {
+        const pdfLink = document.getElementById('pdf-link')
+        if (!pdfLink) return
+
+        const currentFontSize = document.body.style.getPropertyValue('--exam-font-size') || '14pt'
+        const currentSpacing = document.body.style.getPropertyValue('--exam-question-margin') || '18pt'
+        
+        // Extract font size number (e.g., "9pt" -> "9")
+        const fontSizeNumber = currentFontSize.replace('pt', '')
+        const spacingNumber = currentSpacing.replace('pt', '')
+        
+        // Update the href with current parameters
+        const url = new URL(pdfLink.href)
+        url.searchParams.set('font_size', fontSizeNumber)
+        url.searchParams.set('question_spacing', spacingNumber)
+        pdfLink.href = url.toString()
     }
 }

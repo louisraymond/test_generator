@@ -54,6 +54,10 @@ class ExamsController < ApplicationController
 
   def show
     @exam = Exam.includes(exam_questions: :question).find(params[:id])
+    
+    # Extract font size and spacing parameters for PDF generation
+    @font_size = params[:font_size]&.to_i || 14
+    @question_spacing = params[:question_spacing]&.to_i || 18
 
     respond_to do |format|
       format.html

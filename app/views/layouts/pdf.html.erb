@@ -11,6 +11,12 @@
   <style>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
+    
+    /* Apply dynamic font size and spacing for PDF */
+    :root {
+      --exam-font-size: <%= @font_size %>pt;
+      --exam-question-margin: <%= @question_spacing %>pt;
+    }
   </style>
   
   <script>
