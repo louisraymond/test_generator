@@ -254,15 +254,43 @@
     </div>
   </div>
 
-  <div class="page">
-    <h1><%= @exam.title %></h1>
-    <% if @exam.duration_minutes.present? %>
-      <p style="text-align:center; margin-top:-10mm; margin-bottom:15mm; font-style: italic;">Duration: <%= @exam.duration_minutes %> minutes</p>
-    <% end %>
+  <%  
+    # Estimate questions per page (rough heuristic)
+    # Header takes ~50mm, each question ~40-60mm on average
+    # A4 page: 297mm height - 50mm padding = 247mm usable
+    # First page has title, so fewer questions (~4-5)
+    # Subsequent pages can fit ~6-8 questions
+    questions_per_page_first = 5
+    questions_per_page_rest = 7
+    
+    all_questions = @exam.questions.to_a
+    pages = []
+    
+    # First page with header
+    pages << all_questions.shift(questions_per_page_first)
+    
+    # Remaining pages
+    while all_questions.any?
+      pages << all_questions.shift(questions_per_page_rest)
+    end
+    
+    question_counter = 0
+  %>
 
-    <% @exam.questions.each_with_index do |question, index| %>
-      <%= render 'questions/question', question: question, number: index + 1, seed: "#{@exam.id}-#{index + 1}" %>
-    <% end %>
-  </div>
+  <% pages.each_with_index do |page_questions, page_index| %>
+    <div class="page" data-exam-display-target="page">
+      <% if page_index == 0 %>
+        <h1><%= @exam.title %></h1>
+        <% if @exam.duration_minutes.present? %>
+          <p style="text-align:center; margin-top:-10mm; margin-bottom:15mm; font-style: italic;">Duration: <%= @exam.duration_minutes %> minutes</p>
+        <% end %>
+      <% end %>
+
+      <% page_questions.each do |question| %>
+        <%= render 'questions/question', question: question, number: question_counter + 1, seed: "#{@exam.id}-#{question_counter + 1}" %>
+        <% question_counter += 1 %>
+      <% end %>
+    </div>
+  <% end %>
 </body>
 </html>

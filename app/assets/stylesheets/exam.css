@@ -1,4 +1,5 @@
 /* CSS Custom Properties for dynamic display settings */
+
 :root {
     --exam-font-size: 14pt;
     --exam-line-height: 1.6;
@@ -6,26 +7,38 @@
     --exam-title-size: 18pt;
 }
 
+
 /* Page container for on-screen preview - matches A4 dimensions exactly (210mm × 297mm) */
+
 .page {
     /* CSS Variables for dynamic sizing */
     --exam-font-size: 14pt;
     --exam-line-height: 1.6;
     --exam-question-margin: 18pt;
     --exam-title-size: 18pt;
-    
     /* A4 paper dimensions */
     width: 210mm;
     min-height: 297mm;
-    margin: 20px auto;
+    margin: 20px auto 40px auto; /* 40px bottom margin for page separation */
     padding: 25mm 20mm;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     background: white;
     position: relative;
 }
 
+/* Add "Page X" indicator at bottom of each page in preview */
+.page::after {
+    content: "Page " counter(page);
+    counter-increment: page;
+    position: absolute;
+    bottom: 10mm;
+    right: 20mm;
+    font-size: 9pt;
+    color: #9ca3af;
+    display: block;
+}
 
-/* Base (shared) */
+/* Base (shared) - body with page counter reset */
 
 body {
     font-family: Arial, sans-serif;
@@ -33,6 +46,7 @@ body {
     line-height: var(--exam-line-height);
     margin: 0;
     background: #f5f5f5;
+    counter-reset: page; /* Reset page counter for page numbering */
 }
 
 
@@ -58,6 +72,13 @@ body {
     }
     .page {
         width: auto;
+    }
+    .page::after {
+        display: none; /* Hide page counter in print */
+    }
+    .exam-actions-header,
+    .display-controls-sidebar {
+        display: none; /* Hide UI elements in print */
         min-height: auto;
         margin: 0;
         padding: 0;
