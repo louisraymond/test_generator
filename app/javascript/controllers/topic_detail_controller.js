@@ -200,11 +200,11 @@ export default class extends Controller {
     async saveCategory(event) {
         // Prevent multiple submissions - disable button immediately
         const saveButton = event && event.target ? event.target : this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
-        
+
         if (saveButton.disabled || this.isSavingCategory) {
             return
         }
-        
+
         // Disable button and set flag immediately
         saveButton.disabled = true
         this.isSavingCategory = true
@@ -308,11 +308,11 @@ export default class extends Controller {
     async saveModule(event) {
         // Prevent multiple submissions - disable button immediately
         const saveButton = event && event.target ? event.target : this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
-        
+
         if (saveButton.disabled || this.isSavingModule) {
             return
         }
-        
+
         // Disable button and set flag immediately
         saveButton.disabled = true
         this.isSavingModule = true

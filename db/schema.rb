@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_06_231401) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -146,6 +146,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_231401) do
     t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["topic_id", "name"], name: "index_topic_modules_on_topic_id_and_name", unique: true
     t.index ["topic_id"], name: "index_topic_modules_on_topic_id"
   end
 
