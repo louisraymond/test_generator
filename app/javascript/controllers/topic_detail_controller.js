@@ -220,7 +220,9 @@ export default class extends Controller {
 
         // Set loading state
         this.isSavingCategory = true
-        const saveButton = event.target
+        
+        // Find the save button if event is not provided
+        const saveButton = event?.target || this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
         const originalText = saveButton.innerHTML
         saveButton.disabled = true
         saveButton.innerHTML = `
@@ -260,7 +262,7 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add category')
-                // Reset button state on error
+                    // Reset button state on error
                 saveButton.disabled = false
                 saveButton.innerHTML = originalText
                 this.isSavingCategory = false
@@ -268,7 +270,7 @@ export default class extends Controller {
         } catch (error) {
             console.error('Error adding category:', error)
             alert('Failed to add category')
-            // Reset button state on error
+                // Reset button state on error
             saveButton.disabled = false
             saveButton.innerHTML = originalText
             this.isSavingCategory = false
@@ -316,7 +318,9 @@ export default class extends Controller {
 
         // Set loading state
         this.isSavingModule = true
-        const saveButton = event.target
+        
+        // Find the save button if event is not provided
+        const saveButton = event?.target || this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
         const originalText = saveButton.innerHTML
         saveButton.disabled = true
         saveButton.innerHTML = `
@@ -348,7 +352,7 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add module')
-                // Reset button state on error
+                    // Reset button state on error
                 saveButton.disabled = false
                 saveButton.innerHTML = originalText
                 this.isSavingModule = false
@@ -356,7 +360,7 @@ export default class extends Controller {
         } catch (error) {
             console.error('Error adding module:', error)
             alert('Failed to add module')
-            // Reset button state on error
+                // Reset button state on error
             saveButton.disabled = false
             saveButton.innerHTML = originalText
             this.isSavingModule = false

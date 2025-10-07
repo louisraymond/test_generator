@@ -634,7 +634,9 @@ main {
     }
 }
 
+
 /* Flash Messages */
+
 .flash-message {
     position: fixed;
     top: 20px;
@@ -660,7 +662,9 @@ main {
     transform: translateX(100%);
 }
 
+
 /* Loading Animation */
+
 .animate-spin {
     animation: spin 1s linear infinite;
 }
