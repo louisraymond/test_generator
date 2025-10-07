@@ -198,10 +198,15 @@ export default class extends Controller {
     }
 
     async saveCategory(event) {
-        // Prevent multiple submissions - set flag immediately
-        if (this.isSavingCategory) {
+        // Prevent multiple submissions - disable button immediately
+        const saveButton = event && event.target ? event.target : this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
+        
+        if (saveButton.disabled || this.isSavingCategory) {
             return
         }
+        
+        // Disable button and set flag immediately
+        saveButton.disabled = true
         this.isSavingCategory = true
 
         const categoryName = this.categoryNameInputTarget.value.trim()
@@ -210,6 +215,7 @@ export default class extends Controller {
         if (!categoryName) {
             alert('Category name is required')
             this.categoryNameInputTarget.focus()
+            saveButton.disabled = false
             this.isSavingCategory = false
             return
         }
@@ -217,14 +223,13 @@ export default class extends Controller {
         if (!description) {
             alert('First learning outcome is required')
             this.firstLoInputTarget.focus()
+            saveButton.disabled = false
             this.isSavingCategory = false
             return
         }
 
-        // Find the save button if event is not provided
-        const saveButton = event && event.target ? event.target : this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
+        // Show loading state
         const originalText = saveButton.innerHTML
-        saveButton.disabled = true
         saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -301,10 +306,15 @@ export default class extends Controller {
     }
 
     async saveModule(event) {
-        // Prevent multiple submissions - set flag immediately
-        if (this.isSavingModule) {
+        // Prevent multiple submissions - disable button immediately
+        const saveButton = event && event.target ? event.target : this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
+        
+        if (saveButton.disabled || this.isSavingModule) {
             return
         }
+        
+        // Disable button and set flag immediately
+        saveButton.disabled = true
         this.isSavingModule = true
 
         const moduleName = this.wipModuleNameTarget.value.trim()
@@ -312,16 +322,15 @@ export default class extends Controller {
         if (!moduleName) {
             alert('Module name is required')
             this.wipModuleNameTarget.focus()
+            saveButton.disabled = false
             this.isSavingModule = false
             return
         }
 
         const moduleDescription = this.wipModuleDescriptionTarget.value.trim()
 
-        // Find the save button if event is not provided
-        const saveButton = event && event.target ? event.target : this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
+        // Show loading state
         const originalText = saveButton.innerHTML
-        saveButton.disabled = true
         saveButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
                 <circle cx="12" cy="12" r="10"></circle>
