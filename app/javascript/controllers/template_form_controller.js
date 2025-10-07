@@ -1,83 +1,83 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [
-    "sectionsContainer",
-    "sectionTemplate",
-    "sectionCard",
-    "sourceRuleField",
-    "questionRuleField"
-  ]
-  
-  static values = {
-    topics: Array,
-    modules: Array,
-    learningObjectives: Array
-  }
+    static targets = [
+        "sectionsContainer",
+        "sectionTemplate",
+        "sectionCard",
+        "sourceRuleField",
+        "questionRuleField"
+    ]
 
-  connect() {
-    this.sectionIndex = this.sectionCardTargets.length
-    
-    // Parse JSON data from data attributes if not already set
-    if (!this.hasTopicsValue) {
-      const topicsData = this.element.dataset.topicsJson
-      if (topicsData) {
-        this.topicsValue = JSON.parse(topicsData)
-      }
+    static values = {
+        topics: Array,
+        modules: Array,
+        learningObjectives: Array
     }
-    
-    if (!this.hasModulesValue) {
-      const modulesData = this.element.dataset.modulesJson
-      if (modulesData) {
-        this.modulesValue = JSON.parse(modulesData)
-      }
+
+    connect() {
+        this.sectionIndex = this.sectionCardTargets.length
+
+        // Parse JSON data from data attributes if not already set
+        if (!this.hasTopicsValue) {
+            const topicsData = this.element.dataset.topicsJson
+            if (topicsData) {
+                this.topicsValue = JSON.parse(topicsData)
+            }
+        }
+
+        if (!this.hasModulesValue) {
+            const modulesData = this.element.dataset.modulesJson
+            if (modulesData) {
+                this.modulesValue = JSON.parse(modulesData)
+            }
+        }
+
+        if (!this.hasLearningObjectivesValue) {
+            const losData = this.element.dataset.learningObjectivesJson
+            if (losData) {
+                this.learningObjectivesValue = JSON.parse(losData)
+            }
+        }
     }
-    
-    if (!this.hasLearningObjectivesValue) {
-      const losData = this.element.dataset.learningObjectivesJson
-      if (losData) {
-        this.learningObjectivesValue = JSON.parse(losData)
-      }
+
+    buildSourceOptions() {
+        let options = '<option value="">Select source</option>'
+
+        // Add all topics by default
+        if (this.topicsValue && this.topicsValue.length > 0) {
+            this.topicsValue.forEach(topic => {
+                options += `<option value="${topic.id}">${topic.name}</option>`
+            })
+        }
+
+        return options
     }
-  }
-  
-  buildSourceOptions() {
-    let options = '<option value="">Select source</option>'
-    
-    // Add all topics by default
-    if (this.topicsValue && this.topicsValue.length > 0) {
-      this.topicsValue.forEach(topic => {
-        options += `<option value="${topic.id}">${topic.name}</option>`
-      })
+
+    buildModuleOptions() {
+        let options = '<option value="">Select source</option>'
+
+        if (this.modulesValue && this.modulesValue.length > 0) {
+            this.modulesValue.forEach(mod => {
+                options += `<option value="${mod.id}">${mod.topic_name} → ${mod.name}</option>`
+            })
+        }
+
+        return options
     }
-    
-    return options
-  }
-  
-  buildModuleOptions() {
-    let options = '<option value="">Select source</option>'
-    
-    if (this.modulesValue && this.modulesValue.length > 0) {
-      this.modulesValue.forEach(mod => {
-        options += `<option value="${mod.id}">${mod.topic_name} → ${mod.name}</option>`
-      })
+
+    buildLearningObjectiveOptions() {
+        let options = '<option value="">Select source</option>'
+
+        if (this.learningObjectivesValue && this.learningObjectivesValue.length > 0) {
+            this.learningObjectivesValue.forEach(lo => {
+                const desc = lo.description.length > 50 ? lo.description.substring(0, 50) + '...' : lo.description
+                options += `<option value="${lo.id}">${lo.module_path} → ${desc}</option>`
+            })
+        }
+
+        return options
     }
-    
-    return options
-  }
-  
-  buildLearningObjectiveOptions() {
-    let options = '<option value="">Select source</option>'
-    
-    if (this.learningObjectivesValue && this.learningObjectivesValue.length > 0) {
-      this.learningObjectivesValue.forEach(lo => {
-        const desc = lo.description.length > 50 ? lo.description.substring(0, 50) + '...' : lo.description
-        options += `<option value="${lo.id}">${lo.module_path} → ${desc}</option>`
-      })
-    }
-    
-    return options
-  }
 
     addSection(event) {
         event.preventDefault()
@@ -111,16 +111,16 @@ export default class extends Controller {
         }
     }
 
-  addSourceRule(event) {
-    event.preventDefault()
-    const button = event.target.closest('button')
-    const sectionIndex = button.dataset.sectionIndex
-    const container = button.previousElementSibling
-    
-    const newId = new Date().getTime()
-    const sourceOptions = this.buildSourceOptions() // Default to topics
-    
-    const template = `
+    addSourceRule(event) {
+        event.preventDefault()
+        const button = event.target.closest('button')
+        const sectionIndex = button.dataset.sectionIndex
+        const container = button.previousElementSibling
+
+        const newId = new Date().getTime()
+        const sourceOptions = this.buildSourceOptions() // Default to topics
+
+        const template = `
       <div class="rule-field" data-template-form-target="sourceRuleField">
         <input type="hidden" name="exam_template[exam_sections_attributes][${sectionIndex}][section_source_rules_attributes][${newId}][_destroy]" value="false">
         
@@ -158,33 +158,33 @@ export default class extends Controller {
         </div>
       </div>
     `
-    
-    container.insertAdjacentHTML('beforeend', template)
-  }
-  
-  updateSourceDropdown(event) {
-    const typeSelect = event.target
-    const sourceType = typeSelect.value
-    const ruleField = typeSelect.closest('.rule-field')
-    const sourceSelect = ruleField.querySelector('select[name*="[source_id]"]')
-    
-    let options = ''
-    switch(sourceType) {
-      case 'Topic':
-        options = this.buildSourceOptions()
-        break
-      case 'TopicModule':
-        options = this.buildModuleOptions()
-        break
-      case 'LearningObjective':
-        options = this.buildLearningObjectiveOptions()
-        break
-      default:
-        options = '<option value="">Select source</option>'
+
+        container.insertAdjacentHTML('beforeend', template)
     }
-    
-    sourceSelect.innerHTML = options
-  }
+
+    updateSourceDropdown(event) {
+        const typeSelect = event.target
+        const sourceType = typeSelect.value
+        const ruleField = typeSelect.closest('.rule-field')
+        const sourceSelect = ruleField.querySelector('select[name*="[source_id]"]')
+
+        let options = ''
+        switch (sourceType) {
+            case 'Topic':
+                options = this.buildSourceOptions()
+                break
+            case 'TopicModule':
+                options = this.buildModuleOptions()
+                break
+            case 'LearningObjective':
+                options = this.buildLearningObjectiveOptions()
+                break
+            default:
+                options = '<option value="">Select source</option>'
+        }
+
+        sourceSelect.innerHTML = options
+    }
 
     removeSourceRule(event) {
         event.preventDefault()
