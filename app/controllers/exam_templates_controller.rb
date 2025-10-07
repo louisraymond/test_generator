@@ -124,7 +124,7 @@ class ExamTemplatesController < ApplicationController
         id: q.id,
         topic_name: q.topic.name,
         question_type: q.question_type,
-        stem: q.question_stem&.truncate(50) || 'No stem'
+        stem: q.content&.truncate(50) || 'No stem'
       }
     end.to_json
   end
