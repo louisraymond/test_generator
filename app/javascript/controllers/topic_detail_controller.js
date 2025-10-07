@@ -222,7 +222,7 @@ export default class extends Controller {
         this.isSavingCategory = true
 
         // Find the save button if event is not provided
-        const saveButton = event?.target || this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
+        const saveButton = event ? .target || this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
         const originalText = saveButton.innerHTML
         saveButton.disabled = true
         saveButton.innerHTML = `
@@ -320,7 +320,7 @@ export default class extends Controller {
         this.isSavingModule = true
 
         // Find the save button if event is not provided
-        const saveButton = event?.target || this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
+        const saveButton = event ? .target || this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
         const originalText = saveButton.innerHTML
         saveButton.disabled = true
         saveButton.innerHTML = `
