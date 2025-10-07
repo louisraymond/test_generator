@@ -2,7 +2,8 @@
   controller: "template-form",
   topics_json: @topics_json,
   modules_json: @modules_json,
-  learning_objectives_json: @learning_objectives_json
+  learning_objectives_json: @learning_objectives_json,
+  questions_json: @questions_json
 }) do |form| %>
   <% if exam_template.errors.any? %>
     <div class="alert alert--error">

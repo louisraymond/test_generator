@@ -118,6 +118,15 @@ class ExamTemplatesController < ApplicationController
           module_path: "#{lo.topic_module.topic.name} → #{lo.topic_module.name}"
         }
       end.compact.to_json
+    
+    @questions_json = @questions.select { |q| q.topic.present? }.map do |q|
+      {
+        id: q.id,
+        topic_name: q.topic.name,
+        question_type: q.question_type,
+        stem: q.question_stem&.truncate(50) || 'No stem'
+      }
+    end.to_json
   end
 end
 

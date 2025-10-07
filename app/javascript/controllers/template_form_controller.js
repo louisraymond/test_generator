@@ -9,11 +9,12 @@ export default class extends Controller {
         "questionRuleField"
     ]
 
-    static values = {
-        topics: Array,
-        modules: Array,
-        learningObjectives: Array
-    }
+  static values = {
+    topics: Array,
+    modules: Array,
+    learningObjectives: Array,
+    questions: Array
+  }
 
     connect() {
         this.sectionIndex = this.sectionCardTargets.length
@@ -33,13 +34,20 @@ export default class extends Controller {
             }
         }
 
-        if (!this.hasLearningObjectivesValue) {
-            const losData = this.element.dataset.learningObjectivesJson
-            if (losData) {
-                this.learningObjectivesValue = JSON.parse(losData)
-            }
-        }
+    if (!this.hasLearningObjectivesValue) {
+      const losData = this.element.dataset.learningObjectivesJson
+      if (losData) {
+        this.learningObjectivesValue = JSON.parse(losData)
+      }
     }
+    
+    if (!this.hasQuestionsValue) {
+      const questionsData = this.element.dataset.questionsJson
+      if (questionsData) {
+        this.questionsValue = JSON.parse(questionsData)
+      }
+    }
+  }
 
     buildSourceOptions() {
         let options = '<option value="">Select source</option>'
@@ -66,18 +74,45 @@ export default class extends Controller {
         return options
     }
 
-    buildLearningObjectiveOptions() {
-        let options = '<option value="">Select source</option>'
-
-        if (this.learningObjectivesValue && this.learningObjectivesValue.length > 0) {
-            this.learningObjectivesValue.forEach(lo => {
-                const desc = lo.description.length > 50 ? lo.description.substring(0, 50) + '...' : lo.description
-                options += `<option value="${lo.id}">${lo.module_path} → ${desc}</option>`
-            })
-        }
-
-        return options
+  buildLearningObjectiveOptions() {
+    let options = '<option value="">Select source</option>'
+    
+    if (this.learningObjectivesValue && this.learningObjectivesValue.length > 0) {
+      this.learningObjectivesValue.forEach(lo => {
+        const desc = lo.description.length > 50 ? lo.description.substring(0, 50) + '...' : lo.description
+        options += `<option value="${lo.id}">${lo.module_path} → ${desc}</option>`
+      })
     }
+    
+    return options
+  }
+  
+  buildQuestionOptions() {
+    let options = '<option value="">Select question</option>'
+    
+    if (this.questionsValue && this.questionsValue.length > 0) {
+      // Group questions by topic
+      const byTopic = {}
+      this.questionsValue.forEach(q => {
+        if (!byTopic[q.topic_name]) {
+          byTopic[q.topic_name] = []
+        }
+        byTopic[q.topic_name].push(q)
+      })
+      
+      // Build optgroups
+      Object.keys(byTopic).sort().forEach(topicName => {
+        options += `<optgroup label="${topicName}">`
+        byTopic[topicName].forEach(q => {
+          const label = `Q${q.id}: ${q.question_type} - ${q.stem || 'No stem'}`
+          options += `<option value="${q.id}">${label}</option>`
+        })
+        options += '</optgroup>'
+      })
+    }
+    
+    return options
+  }
 
     addSection(event) {
         event.preventDefault()
@@ -206,6 +241,8 @@ export default class extends Controller {
         const container = button.previousElementSibling
 
         const newId = new Date().getTime()
+        const questionOptions = this.buildQuestionOptions()
+        
         const template = `
       <div class="rule-field" data-template-form-target="questionRuleField">
         <input type="hidden" name="exam_template[exam_sections_attributes][${sectionIndex}][section_question_rules_attributes][${newId}][_destroy]" value="false">
@@ -223,7 +260,7 @@ export default class extends Controller {
           <div class="rule-field__select-group" style="grid-column: span 2;">
             <label class="rule-field__label" for="exam_template_exam_sections_attributes_${sectionIndex}_section_question_rules_attributes_${newId}_question_id">Question</label>
             <select class="rule-field__select" name="exam_template[exam_sections_attributes][${sectionIndex}][section_question_rules_attributes][${newId}][question_id]" id="exam_template_exam_sections_attributes_${sectionIndex}_section_question_rules_attributes_${newId}_question_id">
-              <option value="">Select question</option>
+              ${questionOptions}
             </select>
           </div>
 
