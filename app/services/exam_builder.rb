@@ -160,7 +160,8 @@ class ExamBuilder
       if section.section_source_rules.size > 1
         selected = select_by_source_weights(section, available, remaining_count)
       else
-        selected = available.order(Arel.sql('RANDOM()')).limit(remaining_count).to_a
+        # Load to array first to avoid DISTINCT + RANDOM() conflict
+        selected = available.to_a.shuffle.take(remaining_count)
       end
       
       questions.concat(selected)
@@ -197,7 +198,8 @@ class ExamBuilder
                       .where(question_learning_objectives: { learning_objective_id: rule.source_id })
       end
       
-      selected.concat(source_questions.order(Arel.sql('RANDOM()')).limit(allocation).to_a)
+      # Load to array first to avoid DISTINCT + RANDOM() conflict
+      selected.concat(source_questions.to_a.shuffle.take(allocation))
     end
     
     selected
