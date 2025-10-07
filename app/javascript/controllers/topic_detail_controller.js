@@ -198,10 +198,11 @@ export default class extends Controller {
     }
 
     async saveCategory(event) {
-        // Prevent multiple submissions
+        // Prevent multiple submissions - set flag immediately
         if (this.isSavingCategory) {
             return
         }
+        this.isSavingCategory = true
 
         const categoryName = this.categoryNameInputTarget.value.trim()
         const description = this.firstLoInputTarget.value.trim()
@@ -209,17 +210,16 @@ export default class extends Controller {
         if (!categoryName) {
             alert('Category name is required')
             this.categoryNameInputTarget.focus()
+            this.isSavingCategory = false
             return
         }
 
         if (!description) {
             alert('First learning outcome is required')
             this.firstLoInputTarget.focus()
+            this.isSavingCategory = false
             return
         }
-
-        // Set loading state
-        this.isSavingCategory = true
 
         // Find the save button if event is not provided
         const saveButton = event && event.target ? event.target : this.addCategoryFormTarget.querySelector('button[data-action*="saveCategory"]')
@@ -262,7 +262,7 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add category')
-                // Reset button state on error
+                    // Reset button state on error
                 saveButton.disabled = false
                 saveButton.innerHTML = originalText
                 this.isSavingCategory = false
@@ -270,7 +270,7 @@ export default class extends Controller {
         } catch (error) {
             console.error('Error adding category:', error)
             alert('Failed to add category')
-            // Reset button state on error
+                // Reset button state on error
             saveButton.disabled = false
             saveButton.innerHTML = originalText
             this.isSavingCategory = false
@@ -301,23 +301,22 @@ export default class extends Controller {
     }
 
     async saveModule(event) {
-        // Prevent multiple submissions
+        // Prevent multiple submissions - set flag immediately
         if (this.isSavingModule) {
             return
         }
+        this.isSavingModule = true
 
         const moduleName = this.wipModuleNameTarget.value.trim()
 
         if (!moduleName) {
             alert('Module name is required')
             this.wipModuleNameTarget.focus()
+            this.isSavingModule = false
             return
         }
 
         const moduleDescription = this.wipModuleDescriptionTarget.value.trim()
-
-        // Set loading state
-        this.isSavingModule = true
 
         // Find the save button if event is not provided
         const saveButton = event && event.target ? event.target : this.wipModuleCardTarget.querySelector('button[data-action*="saveModule"]')
@@ -352,7 +351,7 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add module')
-                // Reset button state on error
+                    // Reset button state on error
                 saveButton.disabled = false
                 saveButton.innerHTML = originalText
                 this.isSavingModule = false
@@ -360,7 +359,7 @@ export default class extends Controller {
         } catch (error) {
             console.error('Error adding module:', error)
             alert('Failed to add module')
-            // Reset button state on error
+                // Reset button state on error
             saveButton.disabled = false
             saveButton.innerHTML = originalText
             this.isSavingModule = false
