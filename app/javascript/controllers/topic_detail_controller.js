@@ -198,6 +198,11 @@ export default class extends Controller {
     }
 
     async saveCategory(event) {
+        // Prevent multiple submissions
+        if (this.isSavingCategory) {
+            return
+        }
+
         const categoryName = this.categoryNameInputTarget.value.trim()
         const description = this.firstLoInputTarget.value.trim()
 
@@ -212,6 +217,19 @@ export default class extends Controller {
             this.firstLoInputTarget.focus()
             return
         }
+
+        // Set loading state
+        this.isSavingCategory = true
+        const saveButton = event.target
+        const originalText = saveButton.innerHTML
+        saveButton.disabled = true
+        saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+            </svg>
+            Saving...
+        `
 
         try {
             const loData = {
@@ -242,10 +260,18 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add category')
+                // Reset button state on error
+                saveButton.disabled = false
+                saveButton.innerHTML = originalText
+                this.isSavingCategory = false
             }
         } catch (error) {
             console.error('Error adding category:', error)
             alert('Failed to add category')
+            // Reset button state on error
+            saveButton.disabled = false
+            saveButton.innerHTML = originalText
+            this.isSavingCategory = false
         }
     }
 
@@ -273,6 +299,11 @@ export default class extends Controller {
     }
 
     async saveModule(event) {
+        // Prevent multiple submissions
+        if (this.isSavingModule) {
+            return
+        }
+
         const moduleName = this.wipModuleNameTarget.value.trim()
 
         if (!moduleName) {
@@ -282,6 +313,19 @@ export default class extends Controller {
         }
 
         const moduleDescription = this.wipModuleDescriptionTarget.value.trim()
+
+        // Set loading state
+        this.isSavingModule = true
+        const saveButton = event.target
+        const originalText = saveButton.innerHTML
+        saveButton.disabled = true
+        saveButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+            </svg>
+            Saving...
+        `
 
         try {
             const response = await fetch(`/api/topics/${this.topicIdValue}/topic_modules`, {
@@ -304,10 +348,18 @@ export default class extends Controller {
             } else {
                 const data = await response.json()
                 alert(data.errors ? data.errors.join(', ') : 'Failed to add module')
+                // Reset button state on error
+                saveButton.disabled = false
+                saveButton.innerHTML = originalText
+                this.isSavingModule = false
             }
         } catch (error) {
             console.error('Error adding module:', error)
             alert('Failed to add module')
+            // Reset button state on error
+            saveButton.disabled = false
+            saveButton.innerHTML = originalText
+            this.isSavingModule = false
         }
     }
 
