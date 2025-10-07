@@ -25,7 +25,7 @@ class ExamSection < ApplicationRecord
   
   # Question type filter is stored as jsonb array
   def question_types
-    question_type_filter || []
+    (question_type_filter || []).reject(&:blank?)
   end
   
   def question_types=(types)
@@ -38,20 +38,29 @@ class ExamSection < ApplicationRecord
   
   # Get all available questions for this section based on rules
   def available_questions
-    questions = Question.none
+    return Question.none if section_source_rules.empty?
     
-    # Build query from source rules
+    # Collect question IDs from all source rules
+    question_ids = Set.new
+    
     section_source_rules.each do |rule|
-      case rule.source_type
+      ids = case rule.source_type
       when 'Topic'
-        questions = questions.or(Question.where(topic_id: rule.source_id))
+        Question.where(topic_id: rule.source_id).pluck(:id)
       when 'TopicModule'
-        questions = questions.or(Question.where(topic_module_id: rule.source_id))
+        Question.where(topic_module_id: rule.source_id).pluck(:id)
       when 'LearningObjective'
-        questions = questions.or(Question.joins(:question_learning_objectives)
-                                        .where(question_learning_objectives: { learning_objective_id: rule.source_id }))
+        Question.joins(:question_learning_objectives)
+                .where(question_learning_objectives: { learning_objective_id: rule.source_id })
+                .pluck(:id)
+      else
+        []
       end
+      question_ids.merge(ids)
     end
+    
+    # Start with all questions from source rules
+    questions = Question.where(id: question_ids.to_a)
     
     # Filter by question types if specified
     questions = questions.where(question_type: question_types) if question_types.any?
