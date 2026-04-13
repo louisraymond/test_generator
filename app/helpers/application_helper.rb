@@ -1,4 +1,6 @@
 module ApplicationHelper
+  include Pagy::Frontend
+
   def nav_link_to(name, path, **options)
     classes = Array(options[:class]) + ['app-nav__link']
     classes << 'is-active' if current_page?(path)

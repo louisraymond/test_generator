@@ -27,6 +27,7 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 gem "grover"
+gem "pagy"
 gem "haml-rails"
 gem "redcarpet"  # Markdown parsing
 gem "rouge"      # Syntax highlighting for code blocks
