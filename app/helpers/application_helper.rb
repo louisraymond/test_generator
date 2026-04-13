@@ -1,5 +1,5 @@
 module ApplicationHelper
-  include Pagy::Frontend
+  include Pagy::HelperLoader
 
   def nav_link_to(name, path, **options)
     classes = Array(options[:class]) + ['app-nav__link']
