@@ -18,6 +18,8 @@ module TopicsHelper
       )
     end
 
+    # Safe: `escaped` was html_escape'd on line 3, and content_tag auto-escapes its arguments.
+    # The .html_safe here is intentional — the string contains only escaped text + safe tag output.
     replaced.html_safe
   end
 

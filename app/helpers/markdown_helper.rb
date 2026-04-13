@@ -29,9 +29,14 @@ module MarkdownHelper
       space_after_headers: true
     )
 
-    # Render markdown and mark as html_safe
-    # LaTeX will be rendered client-side by KaTeX
-    markdown.render(text).html_safe
+    # Render markdown, sanitize to prevent XSS, then mark safe.
+    # LaTeX delimiters ($...$, $$...$$) pass through — rendered client-side by KaTeX.
+    sanitize(
+      markdown.render(text),
+      tags: %w[p br h1 h2 h3 h4 h5 h6 strong em a ul ol li code pre
+               blockquote table thead tbody tr th td hr sup del img span div],
+      attributes: %w[href src alt title class id lang]
+    )
   end
 
   # Split a markdown string at the first fenced code block. Returns [prompt, body].
@@ -63,6 +68,6 @@ module MarkdownHelper
     html = html.gsub(/\*([^\*]+)\*/) { %(<em>#{$1}</em>) }
     html = html.gsub(/_([^_]+)_/) { %(<em>#{$1}</em>) }
     
-    html.html_safe
+    sanitize(html, tags: %w[code strong em], attributes: %w[class])
   end
 end
