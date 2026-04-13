@@ -1,8 +1,0 @@
-<%# Render content with blanks. Supports [[answer]] or {{answer}} markers. %>
-<% masked = ERB::Util.html_escape(question.content.to_s) %>
-<% masked.gsub!(/\[\[(.+?)\]\]|\{\{(.+?)\}\}/, '<span class="cloze-blank"></span>') %>
-<div class="cloze">
-  <%= raw masked %>
-  <%# Note: answers are intentionally NOT embedded; they appear only in the marking scheme via question.answer %>
-  <%# This prevents leaks in HTML/PDF sources and tooltips. %>
-</div>
