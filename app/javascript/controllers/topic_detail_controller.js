@@ -120,8 +120,9 @@ export default class extends Controller {
                 const loList = categoryCard.querySelector('.learning-objectives')
                 const loCount = loList.querySelectorAll('.lo-item').length + 1
 
+                const safeId = parseInt(data.id, 10)
                 const newLoHtml = `
-          <div class="lo-item" data-lo-id="${data.id}">
+          <div class="lo-item" data-lo-id="${safeId}">
             <div class="lo-item__content">
               <span class="lo-item__number">${loCount}</span>
               <span class="lo-item__text">${this.escapeHtml(data.description)}</span>

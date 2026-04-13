@@ -58,11 +58,14 @@ export default class extends Controller {
     saveOverviewOnBlur() {
         const value = this.overviewInputTarget.value.trim()
         if (value) {
-            this.overviewTextTarget.innerHTML = value.replace(/\n/g, '<br>')
+            this.overviewTextTarget.textContent = value
+            this.overviewTextTarget.style.whiteSpace = 'pre-line'
             this.overviewTextTarget.style.color = '#166534'
             this.overviewTextTarget.style.fontStyle = 'italic'
         } else {
-            this.overviewTextTarget.innerHTML = '<em style="color: #9ca3af;">Click to add topic overview/description...</em>'
+            this.overviewTextTarget.textContent = 'Click to add topic overview/description...'
+            this.overviewTextTarget.style.color = '#9ca3af'
+            this.overviewTextTarget.style.fontStyle = 'italic'
         }
         this.overviewInputTarget.style.display = 'none'
         this.overviewDisplayTarget.style.display = 'block'
@@ -182,7 +185,8 @@ export default class extends Controller {
 
         const value = input.value.trim()
         if (value) {
-            descText.innerHTML = value
+            descText.textContent = value
+            descText.style.whiteSpace = 'pre-line'
             descText.style.color = '#64748b'
             const module = this.modules.find(m => m.index === index)
             if (module) module.description = value
