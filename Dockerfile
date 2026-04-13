@@ -40,10 +40,13 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
-# Install packages needed for deployment
+# Install packages needed for deployment (chromium for Grover PDF generation)
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libvips postgresql-client && \
+    apt-get install --no-install-recommends -y curl libvips postgresql-client \
+    chromium nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
