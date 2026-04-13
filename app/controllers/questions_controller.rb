@@ -11,8 +11,7 @@ class QuestionsController < ApplicationController
 
     @total_count = scope.count
     @type_counts = scope.group(:question_type).count
-    @questions = scope.order(created_at: :desc).limit(200)
-    @capped = @total_count > @questions.size
+    @pagy, @questions = pagy(scope.order(created_at: :desc), items: 50)
   end
 
   def new

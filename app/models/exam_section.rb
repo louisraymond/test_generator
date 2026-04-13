@@ -43,20 +43,21 @@ class ExamSection < ApplicationRecord
     # Collect question IDs from all source rules
     question_ids = Set.new
     
-    section_source_rules.each do |rule|
-      ids = case rule.source_type
-      when 'Topic'
-        Question.where(topic_id: rule.source_id).pluck(:id)
-      when 'TopicModule'
-        Question.where(topic_module_id: rule.source_id).pluck(:id)
-      when 'LearningObjective'
+    # Group source rules by type and batch-query each type once (max 3 queries)
+    rules_by_type = section_source_rules.group_by(&:source_type)
+
+    topic_ids = rules_by_type.fetch('Topic', []).map(&:source_id)
+    module_ids = rules_by_type.fetch('TopicModule', []).map(&:source_id)
+    lo_ids = rules_by_type.fetch('LearningObjective', []).map(&:source_id)
+
+    question_ids.merge(Question.where(topic_id: topic_ids).pluck(:id)) if topic_ids.any?
+    question_ids.merge(Question.where(topic_module_id: module_ids).pluck(:id)) if module_ids.any?
+    if lo_ids.any?
+      question_ids.merge(
         Question.joins(:question_learning_objectives)
-                .where(question_learning_objectives: { learning_objective_id: rule.source_id })
+                .where(question_learning_objectives: { learning_objective_id: lo_ids })
                 .pluck(:id)
-      else
-        []
-      end
-      question_ids.merge(ids)
+      )
     end
     
     # Start with all questions from source rules

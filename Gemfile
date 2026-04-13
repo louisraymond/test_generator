@@ -24,6 +24,7 @@ gem "turbo-rails"
 gem "stimulus-rails"
 
 gem "grover"
+gem "pagy"
 gem "haml-rails"
 gem "redcarpet"  # Markdown parsing
 gem "rouge"      # Syntax highlighting for code blocks

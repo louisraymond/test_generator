@@ -1,6 +1,9 @@
 class ExamsController < ApplicationController
   def index
-    @exams = Exam.includes(exam_questions: :question).order(created_at: :desc)
+    @pagy, @exams = pagy(
+      Exam.includes(exam_questions: { question: :topic }).order(created_at: :desc),
+      items: 25
+    )
   end
 
   def new
