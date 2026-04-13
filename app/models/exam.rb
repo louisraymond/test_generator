@@ -2,7 +2,10 @@ class Exam < ApplicationRecord
   belongs_to :exam_template, optional: true
   has_many :exam_questions, -> { order(position: :asc) }, dependent: :destroy
   has_many :questions, -> { order(Arel.sql('exam_questions.position ASC')) }, through: :exam_questions
-  
+
+  validates :title, presence: true
+  validates :duration_minutes, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+
   # Group exam questions by section
   def questions_by_section
     exam_questions.group_by(&:section_number)

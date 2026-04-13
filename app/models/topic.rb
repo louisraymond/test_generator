@@ -7,7 +7,7 @@ class Topic < ApplicationRecord
   belongs_to :parent_topic, class_name: 'Topic', optional: true
   has_many :subtopics, class_name: 'Topic', foreign_key: :parent_topic_id, dependent: :nullify
 
-  has_many :topic_modules, dependent: :destroy
+  has_many :topic_modules, -> { order(position: :asc) }, dependent: :destroy
   has_many :questions, dependent: :destroy
   has_many :learning_objectives, -> { order(:category_order, :position, :id) }, dependent: :destroy
 
