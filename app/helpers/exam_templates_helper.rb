@@ -23,7 +23,7 @@ module ExamTemplatesHelper
   
   def group_questions_by_topic(questions)
     questions.select { |q| q.topic.present? }.group_by { |q| q.topic.name }.map do |topic_name, qs|
-      [topic_name, qs.map { |q| ["Q#{q.id}: #{q.question_type} - #{q.question_stem&.truncate(50) || 'No stem'}", q.id] }]
+      [topic_name, qs.map { |q| ["Q#{q.id}: #{q.question_type} - #{q.content&.truncate(50) || 'No content'}", q.id] }]
     end
   end
 end
