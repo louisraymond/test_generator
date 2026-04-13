@@ -102,7 +102,8 @@ class ExamsController < ApplicationController
         alloc = ExamBuilder.allocate_by_weights(scope, topic_ids, weights, [count, total_available].min)
         # Count how many picked per topic id
         allocation = alloc.group_by { |q| q.topic_id.to_s }.transform_values(&:size)
-      rescue => _e
+      rescue ExamBuilder::Error => e
+        Rails.logger.warn("preview_counts allocation failed: #{e.message}")
         allocation = {}
       end
     end

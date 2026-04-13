@@ -1,5 +1,5 @@
 class ExamTemplatesController < ApplicationController
-  before_action :set_exam_template, only: [:show, :edit, :update, :destroy, :generate]
+  before_action :set_exam_template, only: [:edit, :update, :destroy, :generate]
 
   def index
     @exam_templates = ExamTemplate.includes(:exam_sections)
@@ -10,7 +10,9 @@ class ExamTemplatesController < ApplicationController
   end
 
   def show
-    @exam_template = ExamTemplate.includes(exam_sections: [:section_source_rules, :section_question_rules]).find(params[:id])
+    @exam_template = ExamTemplate.includes(
+      exam_sections: [:section_source_rules, { section_question_rules: :question }]
+    ).find(params[:id])
   end
 
   def new
