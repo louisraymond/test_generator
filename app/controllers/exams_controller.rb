@@ -63,15 +63,7 @@ class ExamsController < ApplicationController
       format.html
       format.pdf do
         html = render_to_string(template: 'exams/show', layout: 'pdf', formats: [:html])
-        pdf = Grover.new(
-          html,
-          base_url: request.base_url,
-          emulate_media: 'print',
-          print_background: true,
-          prefer_css_page_size: true,
-          wait_until: 'domcontentloaded',
-          timeout: 90_000
-        ).to_pdf
+        pdf = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
         send_data pdf, filename: "exam_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
@@ -84,15 +76,7 @@ class ExamsController < ApplicationController
       format.html
       format.pdf do
         html = render_to_string(template: 'exams/marking_scheme', layout: false, formats: [:html])
-        pdf = Grover.new(
-          html,
-          base_url: request.base_url,
-          emulate_media: 'print',
-          print_background: true,
-          prefer_css_page_size: true,
-          wait_until: 'domcontentloaded',
-          timeout: 90_000
-        ).to_pdf
+        pdf = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
         send_data pdf, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
@@ -118,7 +102,8 @@ class ExamsController < ApplicationController
         alloc = ExamBuilder.allocate_by_weights(scope, topic_ids, weights, [count, total_available].min)
         # Count how many picked per topic id
         allocation = alloc.group_by { |q| q.topic_id.to_s }.transform_values(&:size)
-      rescue => _e
+      rescue ExamBuilder::Error => e
+        Rails.logger.warn("preview_counts allocation failed: #{e.message}")
         allocation = {}
       end
     end

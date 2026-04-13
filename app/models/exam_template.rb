@@ -11,10 +11,10 @@ class ExamTemplate < ApplicationRecord
   scope :most_used, -> { where('use_count > 0').order(use_count: :desc) }
   
   def increment_use_count!
-    update!(
-      use_count: use_count + 1,
-      last_used_at: Time.current
+    self.class.where(id: id).update_all(
+      ['use_count = use_count + 1, last_used_at = ?', Time.current]
     )
+    reload
   end
   
   def total_questions
