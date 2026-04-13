@@ -120,7 +120,7 @@
             <div class="rule-list">
               <% forced.each do |rule| %>
                 <div class="rule-item">
-                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.question_stem&.truncate(60) || rule.question.question_type %></span>
+                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.content&.truncate(60) || rule.question.question_type %></span>
                   <% if rule.repeat_count > 1 %>
                     <span class="rule-item__repeat">×<%= rule.repeat_count %></span>
                   <% end %>
@@ -137,7 +137,7 @@
             <div class="rule-list">
               <% excluded.each do |rule| %>
                 <div class="rule-item">
-                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.question_stem&.truncate(60) || rule.question.question_type %></span>
+                  <span class="rule-item__name">Q<%= rule.question_id %>: <%= rule.question.content&.truncate(60) || rule.question.question_type %></span>
                 </div>
               <% end %>
             </div>
