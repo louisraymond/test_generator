@@ -1,6 +1,6 @@
 class ExamsController < ApplicationController
   def index
-    @exams = Exam.includes(exam_questions: :question).order(created_at: :desc)
+    @exams = Exam.includes(exam_questions: { question: :topic }).order(created_at: :desc)
   end
 
   def new
