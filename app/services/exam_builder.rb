@@ -143,7 +143,7 @@ class ExamBuilder
     questions = []
     
     # First, add all force-included questions (with repeats if specified)
-    section.section_question_rules.force_includes.each do |rule|
+    section.section_question_rules.force_includes.includes(:question).each do |rule|
       rule.repeat_count.times do
         questions << rule.question
       end
