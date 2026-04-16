@@ -40,6 +40,9 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Kamal secrets
+/.kamal/secrets
 implementation_review.md
 
 # RSpec persistence files

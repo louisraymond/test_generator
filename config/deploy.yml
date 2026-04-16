@@ -1,0 +1,52 @@
+service: test-generator
+image: louis93/test-generator
+
+builder:
+  arch: amd64
+
+servers:
+  web:
+    hosts:
+      - 65.21.146.42
+
+proxy:
+  ssl: true
+  host: selftesting.louisraymond.com
+  app_port: 3000
+
+registry:
+  username: louis93
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: "1"
+    RAILS_SERVE_STATIC_FILES: "true"
+    WEB_CONCURRENCY: "1"
+    RAILS_MAX_THREADS: "3"
+    PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+    APP_HOST: selftesting.louisraymond.com
+    LANG: C.UTF-8
+  secret:
+    - SECRET_KEY_BASE
+    - DATABASE_URL
+    - AUTH_USER
+    - AUTH_PASSWORD
+
+accessories:
+  db:
+    image: postgres:16
+    host: 65.21.146.42
+    port: "127.0.0.1:5432:5432"
+    env:
+      clear:
+        POSTGRES_DB: exam_generator_production
+        POSTGRES_USER: exam_generator
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data
+
+retain_containers: 3

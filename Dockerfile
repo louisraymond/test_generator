@@ -11,7 +11,7 @@ WORKDIR /rails
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="development:test"
 
 
 # Throw-away build stage to reduce size of final image
@@ -43,7 +43,7 @@ FROM base
 # Install packages needed for deployment (chromium for Grover PDF generation)
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libvips postgresql-client \
-    chromium nodejs npm && \
+    chromium nodejs && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium

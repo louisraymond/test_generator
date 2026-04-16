@@ -79,6 +79,4 @@ test:
 #
 production:
   <<: *default
-  database: exam_generator_production
-  username: exam_generator
-  password: <%= ENV["EXAM_GENERATOR_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
