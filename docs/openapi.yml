@@ -1,0 +1,409 @@
+openapi: 3.0.3
+info:
+  title: test_generator API
+  description: Exam and question generation API for self-testing
+  version: 1.0.0
+
+servers:
+  - url: https://selftesting.louisraymond.com
+    description: Production
+
+security:
+  - basicAuth: []
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Topic:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        question_count: { type: integer }
+
+    TopicTree:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        modules:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              name: { type: string }
+              position: { type: integer }
+              learning_objectives:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    position: { type: integer }
+                    category: { type: string }
+                    description: { type: string }
+
+    BulkResult:
+      type: object
+      properties:
+        created: { type: integer }
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              index: { type: integer }
+              client_id: { type: string }
+              message: { type: string }
+
+    ExamResult:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        question_count: { type: integer }
+        requested_count: { type: integer }
+        pdf_url: { type: string }
+        marking_scheme_url: { type: string }
+
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+paths:
+  /up:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        '200': { description: OK }
+
+  /api/topics:
+    get:
+      summary: List topics
+      parameters:
+        - name: name
+          in: query
+          schema: { type: string }
+          description: Filter by exact topic name
+      responses:
+        '200':
+          description: Array of topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Topic' }
+
+    post:
+      summary: Create topic with nested modules and learning objectives
+      description: If a topic with the same name exists, returns the existing one (200). Otherwise creates (201).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                modules:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name: { type: string }
+                      position: { type: integer }
+                      learning_objectives:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            category: { type: string }
+                            description: { type: string }
+                            position: { type: integer }
+      responses:
+        '201':
+          description: Topic created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TopicTree' }
+        '200':
+          description: Existing topic returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TopicTree' }
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/topics/{id}:
+    get:
+      summary: Get topic with full module and LO tree
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TopicTree' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+    delete:
+      summary: Delete topic and all associated data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/topics/{topic_id}/topic_modules:
+    post:
+      summary: Create a module within a topic
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic_module]
+              properties:
+                topic_module:
+                  type: object
+                  properties:
+                    name: { type: string }
+                    description: { type: string }
+      responses:
+        '201': { description: Module created }
+        '422': { description: Validation error }
+
+  /api/topics/{topic_id}/learning_objectives:
+    post:
+      summary: Create a learning objective within a topic
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [learning_objective]
+              properties:
+                learning_objective:
+                  type: object
+                  properties:
+                    description: { type: string }
+                    category: { type: string }
+                    topic_module_id: { type: integer }
+      responses:
+        '201': { description: LO created }
+        '422': { description: Validation error }
+
+  /api/topics/{topic_id}/learning_objectives/{id}:
+    put:
+      summary: Update a learning objective
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                learning_objective:
+                  type: object
+                  properties:
+                    description: { type: string }
+                    category: { type: string }
+      responses:
+        '200': { description: Updated }
+
+    delete:
+      summary: Delete a learning objective
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+
+  /api/questions/bulk:
+    post:
+      summary: Bulk-create questions for a topic
+      description: |
+        Max 500 questions per request. With `strict: true`, any error rolls back the entire batch.
+        The `options` field format varies by question_type.
+        Use `source_name` to look up a Source by name instead of providing `source_id`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic_id, questions]
+              properties:
+                topic_id: { type: integer }
+                strict: { type: boolean, default: false }
+                questions:
+                  type: array
+                  maxItems: 500
+                  items:
+                    type: object
+                    required: [content, question_type, answer, points]
+                    properties:
+                      client_id: { type: string }
+                      content: { type: string }
+                      question_type:
+                        type: string
+                        enum: [multiple_choice, short_answer, constructive, transfer, calculation, ordering, ranking, matching, diagram_label, image_occlusion, cloze, composite, markdown]
+                      answer: { type: string }
+                      points: { type: integer }
+                      options: { description: "Format varies by question_type" }
+                      topic_module_id: { type: integer }
+                      source_id: { type: integer }
+                      source_name: { type: string }
+                      learning_objective_ids:
+                        type: array
+                        items: { type: integer }
+                      answer_size: { type: string }
+                      source_reference: { type: string }
+                      answer_label: { type: string }
+                      unit: { type: string }
+      responses:
+        '200':
+          description: Questions created (possibly with partial errors)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BulkResult' }
+        '422':
+          description: All failed (strict mode) or validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BulkResult' }
+
+  /api/exams:
+    post:
+      summary: Create an exam from available questions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic_ids, count]
+              properties:
+                title: { type: string, default: "Practice Exam" }
+                topic_ids:
+                  type: array
+                  items: { type: integer }
+                count: { type: integer }
+                duration_minutes: { type: integer }
+                strict: { type: boolean, default: false }
+                types:
+                  type: array
+                  items: { type: string }
+                  description: Filter by question types
+                topic_module_ids:
+                  type: array
+                  items: { type: integer }
+                  description: Filter by specific modules
+                learning_objective_ids:
+                  type: array
+                  items: { type: integer }
+                  description: Filter by specific learning objectives
+      responses:
+        '201':
+          description: Exam created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExamResult' }
+        '422':
+          description: No matching questions or validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/exams/{id}/pdf:
+    get:
+      summary: Download exam as PDF
+      description: Renders via Chromium/Grover. May take 10-30 seconds.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: font_size
+          in: query
+          schema: { type: integer, default: 14 }
+        - name: question_spacing
+          in: query
+          schema: { type: integer, default: 18 }
+      responses:
+        '200':
+          description: PDF binary
+          content:
+            application/pdf: {}
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/exams/{id}/marking_scheme_pdf:
+    get:
+      summary: Download marking scheme as PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: PDF binary
+          content:
+            application/pdf: {}
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
