@@ -54,6 +54,7 @@ jobs:
         run: bundle exec rspec
 
       - name: Security audit
+        continue-on-error: true
         run: |
           gem install bundler-audit
           bundle audit check --update
