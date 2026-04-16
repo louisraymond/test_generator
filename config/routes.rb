@@ -22,7 +22,7 @@ Rails.application.routes.draw do
   resources :topics, only: %i[index show new create edit update]
 
   namespace :api do
-    resources :topics, only: %i[create show index destroy] do
+    resources :topics, only: %i[create show index update destroy] do
       resources :learning_objectives, only: %i[create update destroy]
       resources :topic_modules, only: %i[create]
     end

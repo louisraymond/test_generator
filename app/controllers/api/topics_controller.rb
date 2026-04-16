@@ -3,9 +3,15 @@ module Api
     def index
       topics = Topic.all
       topics = topics.where(name: params[:name]) if params[:name].present?
+      topics = topics.where(parent_topic_id: nil) if params[:top_level] == 'true'
 
       render json: topics.map { |t|
-        { id: t.id, name: t.name, question_count: t.questions.count }
+        {
+          id: t.id,
+          name: t.name,
+          parent_topic_id: t.parent_topic_id,
+          question_count: t.questions.count
+        }
       }
     end
 
@@ -25,7 +31,10 @@ module Api
 
       topic = nil
       ActiveRecord::Base.transaction do
-        topic = Topic.create!(name: topic_params[:name])
+        topic = Topic.create!(
+          name: topic_params[:name],
+          parent_topic_id: topic_params[:parent_topic_id]
+        )
 
         Array(topic_params[:modules]).each_with_index do |mod_attrs, mod_index|
           position = mod_attrs[:position] || mod_index + 1
@@ -52,6 +61,15 @@ module Api
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    def update
+      topic = Topic.find(params[:id])
+      if topic.update(topic_update_params)
+        render json: topic_tree(topic.reload), status: :ok
+      else
+        render json: { error: topic.errors.full_messages.join(', ') }, status: :unprocessable_entity
+      end
+    end
+
     def destroy
       topic = Topic.find(params[:id])
       topic.destroy!
@@ -62,7 +80,7 @@ module Api
 
     def topic_params
       params.permit(
-        :name,
+        :name, :parent_topic_id,
         modules: [
           :name, :position,
           learning_objectives: %i[category description position]
@@ -70,10 +88,16 @@ module Api
       )
     end
 
+    def topic_update_params
+      params.permit(:name, :parent_topic_id)
+    end
+
     def topic_tree(topic)
       {
         id: topic.id,
         name: topic.name,
+        parent_topic_id: topic.parent_topic_id,
+        children: topic.subtopics.map { |c| { id: c.id, name: c.name } },
         modules: topic.topic_modules.ordered.map { |tm|
           {
             id: tm.id,
