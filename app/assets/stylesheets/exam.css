@@ -1221,6 +1221,57 @@ h1 {
 }
 
 
+/* Code analysis question type */
+
+.code-analysis {
+    margin: 4mm 0 6mm;
+}
+
+.code-analysis .code-language-label {
+    display: inline-block;
+    padding: 0.5mm 2.5mm;
+    font-size: 8pt;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    background: #e1e4e8;
+    color: #24292e;
+    text-transform: lowercase;
+    letter-spacing: 0.3pt;
+    border: 1pt solid #cfcfcf;
+    border-bottom: none;
+    border-top-left-radius: 3pt;
+    border-top-right-radius: 3pt;
+    margin-bottom: -1pt;
+    position: relative;
+    z-index: 1;
+}
+
+.code-analysis .code-analysis-block {
+    margin-top: 0;
+}
+
+.code-analysis .code-analysis-block .highlight,
+.code-analysis .code-analysis-block pre {
+    margin: 0 0 0 0;
+    border-top-left-radius: 0;
+}
+
+.code-analysis .code-analysis-block pre {
+    background: #f6f8fa;
+    border: 1pt solid #cfcfcf;
+    padding: 3mm;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 10pt;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow: hidden;
+}
+
+.code-analysis .mc-options,
+.code-analysis .answer-lines {
+    margin-top: 4mm;
+}
+
+
 /* Inline code chips (usable inside headers and body) */
 
 code.md-inline,

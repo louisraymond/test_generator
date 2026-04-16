@@ -1,0 +1,20 @@
+.type-panel-content
+  %p.hint
+    Code analysis questions show a syntax-highlighted code block plus either ruled answer lines or multiple-choice options. Author via the
+    %code POST /api/questions/bulk
+    API or a seed file. Use the JSON options shape:
+  %pre.hint-json
+    :plain
+      {
+        "language": "python",
+        "code": "def foo():\n    pass",
+        "answer_format": "lines"
+      }
+  %p.hint
+    For multiple choice, set
+    %code "answer_format": "multiple_choice"
+    with a
+    %code choices
+    array where each item is
+    %code { "text": "...", "correct": true|false }
+    \.

@@ -297,10 +297,18 @@ paths:
                       content: { type: string }
                       question_type:
                         type: string
-                        enum: [multiple_choice, short_answer, constructive, transfer, calculation, ordering, ranking, matching, diagram_label, image_occlusion, cloze, composite, markdown]
+                        enum: [multiple_choice, short_answer, constructive, transfer, calculation, ordering, ranking, matching, diagram_label, image_occlusion, cloze, composite, markdown, code_analysis]
                       answer: { type: string }
                       points: { type: integer }
-                      options: { description: "Format varies by question_type" }
+                      options:
+                        description: |
+                          Format varies by question_type. For `code_analysis`, an object with:
+                            - `language` (string, optional — Rouge lexer name like "python", "ruby")
+                            - `code` (string, required — the source to display)
+                            - `answer_format` (string, required — "lines" or "multiple_choice")
+                            - `choices` (array of {text, correct} objects, required when answer_format is "multiple_choice")
+                          For `multiple_choice`, an array of {text, correct} objects.
+                          For `matching`, an object with `left` and `right` string arrays of equal length.
                       topic_module_id: { type: integer }
                       source_id: { type: integer }
                       source_name: { type: string }

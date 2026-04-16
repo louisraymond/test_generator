@@ -48,6 +48,8 @@
       <% end %>
     <% when 'composite' %>
       <%= render 'questions/composite', question: question %>
+    <% when 'code_analysis' %>
+      <%= render 'questions/code_analysis', question: question %>
     <% else %>
       <div class="answer-lines answer-lines-<%= size_class %>"></div>
     <% end %>

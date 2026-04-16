@@ -1,0 +1,31 @@
+<% opts = question.options.is_a?(Hash) ? question.options : {} %>
+<% language = opts['language'].to_s.strip %>
+<% code = opts['code'].to_s %>
+<% fenced_lang = language.presence %>
+<% fenced = "```#{fenced_lang}\n#{code}\n```" %>
+
+<div class="code-analysis">
+  <% if language.present? %>
+    <span class="code-language-label"><%= language %></span>
+  <% end %>
+  <div class="markdown-body code-analysis-block">
+    <%= render_markdown(fenced) %>
+  </div>
+
+  <% if opts['answer_format'] == 'multiple_choice' %>
+    <div class="mc-options">
+      <% Array(opts['choices']).each_with_index do |choice, idx| %>
+        <div class="mc-option">
+          <div class="mc-checkbox"></div>
+          <span class="mc-label"><%= ('A'.ord + idx).chr %></span>
+          <span class="markdown-content">
+            <%= render_markdown_inline(choice.is_a?(Hash) ? choice['text'] : choice.to_s) %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <% size_class = question.answer_size.presence || 'medium' %>
+    <div class="answer-lines answer-lines-<%= size_class %>"></div>
+  <% end %>
+</div>
