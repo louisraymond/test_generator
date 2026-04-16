@@ -30,7 +30,8 @@ topic_dirs = [
   'theory_of_constraints',
   'ruby_on_rails',
   'this_codebase',
-  'system_design'
+  'system_design',
+  'foundation_models'
 ]
 
 topic_dirs.each do |topic_dir|

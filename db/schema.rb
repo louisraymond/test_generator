@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_13_200200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "exam_questions", force: :cascade do |t|
     t.bigint "exam_id", null: false
     t.bigint "question_id", null: false
-    t.integer "position"
+    t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "section_number"
@@ -37,7 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.jsonb "question_type_filter", default: []
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["exam_template_id", "position"], name: "index_exam_sections_on_exam_template_id_and_position"
+    t.index ["exam_template_id", "position"], name: "index_exam_sections_on_exam_template_id_and_position", unique: true
     t.index ["exam_template_id"], name: "index_exam_sections_on_exam_template_id"
   end
 
@@ -50,15 +50,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["last_used_at"], name: "index_exam_templates_on_last_used_at"
-    t.index ["name"], name: "index_exam_templates_on_name"
+    t.index ["name"], name: "index_exam_templates_on_name", unique: true
   end
 
   create_table "exams", force: :cascade do |t|
-    t.string "title"
+    t.string "title", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "duration_minutes"
     t.bigint "exam_template_id"
+    t.index ["created_at"], name: "index_exams_on_created_at"
     t.index ["exam_template_id"], name: "index_exams_on_exam_template_id"
   end
 
@@ -94,7 +95,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.text "answer", null: false
     t.integer "points", null: false
     t.string "answer_size"
-    t.string "question_type"
+    t.string "question_type", null: false
     t.jsonb "options", default: [], null: false
     t.string "source_reference"
     t.string "answer_label"
@@ -102,7 +103,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "topic_module_id"
+    t.index ["question_type"], name: "index_questions_on_question_type"
     t.index ["source_id"], name: "index_questions_on_source_id"
+    t.index ["topic_id", "question_type"], name: "index_questions_on_topic_id_and_question_type"
     t.index ["topic_id"], name: "index_questions_on_topic_id"
     t.index ["topic_module_id"], name: "index_questions_on_topic_module_id"
   end
@@ -114,7 +117,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.integer "repeat_count", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["exam_section_id", "question_id", "rule_type"], name: "index_section_question_rules_on_section_question_type"
+    t.index ["exam_section_id", "question_id", "rule_type"], name: "idx_section_question_rules_unique", unique: true
     t.index ["exam_section_id"], name: "index_section_question_rules_on_exam_section_id"
     t.index ["question_id"], name: "index_section_question_rules_on_question_id"
   end
@@ -122,7 +125,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
   create_table "section_source_rules", force: :cascade do |t|
     t.bigint "exam_section_id", null: false
     t.string "source_type", null: false
-    t.integer "source_id", null: false
+    t.bigint "source_id", null: false
     t.integer "weight", default: 1
     t.integer "question_count_override"
     t.datetime "created_at", null: false
@@ -132,18 +135,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
   end
 
   create_table "sources", force: :cascade do |t|
-    t.string "name"
-    t.string "source_type"
+    t.string "name", null: false
+    t.string "source_type", null: false
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_sources_on_name"
   end
 
   create_table "topic_modules", force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.text "description"
     t.bigint "topic_id", null: false
-    t.integer "position"
+    t.integer "position", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["topic_id", "name"], name: "index_topic_modules_on_topic_id_and_name", unique: true
@@ -161,6 +165,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_07_030410) do
     t.jsonb "syllabus_outline", default: [], null: false
     t.jsonb "reference_links", default: [], null: false
     t.bigint "parent_topic_id"
+    t.index ["name"], name: "index_topics_on_name"
     t.index ["parent_topic_id"], name: "index_topics_on_parent_topic_id"
   end
 

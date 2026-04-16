@@ -31,3 +31,9 @@ Source.create!(
   source_type: 'internal',
   notes: 'docs/app_exam.md in this repository'
 )
+
+Source.create!(
+  name: 'AI Engineering by Chip Huyen',
+  source_type: 'book',
+  notes: 'AI Engineering, Chip Huyen, O\'Reilly 2025. Chapter 2: Understanding Foundation Models (pp. 119-231).'
+)

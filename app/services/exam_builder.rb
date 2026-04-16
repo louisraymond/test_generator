@@ -48,7 +48,7 @@ class ExamBuilder
   # - topic_weights: optional hash of topic_id => numeric weight (used to distribute count)
   # - duration_minutes: optional integer to set on the exam
   # - allow_repeats: when true, duplicates questions to reach requested count if needed
-  def self.call(topic_ids:, count:, title: 'Practice Exam', strict: true, types: nil, topic_weights: nil, duration_minutes: nil, allow_repeats: false)
+  def self.call(topic_ids:, count:, title: 'Practice Exam', strict: true, types: nil, topic_weights: nil, duration_minutes: nil, allow_repeats: false, topic_module_ids: nil, learning_objective_ids: nil)
     topic_ids = Array(topic_ids).reject(&:blank?)
     raise MissingTopicsError, 'Select at least one topic.' if topic_ids.empty?
 
@@ -56,6 +56,12 @@ class ExamBuilder
     requested = 1 if requested < 1
 
     scope = Question.where(topic_id: topic_ids)
+    scope = scope.where(topic_module_id: Array(topic_module_ids)) if topic_module_ids.present?
+    if learning_objective_ids.present?
+      scope = scope.joins(:question_learning_objectives)
+                   .where(question_learning_objectives: { learning_objective_id: Array(learning_objective_ids) })
+                   .distinct
+    end
     scope = scope.where(question_type: Array(types)) if types.present?
     available = scope.count
 
