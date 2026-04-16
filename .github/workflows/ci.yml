@@ -44,6 +44,9 @@ jobs:
           ruby-version: '3.3.9'
           bundler-cache: true
 
+      - name: Install puppeteer
+        run: npm install --omit=dev
+
       - name: Setup database
         run: bin/rails db:schema:load
 
