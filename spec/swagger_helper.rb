@@ -33,7 +33,11 @@ RSpec.configure do |config|
           basicAuth: { type: :http, scheme: :basic }
         }
       },
-      security: [{ basicAuth: [] }],
+      # NB: global `security` intentionally omitted so request specs don't
+      # demand an Authorization header in test env (HTTP Basic Auth is
+      # disabled in test — see ApplicationController). The exported spec
+      # still documents basicAuth via components; per-endpoint security
+      # blocks can be added to individual paths as needed.
       paths: {}
     }
   }
