@@ -12,6 +12,7 @@ class Question < ApplicationRecord
     image_occlusion
     composite
     markdown
+    code_analysis
   ].freeze
 
   attribute :options, :json, default: []
@@ -105,6 +106,37 @@ class Question < ApplicationRecord
       end
     when 'cloze', 'composite'
       # validated via content presence and base rules; options shape flexible for now
+    when 'code_analysis'
+      unless options.is_a?(Hash)
+        errors.add(:options, 'must be a hash with keys language, code, answer_format')
+        return
+      end
+
+      if options['code'].to_s.strip.blank?
+        errors.add(:options, "must include 'code'")
+      end
+
+      fmt = options['answer_format']
+      unless %w[lines multiple_choice].include?(fmt)
+        errors.add(:options, "answer_format must be 'lines' or 'multiple_choice'")
+        return
+      end
+
+      if fmt == 'multiple_choice'
+        choices = options['choices']
+        unless choices.is_a?(Array) && choices.length >= 2
+          errors.add(:options, 'multiple_choice requires at least 2 choices')
+          return
+        end
+
+        unless choices.all? { |c| c.is_a?(Hash) && c['text'].to_s.strip.present? }
+          errors.add(:options, 'each choice must include text')
+        end
+
+        unless choices.any? { |c| ActiveModel::Type::Boolean.new.cast(c['correct']) }
+          errors.add(:options, 'at least one choice must be correct')
+        end
+      end
     end
   end
 

@@ -137,6 +137,9 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.13.2)
+    json-schema (6.2.0)
+      addressable (~> 2.8)
+      bigdecimal (>= 3.1, < 5)
     logger (1.7.0)
     loofah (2.24.1)
       crass (~> 1.0.2)
@@ -264,6 +267,11 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.6)
+    rswag-specs (2.17.0)
+      activesupport (>= 5.2, < 8.2)
+      json-schema (>= 2.2, < 7.0)
+      railties (>= 5.2, < 8.2)
+      rspec-core (>= 2.14)
     rubyzip (3.1.1)
     securerandom (0.4.1)
     selenium-webdriver (4.36.0)
@@ -337,6 +345,7 @@ DEPENDENCIES
   redcarpet
   rouge
   rspec-rails (~> 7.1)
+  rswag-specs
   selenium-webdriver
   sprockets-rails
   stimulus-rails

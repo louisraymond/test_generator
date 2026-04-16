@@ -68,3 +68,6 @@ end
 
 gem "rspec-rails", "~> 7.1", group: :test
 gem "factory_bot_rails", "~> 6.5", group: :test
+
+# OpenAPI spec generation from request specs
+gem "rswag-specs", group: [:development, :test]
