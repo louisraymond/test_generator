@@ -2,7 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  
+  <!-- Force light colour scheme: PDFs are printed onto white paper. A stray
+       @media (prefers-color-scheme: dark) rule once turned our body text
+       invisible; this meta closes the door on that regression. -->
+  <meta name="color-scheme" content="light only">
+
   <!-- KaTeX for LaTeX rendering in PDFs -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
@@ -11,11 +15,13 @@
   <style>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
-    
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/marking_scheme.css')) %>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/math_typography.css')) %>
+
     /* Apply dynamic font size and spacing for PDF */
     :root {
-      --exam-font-size: <%= @font_size %>pt;
-      --exam-question-margin: <%= @question_spacing %>pt;
+      --exam-font-size: <%= (@font_size || 12) %>pt;
+      --exam-question-margin: <%= (@question_spacing || 12) %>pt;
     }
   </style>
   
@@ -30,6 +36,7 @@
           {left: '\\[', right: '\\]', display: true}
         ],
         throwOnError: false,
+        strict: false,
         ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       });
     });

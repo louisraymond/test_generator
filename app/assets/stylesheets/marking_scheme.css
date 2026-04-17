@@ -1,0 +1,200 @@
+/* Marking Scheme (shared between screen + PDF) */
+@page {
+  margin: 20mm;
+}
+
+.marking-scheme-body {
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+  margin: 0;
+  padding: 20mm;
+}
+
+.marking-scheme-header {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, #7c2d12, #991b1b);
+  border-bottom: 3px solid #991b1b;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: -20mm -20mm 20mm -20mm;
+}
+
+.marking-scheme-header h2 {
+  color: white;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.marking-scheme-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.marking-scheme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.marking-scheme-btn--primary {
+  background: #dc2626;
+  color: white;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+}
+
+.marking-scheme-btn--primary:hover {
+  background: #b91c1c;
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.5);
+  transform: translateY(-1px);
+}
+
+.marking-scheme-btn--ghost {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.marking-scheme-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.marking-scheme-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.marking-scheme-body .header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14pt;
+  margin-bottom: 8px;
+}
+
+.marking-scheme-body .subtitle {
+  text-align: center;
+  font-size: 9pt;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.marking-scheme-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.marking-scheme-body th,
+.marking-scheme-body td {
+  border: 1px solid #000;
+  padding: 8px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.marking-scheme-body th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  font-size: 10pt;
+}
+
+.marking-scheme-body .question-col {
+  width: 10%;
+}
+
+.marking-scheme-body .answers-col {
+  width: 35%;
+}
+
+.marking-scheme-body .guidance-col {
+  width: 45%;
+}
+
+.marking-scheme-body .mark-col {
+  width: 10%;
+  text-align: center;
+}
+
+.marking-scheme-body td {
+  font-size: 10pt;
+}
+
+.marking-scheme-body .section-break-row {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.marking-scheme-body .section-header-cell {
+  padding: 15px 10px !important;
+}
+
+.marking-scheme-body .section-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 13pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.marking-scheme-body .section-info {
+  display: flex;
+  gap: 15px;
+  font-size: 9pt;
+  color: #555;
+  font-style: italic;
+}
+
+@media print {
+  .marking-scheme-body {
+    padding: 0;
+  }
+
+  .marking-scheme-header {
+    display: none;
+  }
+
+  .marking-scheme-body .section-break-row {
+    page-break-before: auto;
+    page-break-after: avoid;
+  }
+}
+
+@media (max-width: 768px) {
+  .marking-scheme-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .marking-scheme-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .marking-scheme-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .marking-scheme-header h2 {
+    text-align: center;
+  }
+}

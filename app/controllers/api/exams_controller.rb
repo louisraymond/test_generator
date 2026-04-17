@@ -50,7 +50,7 @@ module Api
     def marking_scheme_pdf
       @exam = Exam.includes(exam_questions: :question).find(params[:id])
 
-      html = render_to_string(template: 'exams/marking_scheme', layout: false, formats: [:html])
+      html = render_to_string(template: 'exams/marking_scheme', layout: 'pdf', formats: [:html])
       pdf_data = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
       send_data pdf_data, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
     end

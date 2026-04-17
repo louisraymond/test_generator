@@ -12,6 +12,7 @@
 .DS_Store
 .idea/
 .vscode/
+.claude/
 .byebug_history
 
 # Ignore all environment files (except templates).
