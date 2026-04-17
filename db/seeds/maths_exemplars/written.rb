@@ -54,9 +54,9 @@ Question.create!(
     $$
     \begin{aligned}
     \int_{0}^{\pi/2} x\cos x\,\mathrm{d}x
-      &= \Bigl[x\sin x\Bigr]_{0}^{\pi/2} - \int_{0}^{\pi/2}\sin x\,\mathrm{d}x \tag{1}\\
-      &= \tfrac{\pi}{2}\cdot 1 - \Bigl[-\cos x\Bigr]_{0}^{\pi/2} \tag{2}\\
-      &= \tfrac{\pi}{2} + (0 - 1) \tag{3}\\
+      &= \Bigl[x\sin x\Bigr]_{0}^{\pi/2} - \int_{0}^{\pi/2}\sin x\,\mathrm{d}x \\
+      &= \tfrac{\pi}{2}\cdot 1 - \Bigl[-\cos x\Bigr]_{0}^{\pi/2} \\
+      &= \tfrac{\pi}{2} + (0 - 1) \\
       &= \tfrac{\pi}{2} - 1.
     \end{aligned}
     $$

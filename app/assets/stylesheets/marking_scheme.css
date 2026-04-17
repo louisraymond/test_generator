@@ -102,12 +102,31 @@
   margin-top: 10px;
 }
 
+.marking-scheme-body thead {
+  /* Re-emit the header row at the top of each paginated page. */
+  display: table-header-group;
+}
+
+.marking-scheme-body tbody tr {
+  /* Keep each question's row together: split-across-pages mid-row was the
+     "table ends abruptly" bug Louis flagged. If a row truly is taller than
+     a page the browser still falls back to splitting. */
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
 .marking-scheme-body th,
 .marking-scheme-body td {
   border: 1px solid #000;
   padding: 8px;
   vertical-align: top;
   text-align: left;
+}
+
+/* Scale mark-scheme math a touch smaller so display blocks fit the narrow
+   answers column more often. Inline math stays at normal size. */
+.marking-scheme-body .answers-col .katex-display {
+  font-size: 0.9em;
 }
 
 .marking-scheme-body th {

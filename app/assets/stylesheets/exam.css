@@ -574,6 +574,18 @@ h1 {
     /* Blank reserved writing space (no ruled lines — Louis's preference). */
     background-image: none;
     min-height: 20mm;
+    /* Keep the whole writing block together: better to bump to next page than
+       to split the candidate's answer area across the page boundary. */
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.answer-space {
+    /* Pair header + writing space so a short/medium question doesn't orphan
+       the answer area on the next page. Long questions opt-out via
+       `.question-large` (which already sets page-break-inside: auto). */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .answer-lines-short {
@@ -1500,6 +1512,10 @@ code.md-inline,
 .sub-question {
     margin: 6mm 0 10mm;
     margin-left: 12mm;
+    /* Keep a composite sub-question + its answer area on one page so writing
+       space never splits mid-part. */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .sub-question-number {

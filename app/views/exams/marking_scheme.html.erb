@@ -62,7 +62,7 @@
           <td class="question-col"><%= index + 1 %></td>
           <td class="answers-col markdown-content"><%= render_markdown(question.answer) %></td>
           <td class="guidance-col markdown-content">
-            Award <%= question.points %> <%= 'mark'.pluralize(question.points) %> for <%= render_markdown_inline(question.content.truncate(100)) %>
+            Award <%= question.points %> <%= 'mark'.pluralize(question.points) %> for <%= render_markdown_inline(truncate_without_breaking_math(question.content, length: 140)) %>
           </td>
           <td class="mark-col"><%= question.points %></td>
         </tr>
