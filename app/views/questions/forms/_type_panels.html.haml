@@ -1,4 +1,4 @@
-- option_types = %w[multiple_choice matching ordering ranking diagram_label image_occlusion composite]
+- option_types = %w[multiple_choice matching ordering ranking diagram_label image_occlusion composite code_analysis]
 .question-type-panels
   - Question::QUESTION_TYPES.each do |type|
     - clears = !option_types.include?(type)

@@ -1,20 +1,47 @@
-.type-panel-content
-  %p.hint
-    Code analysis questions show a syntax-highlighted code block plus either ruled answer lines or multiple-choice options. Author via the
-    %code POST /api/questions/bulk
-    API or a seed file. Use the JSON options shape:
-  %pre.hint-json
-    :plain
-      {
-        "language": "python",
-        "code": "def foo():\n    pass",
-        "answer_format": "lines"
-      }
-  %p.hint
-    For multiple choice, set
-    %code "answer_format": "multiple_choice"
-    with a
-    %code choices
-    array where each item is
-    %code { "text": "...", "correct": true|false }
-    \.
+- opts = question.options.is_a?(Hash) ? question.options : {}
+- language_value    = opts['language'].to_s
+- code_value        = opts['code'].to_s
+- answer_format_val = opts['answer_format'].presence || 'lines'
+- existing_choices  = opts['choices'].is_a?(Array) ? opts['choices'] : []
+- choices_value     = existing_choices.presence || [{ 'text' => '', 'correct' => false }, { 'text' => '', 'correct' => false }]
+- choices_hidden    = answer_format_val != 'multiple_choice'
+
+.type-panel-content{ data: { controller: 'code-analysis-builder',
+                              'code-analysis-builder-field-id-value': options_field_id } }
+  .ca-field
+    %label{ for: 'ca-language' } Language
+    %input#ca-language.question-form__input{ type: 'text',
+                                              name: 'question[code_analysis][language]',
+                                              value: language_value,
+                                              list: 'ca-language-list',
+                                              placeholder: 'e.g. python, ruby, javascript' }
+    %datalist#ca-language-list
+      - %w[python ruby javascript typescript go rust java c cpp csharp swift sql html css json yaml bash haml erb].each do |lang|
+        %option{ value: lang }
+
+  .ca-field
+    %label{ for: 'ca-code' } Code
+    %textarea#ca-code.ca-code-textarea{ name: 'question[code_analysis][code]', rows: 10,
+                                         placeholder: 'Paste the code the student should analyse.' }= code_value
+
+  .ca-field
+    %label Answer format
+    %label.ca-radio
+      %input{ type: 'radio', name: 'question[code_analysis][answer_format]', value: 'lines',
+              checked: answer_format_val == 'lines',
+              data: { action: 'change->code-analysis-builder#answerFormatChanged' } }
+      Ruled lines (prose answer)
+    %label.ca-radio
+      %input{ type: 'radio', name: 'question[code_analysis][answer_format]', value: 'multiple_choice',
+              checked: answer_format_val == 'multiple_choice',
+              data: { action: 'change->code-analysis-builder#answerFormatChanged' } }
+      Multiple choice
+
+  .ca-choices-section{ data: { 'code-analysis-builder-target': 'choicesSection' }, hidden: choices_hidden }
+    %p.hint Add at least two choices. Mark every correct answer.
+    .mc-option-list{ data: { 'code-analysis-builder-target': 'choicesList' } }
+      - choices_value.each_with_index do |choice, idx|
+        = render 'questions/types/code_analysis_choice', choice: choice, index: idx
+    %template{ data: { 'code-analysis-builder-target': 'choiceTemplate' } }
+      = render 'questions/types/code_analysis_choice', choice: { 'text' => '', 'correct' => false }, index: 'NEW_INDEX'
+    %button.btn-small{ type: 'button', data: { action: 'code-analysis-builder#addChoice' } } Add choice

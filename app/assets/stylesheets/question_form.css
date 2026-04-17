@@ -440,6 +440,45 @@
 }
 
 
+/* Code Analysis panel */
+
+.ca-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+}
+
+.ca-field > label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.ca-code-textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.9rem;
+    min-height: 180px;
+    white-space: pre;
+    tab-size: 2;
+}
+
+.ca-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    margin: 0.15rem 0;
+}
+
+.ca-radio input[type="radio"] {
+    margin: 0;
+}
+
+.ca-choices-section[hidden] {
+    display: none;
+}
+
+
 /* Multiple Choice Options */
 
 .mc-option-list {

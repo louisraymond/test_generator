@@ -1,0 +1,19 @@
+- idx_string  = index.to_s
+- label_text  = idx_string =~ /^\d+$/ ? "Choice #{('A'.ord + idx_string.to_i).chr}" : 'New choice'
+- name_base   = "question[code_analysis][choices][#{idx_string}]"
+- text_value  = choice.is_a?(Hash) ? (choice['text'] || choice[:text]).to_s : ''
+- checked_val = choice.is_a?(Hash) && ActiveModel::Type::Boolean.new.cast(choice['correct'] || choice[:correct])
+
+.mc-option-row{ data: { index: idx_string } }
+  .mc-option-body
+    %label.hint{ for: "ca-choice-#{idx_string}" }= label_text
+    %textarea.mc-option-textarea.ca-choice-textarea{ id: "ca-choice-#{idx_string}",
+                                                      name: "#{name_base}[text]", rows: 2,
+                                                      placeholder: 'Choice text' }= text_value
+  .mc-option-controls
+    %input{ type: 'hidden', name: "#{name_base}[correct]", value: '0' }
+    %label.mc-option-correct
+      %input{ type: 'checkbox', name: "#{name_base}[correct]", value: '1', checked: checked_val }
+      Correct answer
+    %button.mc-option-remove{ type: 'button',
+                               data: { action: 'code-analysis-builder#removeChoice', index: idx_string } } Remove
