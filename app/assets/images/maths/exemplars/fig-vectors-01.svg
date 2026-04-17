@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" width="240" height="160" role="img" aria-label="Two vectors a and b from origin O, with angle theta between them">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="2" color="#0f172a">
+    <line x1="40" y1="130" x2="190" y2="60" marker-end="url(#arrow)"/>
+    <line x1="40" y1="130" x2="150" y2="135" marker-end="url(#arrow)"/>
+    <path d="M 72 122 A 30 30 0 0 0 72 130" stroke="#475569" fill="none"/>
+  </g>
+  <g font-family="Libertinus Serif, Georgia, serif" font-style="italic" font-size="14" fill="#0f172a">
+    <text x="32" y="148">O</text>
+    <text x="196" y="58">a</text>
+    <text x="156" y="148">b</text>
+    <text x="80" y="122" fill="#475569">θ</text>
+  </g>
+</svg>

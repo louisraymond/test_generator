@@ -11,80 +11,83 @@ puts '=' * 80
 puts 'Starting seed process...'
 puts '=' * 80
 
-# Clear existing data in correct order
-puts "\nClearing existing data..."
-Question.destroy_all
+# Atomic seed: the destroy_all + load block runs inside a transaction so a
+# mid-seed failure rolls back cleanly instead of leaving a half-wrecked DB.
+# Side-effect: the transaction holds row-level locks on questions/topics/etc.
+# for the full seed run — fine in dev/test, do not run against a shared DB.
+ActiveRecord::Base.transaction do
+  # Clear existing data in correct order
+  puts "\nClearing existing data..."
+  Question.destroy_all
   Exam.destroy_all
-LearningObjective.destroy_all
-Topic.destroy_all
+  LearningObjective.destroy_all
+  Topic.destroy_all
   Source.destroy_all
 
-# Create sources first (shared across topics)
-load Rails.root.join('db/seeds/sources.rb')
+  # Create sources first (shared across topics)
+  load Rails.root.join('db/seeds/sources.rb')
 
-# Load each topic directory
-topic_dirs = [
-  'thermal_quantum_physics',
-  'physics_mosfets',
-  'electronics_signal_processing',
-  'theory_of_constraints',
-  'ruby_on_rails',
-  'this_codebase',
-  'system_design',
-  'foundation_models'
-]
-
-topic_dirs.each do |topic_dir|
-  puts "\n" + ('-' * 80)
-  puts "Loading #{topic_dir.titleize}..."
-  puts ('-' * 80)
-  
-  topic_path = Rails.root.join('db/seeds', topic_dir)
-  
-  # Load topic definition first
-  topic_file = topic_path.join('topic.rb')
-  if File.exist?(topic_file)
-    load topic_file
-  else
-    puts "  WARNING: Missing topic.rb for #{topic_dir}"
-  end
-  
-  # Load question type files in a logical order
-  question_types = %w[
-    written
-    calculation
-    multiple_choice
-    cloze
-    matching
-    ordering
-    ranking
-    diagram_label
-    image_occlusion
-    composite
+  # Load each topic directory
+  topic_dirs = [
+    'thermal_quantum_physics',
+    'physics_mosfets',
+    'electronics_signal_processing',
+    'theory_of_constraints',
+    'ruby_on_rails',
+    'this_codebase',
+    'system_design',
+    'foundation_models',
+    'maths_exemplars'
   ]
-  
-  # Check if this topic has subdirectories (like system_design)
-  subdirs = Dir.glob(topic_path.join('*/')).map { |d| File.basename(d) }
-  
-  if subdirs.any?
-    # Load from subdirectories
-    subdirs.sort.each do |subdir|
-      subdir_path = topic_path.join(subdir)
-      puts "  Loading #{subdir.titleize}..."
-      
-      question_types.each do |type|
-        question_file = subdir_path.join("#{type}.rb")
-        if File.exist?(question_file)
-          load question_file
+
+  topic_dirs.each do |topic_dir|
+    puts "\n" + ('-' * 80)
+    puts "Loading #{topic_dir.titleize}..."
+    puts ('-' * 80)
+
+    topic_path = Rails.root.join('db/seeds', topic_dir)
+
+    # Load topic definition first
+    topic_file = topic_path.join('topic.rb')
+    if File.exist?(topic_file)
+      load topic_file
+    else
+      puts "  WARNING: Missing topic.rb for #{topic_dir}"
+    end
+
+    # Load question type files in a logical order
+    question_types = %w[
+      written
+      calculation
+      multiple_choice
+      cloze
+      matching
+      ordering
+      ranking
+      diagram_label
+      image_occlusion
+      composite
+    ]
+
+    # Check if this topic has subdirectories (like system_design)
+    subdirs = Dir.glob(topic_path.join('*/')).map { |d| File.basename(d) }
+
+    if subdirs.any?
+      # Load from subdirectories
+      subdirs.sort.each do |subdir|
+        subdir_path = topic_path.join(subdir)
+        puts "  Loading #{subdir.titleize}..."
+
+        question_types.each do |type|
+          question_file = subdir_path.join("#{type}.rb")
+          load question_file if File.exist?(question_file)
         end
       end
-    end
-  else
-    # Load directly from topic directory
-    question_types.each do |type|
-      question_file = topic_path.join("#{type}.rb")
-      if File.exist?(question_file)
-        load question_file
+    else
+      # Load directly from topic directory
+      question_types.each do |type|
+        question_file = topic_path.join("#{type}.rb")
+        load question_file if File.exist?(question_file)
       end
     end
   end
