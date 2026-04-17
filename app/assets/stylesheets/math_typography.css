@@ -1,0 +1,109 @@
+/* Math typography — applies to maths questions + mark-scheme rendering.
+   Goal: KaTeX-rendered math sits well next to serif prose and survives PDF export. */
+
+.question .markdown-content,
+.marking-scheme-body .markdown-content,
+.question .question-text,
+.question .sub-question-text,
+.question .question-number {
+  font-family: 'Libertinus Serif', 'Charter', 'Iowan Old Style', 'Source Serif 4', Georgia, serif;
+  line-height: 1.55;
+  font-feature-settings: "liga", "kern", "onum", "pnum";
+  color: #000;
+}
+
+.question .markdown-content p {
+  margin: 0 0 0.65em;
+}
+
+.question .markdown-content p + p {
+  margin-top: 0.8em;
+}
+
+/* Inline math: KaTeX defaults to 1.21em which dwarfs serif body; 1.05 lines up. */
+.katex {
+  font-size: 1.05em;
+  text-rendering: geometricPrecision;
+}
+
+/* Display math */
+.katex-display {
+  margin: 1.1em 0 1.25em;
+  padding: 0 0.25em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.katex-display > .katex {
+  font-size: 1.15em;
+}
+
+.katex-display::-webkit-scrollbar {
+  height: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+/* Figures embedded in maths questions (markdown img) */
+.maths-figure,
+.markdown-content figure,
+.markdown-content p > img {
+  display: block;
+  margin: 1em auto;
+  max-width: 100%;
+  page-break-inside: avoid;
+}
+
+.markdown-content p > img {
+  height: auto;
+}
+
+.maths-figure figcaption {
+  font-size: 0.9em;
+  font-style: italic;
+  color: #475569;
+  margin-top: 0.35em;
+  text-align: center;
+}
+
+/* Narrow viewport: shrink slightly rather than clip */
+@media (max-width: 480px) {
+  .katex-display {
+    font-size: 0.95em;
+  }
+}
+
+/* Print / PDF */
+@media print {
+  .question,
+  .sub-question,
+  .maths-figure,
+  .katex-display {
+    page-break-inside: avoid;
+  }
+
+  .question-header {
+    page-break-after: avoid;
+  }
+
+  .answer-space {
+    page-break-before: avoid;
+  }
+
+  .katex-display {
+    overflow-x: visible;
+  }
+
+  .katex-display > .katex {
+    max-width: 100%;
+  }
+}
+
+/* No dark-mode override: exam/mark-scheme pages render as black-on-white paper
+   regardless of OS preference. KaTeX inherits color from the prose, so math
+   stays black too. */
