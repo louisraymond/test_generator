@@ -96,7 +96,11 @@ class QuestionsController < ApplicationController
       :options_text,
       learning_objective_ids: [],
       multi_choice_options: %i[text correct],
-      ranking_options: %i[text rank]
+      ranking_options: %i[text rank],
+      code_analysis: [
+        :language, :code, :answer_format,
+        { choices: %i[text correct] }
+      ]
     )
 
     permitted[:source_id] = permitted[:source_id].presence
@@ -107,12 +111,19 @@ class QuestionsController < ApplicationController
     when 'multiple_choice'
       permitted[:options_text] = serialize_multi_choice(permitted.delete(:multi_choice_options))
       permitted.delete(:ranking_options)
+      permitted.delete(:code_analysis)
     when 'ranking'
       permitted[:options_text] = serialize_ranking(permitted.delete(:ranking_options))
       permitted.delete(:multi_choice_options)
+      permitted.delete(:code_analysis)
+    when 'code_analysis'
+      permitted[:options_text] = serialize_code_analysis(permitted.delete(:code_analysis))
+      permitted.delete(:multi_choice_options)
+      permitted.delete(:ranking_options)
     else
       permitted.delete(:multi_choice_options)
       permitted.delete(:ranking_options)
+      permitted.delete(:code_analysis)
     end
 
     permitted
@@ -140,6 +151,28 @@ class QuestionsController < ApplicationController
     end.compact
 
     options_array.to_json
+  end
+
+  def serialize_code_analysis(raw)
+    return '' if raw.blank?
+
+    data = {
+      'language'      => raw[:language].to_s,
+      'code'          => raw[:code].to_s,
+      'answer_format' => raw[:answer_format].to_s
+    }
+
+    if raw[:answer_format] == 'multiple_choice'
+      choices_raw = raw[:choices]
+      choices_enum = choices_raw.respond_to?(:values) ? choices_raw.values : Array(choices_raw)
+      data['choices'] = choices_enum.map do |c|
+        text = c[:text].to_s
+        next if text.strip.empty?
+        { 'text' => text, 'correct' => ActiveModel::Type::Boolean.new.cast(c[:correct]) }
+      end.compact
+    end
+
+    data.to_json
   end
 
   def serialize_ranking(raw_options)
