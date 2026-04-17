@@ -89,6 +89,7 @@ class QuestionsController < ApplicationController
       :answer,
       :points,
       :answer_size,
+      :bloom_level,
       :question_type,
       :source_reference,
       :answer_label,
@@ -105,6 +106,7 @@ class QuestionsController < ApplicationController
 
     permitted[:source_id] = permitted[:source_id].presence
     permitted[:answer_size] = permitted[:answer_size].presence
+    permitted[:bloom_level] = permitted[:bloom_level].presence
     permitted[:learning_objective_ids] = Array(permitted[:learning_objective_ids]).reject(&:blank?)
 
     case permitted[:question_type]

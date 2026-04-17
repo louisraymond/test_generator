@@ -15,6 +15,11 @@ class Question < ApplicationRecord
     code_analysis
   ].freeze
 
+  # Bloom's Revised Taxonomy (Anderson & Krathwohl, 2001) — ordered by
+  # increasing cognitive demand. Stored verbatim as a string so the set can
+  # evolve without a migration and so filters can use human-readable values.
+  BLOOM_LEVELS = %w[remember understand apply analyze evaluate create].freeze
+
   attribute :options, :json, default: []
   attr_accessor :options_text
 
@@ -31,6 +36,7 @@ class Question < ApplicationRecord
   validates :points, numericality: { greater_than: 0, less_than_or_equal_to: 100 }
   validates :question_type, inclusion: { in: QUESTION_TYPES }
   validates :answer_size, inclusion: { in: ANSWER_SIZES }, allow_nil: true
+  validates :bloom_level, inclusion: { in: BLOOM_LEVELS }, allow_nil: true
   validate :options_requirements_for_type
   validate :learning_objectives_align_with_topic
 

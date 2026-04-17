@@ -26,6 +26,17 @@ RSpec.describe Question, type: :model do
       expect(build(:question, question_type: 'written')).to be_valid
     end
 
+    it 'validates bloom_level inclusion when present' do
+      expect(build(:question, bloom_level: 'nonsense')).not_to be_valid
+      Question::BLOOM_LEVELS.each do |level|
+        expect(build(:question, bloom_level: level)).to be_valid
+      end
+    end
+
+    it 'allows bloom_level to be nil (back-fill is optional)' do
+      expect(build(:question, bloom_level: nil)).to be_valid
+    end
+
     it 'validates answer_size inclusion when present' do
       expect(build(:question, answer_size: 'huge')).not_to be_valid
       expect(build(:question, answer_size: 'medium')).to be_valid

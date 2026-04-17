@@ -70,7 +70,7 @@ module Api
     private
 
     SCALAR_FIELDS = %w[
-      content answer points question_type answer_size
+      content answer points question_type answer_size bloom_level
       source_reference answer_label unit
       topic_module_id source_id source_name client_id
     ].freeze

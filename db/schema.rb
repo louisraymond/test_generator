@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_13_200200) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_17_045857) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_13_200200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "topic_module_id"
+    t.string "bloom_level"
+    t.index ["bloom_level"], name: "index_questions_on_bloom_level"
     t.index ["question_type"], name: "index_questions_on_question_type"
     t.index ["source_id"], name: "index_questions_on_source_id"
     t.index ["topic_id", "question_type"], name: "index_questions_on_topic_id_and_question_type"
