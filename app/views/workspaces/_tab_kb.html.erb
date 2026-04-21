@@ -1,8 +1,49 @@
-<section class="tab-stub" data-tab="kb">
-  <div class="tab-stub__eyebrow">Knowledge base</div>
-  <h1 class="tab-stub__title">Topics, objectives, and resources</h1>
-  <p class="tab-stub__body">
-    Two-pane tree + file list. Backed by Topic / TopicModule / LearningObjective / Source.
-    The full layout lands in Phase 8.
-  </p>
+<section class="kb" data-controller="topic-tree">
+  <aside class="kb__tree" aria-label="Topic tree">
+    <header class="kb__tree-header">
+      <div class="eyebrow">Knowledge base</div>
+      <div class="kb__tree-title">Topics</div>
+    </header>
+
+    <ul class="topic-tree" role="tree">
+      <% @topics.each do |topic| %>
+        <li class="topic-tree__topic" data-topic-id="<%= topic.id %>">
+          <button type="button" class="topic-row" data-action="click->topic-tree#toggle">
+            <span class="topic-row__caret">▸</span>
+            <span class="topic-row__name"><%= topic.name %></span>
+            <span class="topic-row__count"><%= @question_counts[topic.id] || 0 %></span>
+          </button>
+
+          <% if topic.topic_modules.any? %>
+            <ul class="topic-tree__modules" hidden>
+              <% topic.topic_modules.each do |mod| %>
+                <li class="topic-tree__module">
+                  <a href="<%= topic_path(topic) %>" class="module-row">
+                    <span class="module-row__name"><%= mod.name %></span>
+                  </a>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </aside>
+
+  <main class="kb__resources" aria-label="Resources">
+    <header class="kb__resources-header">
+      <div class="eyebrow">Resources</div>
+      <div class="kb__resources-title">Select a topic to view its files</div>
+    </header>
+
+    <%# Phase 8 stub upload zone — ActiveStorage wiring lands in a follow-up. %>
+    <div class="kb-upload drop-zone" data-controller="file-upload">
+      <div class="kb-upload__message">
+        Drop files here or <button type="button" class="kb-upload__browse">browse</button>
+      </div>
+      <div class="kb-upload__hint">
+        PDFs, DOCX, images. Attached to the selected topic.
+      </div>
+    </div>
+  </main>
 </section>

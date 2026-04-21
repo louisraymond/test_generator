@@ -20,6 +20,11 @@ class WorkspacesController < ApplicationController
       @exam_template = ExamTemplate.new
       @exam_template.exam_sections.build(position: 0, letter: 'A')
     end
+
+    if @tab == 'kb'
+      @topics = Topic.includes(:topic_modules, :questions).order(:name)
+      @question_counts = Question.group(:topic_id).count
+    end
   end
 
   # Placeholder — Phase 4 uses it for the Setup form. Keeps the route alive
