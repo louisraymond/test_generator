@@ -1,0 +1,8 @@
+<%# Reusable skeleton shimmer for loading states.
+    Locals: height (default 16), count (default 3). %>
+<% height ||= 16; count ||= 3 %>
+<div class="skeleton" aria-hidden="true">
+  <% count.times do %>
+    <div class="skeleton__line" style="height: <%= height %>px;"></div>
+  <% end %>
+</div>

@@ -66,6 +66,7 @@ Rails.application.routes.draw do
       member do
         get :pdf
         get :marking_scheme_pdf
+        patch :autosave
       end
     end
   end

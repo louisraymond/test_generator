@@ -5,7 +5,10 @@
   ['review', 'Review',         'Preview & export']
 ] %>
 
-<header class="meta-nav">
+<header class="meta-nav"
+        data-controller="<%= 'autosave' if @exam %>"
+        data-autosave-exam-id-value="<%= @exam&.id %>"
+        data-autosave-debounce-value="3000">
   <div class="meta-nav__brand">
     <a class="meta-nav__wordmark" href="<%= root_path %>">ExamGen</a>
     <span class="meta-nav__tag">v0.9 · alpha</span>
@@ -21,6 +24,9 @@
   </nav>
 
   <span class="meta-nav__state" data-meta-autosave data-state="idle">Idle</span>
+  <% if @exam %>
+    <span hidden data-exam-lock-version="<%= @exam.lock_version %>"></span>
+  <% end %>
 </header>
 
 <main class="workspace-shell__main">
