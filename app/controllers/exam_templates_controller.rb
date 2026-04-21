@@ -69,6 +69,17 @@ class ExamTemplatesController < ApplicationController
       :name,
       :description,
       :duration_minutes,
+      # Phase 1+2 redesign fields
+      :subject,
+      :paper_number,
+      :tier,
+      :subtitle,
+      :rubric,
+      :centre_name,
+      :principles_of_marking,
+      :sections_have_letters,
+      candidate_fields: [],
+      grade_boundaries: {},
       exam_sections_attributes: [
         :id,
         :name,
@@ -77,6 +88,7 @@ class ExamTemplatesController < ApplicationController
         :duration_minutes,
         :min_points,
         :max_points,
+        :letter,
         :_destroy,
         question_type_filter: [],
         section_source_rules_attributes: [

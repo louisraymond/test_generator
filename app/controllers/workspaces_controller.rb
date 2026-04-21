@@ -15,6 +15,11 @@ class WorkspacesController < ApplicationController
   def show
     @tab = params[:tab].presence_in(TABS) || DEFAULT_TAB
     @exam = Exam.find_by(id: params[:exam]) if params[:exam].present?
+
+    if @tab == 'setup'
+      @exam_template = ExamTemplate.new
+      @exam_template.exam_sections.build(position: 0, letter: 'A')
+    end
   end
 
   # Placeholder — Phase 4 uses it for the Setup form. Keeps the route alive

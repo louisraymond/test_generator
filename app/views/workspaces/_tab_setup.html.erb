@@ -1,8 +1,160 @@
-<section class="tab-stub" data-tab="setup">
-  <div class="tab-stub__eyebrow">Setup · Step 1</div>
-  <h1 class="tab-stub__title">Spec the exam</h1>
-  <p class="tab-stub__body">
-    Configure the paper — subject, tier, duration, section structure, candidate fields.
-    The full Setup form lands in Phase 4.
-  </p>
-</section>
+<%= form_with model: @exam_template, url: exam_templates_path, class: 'setup-form',
+              data: { controller: 'setup-form' } do |f| %>
+  <section class="setup-form__section">
+    <div class="eyebrow">Setup · Step 1</div>
+    <h2>Spec the exam</h2>
+    <p class="hint">
+      Define the paper's identity. These fields render on the redesigned cover page and
+      inherit onto every exam generated from this template.
+    </p>
+
+    <div class="setup-form__row setup-form__row--two">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_name">Template name</label>
+        <%= f.text_field :name, id: 'exam_template_name', required: true %>
+      </div>
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_subject">Subject</label>
+        <%= f.text_field :subject, id: 'exam_template_subject', placeholder: 'Mathematics' %>
+      </div>
+    </div>
+
+    <div class="setup-form__row setup-form__row--three">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_paper_number">Paper number</label>
+        <%= f.text_field :paper_number, id: 'exam_template_paper_number', placeholder: '3' %>
+      </div>
+      <div class="setup-field">
+        <label class="setup-field__label">Tier</label>
+        <div class="seg-control">
+          <% ExamTemplate::TIERS.each do |tier| %>
+            <%= f.radio_button :tier, tier, id: "tier_#{tier}" %>
+            <%= f.label :tier, tier, value: tier, for: "tier_#{tier}" %>
+          <% end %>
+        </div>
+      </div>
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_duration_minutes">Duration (min)</label>
+        <%= f.number_field :duration_minutes, id: 'exam_template_duration_minutes', min: 1, placeholder: '90' %>
+      </div>
+    </div>
+
+    <div class="setup-form__row">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_subtitle">Subtitle</label>
+        <%= f.text_field :subtitle, id: 'exam_template_subtitle', placeholder: 'Mock examination · Summer 2026' %>
+      </div>
+    </div>
+
+    <div class="setup-form__row">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_centre_name">Centre</label>
+        <%= f.text_field :centre_name, id: 'exam_template_centre_name', placeholder: 'Heathbank Academy' %>
+      </div>
+    </div>
+  </section>
+
+  <section class="setup-form__section">
+    <div class="eyebrow">Step 2</div>
+    <h2>Instructions & candidate fields</h2>
+    <p class="hint">
+      The rubric renders on the student cover page. Candidate fields print as hand-printing lines.
+    </p>
+
+    <div class="setup-form__row">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_rubric">Rubric / instructions to candidates</label>
+        <%= f.text_area :rubric, id: 'exam_template_rubric', rows: 4, placeholder: "Answer all questions in the spaces provided.\nShow sufficient working.\nCalculators permitted." %>
+      </div>
+    </div>
+
+    <div class="setup-form__row">
+      <div class="setup-field">
+        <label class="setup-field__label">Candidate fields</label>
+        <div class="cand-fields">
+          <% selected = (@exam_template.candidate_fields.presence || ['Full name', 'Centre number', 'Candidate number']) %>
+          <% ['Full name', 'Centre number', 'Candidate number', 'Date of birth', 'Class group'].each do |label| %>
+            <label>
+              <%= check_box_tag 'exam_template[candidate_fields][]', label, selected.include?(label) %>
+              <%= label %>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="setup-form__section">
+    <div class="eyebrow">Step 3</div>
+    <h2>Mark scheme — cover guidance</h2>
+    <p class="hint">
+      These notes and grade boundaries render on the marker's-copy cover page.
+    </p>
+
+    <div class="setup-form__row">
+      <div class="setup-field">
+        <label class="setup-field__label" for="exam_template_principles_of_marking">Principles of marking</label>
+        <%= f.text_area :principles_of_marking, id: 'exam_template_principles_of_marking', rows: 3,
+                         placeholder: "Accept equivalent phrasing.\nCredit shown working.\nIgnore subsequent work once complete." %>
+      </div>
+    </div>
+
+    <div class="setup-form__row setup-form__row--three">
+      <% %w[A* A B].each do |grade| %>
+        <div class="setup-field">
+          <label class="setup-field__label">Grade boundary: <%= grade %></label>
+          <%= number_field_tag "exam_template[grade_boundaries][#{grade}]",
+                                (@exam_template.grade_boundaries || {})[grade],
+                                placeholder: 'e.g. 46' %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="setup-form__section">
+    <div class="eyebrow">Step 4</div>
+    <h2>Section structure</h2>
+    <p class="hint">
+      Add one row per section. Letters auto-assign A/B/C from top to bottom at render time
+      unless you override here.
+    </p>
+
+    <div class="section-rows" data-setup-form-target="sections">
+      <%= f.fields_for :exam_sections do |section| %>
+        <div class="section-row">
+          <div class="setup-field">
+            <label class="setup-field__label">Letter</label>
+            <%= section.text_field :letter, placeholder: 'A' %>
+          </div>
+          <div class="setup-field">
+            <label class="setup-field__label">Name</label>
+            <%= section.text_field :name, placeholder: 'Calculus' %>
+          </div>
+          <div class="setup-field">
+            <label class="setup-field__label">Questions</label>
+            <%= section.number_field :question_count, min: 1, placeholder: '5' %>
+          </div>
+          <div class="setup-field">
+            <label class="setup-field__label">Duration (min)</label>
+            <%= section.number_field :duration_minutes, min: 0, placeholder: '30' %>
+          </div>
+          <div>
+            <%= section.hidden_field :position %>
+            <button type="button" class="remove-btn" data-action="click->setup-form#removeSection">&times;</button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <button type="button" class="add-section-btn" data-action="click->setup-form#addSection">
+      + Add section
+    </button>
+  </section>
+
+  <div class="setup-form__actions">
+    <%= f.submit 'Create template', class: 'primary-btn' %>
+    <span class="hint" style="margin: 0;">
+      Template powers every exam generated from it. Existing exams are not modified.
+    </span>
+  </div>
+<% end %>
