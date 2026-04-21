@@ -1,76 +1,77 @@
 <%#
   Phase 1 — redesigned student paper (used for both PDF rendering and
   HTML preview at /exams/:id/paper). The `layout: 'pdf'` wrapper loads
-  fonts.css, tokens.css, and paper.css so the cover page and interior
+  fonts.css, tokens.css, and paper.css so the cover and interior
   typography render identically whether snapshotted by Grover or viewed
   in a browser.
 
-  Interior question rendering uses the existing
-  `questions/types/_<type>.html.haml` partials wrapped in a paper-style
-  `.q` grid so the new typography applies without rewriting per-type
-  rendering (Phase 7 replaces that wholesale).
+  Layout model: one `.paper` block per section (or one single block if the
+  exam has no sections). Each `.paper` owns its own running head/foot and
+  watermark. CSS `page-break-inside: avoid` on `.q` handles physical
+  pagination in print; on-screen, `.paper` grows past 1123px when a section
+  is long.
 %>
 
 <%= render 'cover_page', exam: @exam %>
 
-<% question_counter = 0 %>
-<% current_section_number = nil %>
-<% @exam.exam_questions.each do |eq| %>
-  <% question = eq.question %>
-  <% section_number = eq.section_number %>
+<%
+  sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
+  global_counter = 0
+%>
 
-  <% if @exam.exam_template && section_number && section_number != current_section_number %>
-    <% current_section_number = section_number %>
-    <% section = @exam.section_info(section_number) %>
-    <% if section %>
-      <div class="paper">
-        <div class="runhead">
-          <b>Section <%= section.letter.presence || ('A'.ord + section.position).chr %> · <%= section.name %></b>
-          <span>Candidate: ________</span>
-        </div>
-
-        <div class="section-head">
-          <div class="section-head__num"><%= section.letter.presence || ('A'.ord + section.position).chr %></div>
-          <div class="section-head__title"><%= section.name %></div>
-          <div class="section-head__meta">
-            <%= pluralize(section.question_count, 'question') %>
-            <% if section.duration_minutes %> · ~<%= section.duration_minutes %> min<% end %>
-          </div>
-        </div>
-
-        <div class="wmk">Specimen · do not redistribute</div>
-        <div class="runfoot">
-          <span>Section <%= section.letter %></span>
-          <span>turn over ▶</span>
-        </div>
-      </div>
-    <% end %>
-  <% end %>
+<% sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions| %>
+  <% section = section_number ? @exam.section_info(section_number) : nil %>
+  <% section_letter = section&.letter.presence || (section_number ? ('A'.ord + section_number).chr : nil) %>
 
   <div class="paper">
     <div class="runhead">
-      <b><%= @exam.subject.presence || @exam.title %></b>
-      <span>Q<%= question_counter + 1 %></span>
+      <% if section %>
+        <b>Section <%= section_letter %> · <%= section.name %></b>
+      <% else %>
+        <b><%= (@exam.subject.presence || @exam.title) %></b>
+      <% end %>
+      <span>Candidate: ________</span>
     </div>
 
-    <div class="q">
-      <div class="q__num"><%= question_counter + 1 %></div>
-      <div class="q__body">
-        <div class="q__stem"><%= question.content.to_s.html_safe %></div>
-        <div class="<%= marks_to_workspace(question.points) %>"></div>
-        <% if question.points.to_i >= 5 %>
-          <%= render_final_answer(label: (question.answer_label.presence || 'Answer') + ' =', unit: question.unit) %>
-        <% end %>
+    <% if section %>
+      <div class="section-head">
+        <div class="section-head__num"><%= section_letter %></div>
+        <div class="section-head__title"><%= section.name %></div>
+        <div class="section-head__meta">
+          <%= pluralize(section.question_count, 'question') %>
+          <% if section.duration_minutes %> · ~<%= section.duration_minutes %> min<% end %>
+        </div>
       </div>
-      <div class="q__marks"><i>[<b><%= question.points %></b> <%= 'mark'.pluralize(question.points) %>]</i></div>
-    </div>
+    <% end %>
+
+    <% exam_questions.each do |eq| %>
+      <% question = eq.question %>
+      <% global_counter += 1 %>
+      <% points = question.points.to_i %>
+
+      <div class="q">
+        <div class="q__num"><%= global_counter %></div>
+        <div class="q__body">
+          <div class="q__stem"><%= question.content.to_s.html_safe %></div>
+          <div class="<%= marks_to_workspace(points) %>"></div>
+          <% if points >= 5 %>
+            <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
+          <% end %>
+        </div>
+        <div class="q__marks"><i>[<b><%= points %></b> <%= 'mark'.pluralize(points) %>]</i></div>
+      </div>
+    <% end %>
 
     <div class="wmk">Specimen · do not redistribute</div>
     <div class="runfoot">
-      <span><%= @exam.subject %></span>
-      <span>Page <%= question_counter + 2 %></span>
+      <span>
+        <%= [@exam.subject, (@exam.paper_number.present? ? "P#{@exam.paper_number}#{@exam.tier&.first&.upcase}" : nil)].compact.join(' / ').presence || 'Exam' %>
+        · <%= (@exam.exam_date || @exam.created_at.to_date).strftime('%d.%m.%Y') %>
+      </span>
+      <span>
+        <% if section %>Section <%= section_letter %><% else %>Interior<% end %>
+        · turn over ▶
+      </span>
     </div>
   </div>
-
-  <% question_counter += 1 %>
 <% end %>

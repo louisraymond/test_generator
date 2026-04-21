@@ -25,7 +25,7 @@
   --gap: #f3efe4;           /* cloze / redacted span */
 
   width: 794px;              /* A4 @ 96dpi */
-  height: 1123px;
+  min-height: 1123px;        /* at least one full A4 page; grows to fit content */
   background: var(--paper);
   color: var(--ink);
   font-family: 'Cormorant Garamond', Georgia, serif;
@@ -41,6 +41,10 @@
 .paper--ms {
   background: #fefdf9;
 }
+
+/* In print, each .paper starts a new page. On-screen we stack them with a
+ * small gap so authors can scroll through the preview. */
+.paper + .paper { margin-top: 24px; page-break-before: always; }
 
 /* running heads */
 .paper .runhead {
