@@ -13,6 +13,9 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   
   <style>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/fonts.css')) %>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/tokens.css')) %>
+    <%= raw File.read(Rails.root.join('app/assets/stylesheets/paper.css')) %>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
     <%= raw File.read(Rails.root.join('app/assets/stylesheets/marking_scheme.css')) %>

@@ -1,0 +1,497 @@
+/* Paper — shared PDF styles for both student paper and mark scheme.
+ * A4 @ 96dpi preview box (794 × 1123); print uses @page A4 below.
+ * Ported from design_handoff_examgenerator/designs/styles/paper.css.
+ * Google Fonts @import removed — self-hosted fonts are loaded via fonts.css.
+ */
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 24mm;
+}
+
+.paper {
+  --ink: #1a1915;
+  --ink-soft: #2d2a23;
+  --ink-muted: #6b665d;
+  --ink-faint: #a9a49a;
+  --rule: #cfc9bd;
+  --rule-soft: #e8e3d7;
+  --paper: #fdfcf8;
+  --paper-shadow: 0 1px 0 rgba(0,0,0,.04), 0 12px 36px rgba(40,35,25,.12);
+  --accent: #7a1d1a;        /* deep maroon — examiner ink (darker than on-screen) */
+  --accent-soft: #f4e9e0;
+  --credit: #2e4a2b;        /* olive — earned marks */
+  --credit-soft: #e9efe4;
+  --gap: #f3efe4;           /* cloze / redacted span */
+
+  width: 794px;              /* A4 @ 96dpi */
+  height: 1123px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 11.5pt;
+  line-height: 1.42;
+  box-shadow: var(--paper-shadow);
+  padding: 76px 64px 64px;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.paper--ms {
+  background: #fefdf9;
+}
+
+/* running heads */
+.paper .runhead {
+  position: absolute;
+  top: 26px; left: 64px; right: 64px;
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8.5pt;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border-bottom: .5pt solid var(--rule-soft);
+  padding-bottom: 6px;
+}
+.paper .runhead b { font-weight: 600; color: var(--ink-soft); letter-spacing: .1em; }
+
+.paper .runfoot {
+  position: absolute;
+  bottom: 26px; left: 64px; right: 64px;
+  display: flex; justify-content: space-between;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8.5pt;
+  color: var(--ink-muted);
+  border-top: .5pt solid var(--rule-soft);
+  padding-top: 6px;
+}
+
+/* cover plate */
+.cover {
+  text-align: left;
+  margin-bottom: 26px;
+  padding-bottom: 22px;
+  border-bottom: .5pt solid var(--ink-soft);
+}
+.cover__eyebrow {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 9pt;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.cover__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: 34pt;
+  line-height: 1.05;
+  letter-spacing: -.5px;
+  margin: 0 0 10px;
+}
+.cover__sub {
+  font-style: italic;
+  font-size: 13pt;
+  color: var(--ink-muted);
+  margin: 0 0 18px;
+}
+.cover__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 9pt;
+}
+.cover__cell { border-left: 1.5pt solid var(--ink); padding-left: 10px; }
+.cover__cell span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 7.5pt;
+  color: var(--ink-muted);
+  margin-bottom: 2px;
+}
+.cover__cell b { font-weight: 600; font-size: 11pt; color: var(--ink); font-family: 'Cormorant Garamond', serif; }
+
+/* rubric */
+.rubric {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: linear-gradient(to right, var(--accent-soft) 0%, var(--accent-soft) 4px, transparent 4px);
+  padding: 10px 12px 10px 16px;
+  margin: 0 0 22px;
+}
+.rubric h4 {
+  margin: 0 0 4px;
+  font-size: 8pt;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+.rubric ul { margin: 0; padding-left: 16px; }
+.rubric li { margin: 1px 0; }
+
+/* sections */
+.section-head {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: baseline;
+  margin: 22px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: .5pt solid var(--ink-soft);
+  page-break-inside: avoid;
+}
+.section-head__num {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: var(--accent);
+}
+.section-head__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 15pt;
+  letter-spacing: -.2px;
+}
+.section-head__meta {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8pt;
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+/* question block */
+.q {
+  display: grid;
+  grid-template-columns: 26px 1fr 56px;
+  column-gap: 10px;
+  margin-bottom: 18px;
+  page-break-inside: avoid;
+}
+.q__num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 12pt;
+  text-align: right;
+  padding-top: 1px;
+}
+.q__body { min-width: 0; }
+.q__marks {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8.5pt;
+  text-align: right;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding-top: 4px;
+  letter-spacing: .02em;
+}
+.q__marks b { font-weight: 600; color: var(--ink); }
+
+.q__stem { margin: 0 0 8px; text-wrap: pretty; }
+.q__stem em { color: var(--ink-soft); }
+
+/* sub-parts: (a)(b)(c) */
+.subparts { margin: 4px 0 0 0; }
+.sub {
+  display: grid;
+  grid-template-columns: 22px 1fr 56px;
+  column-gap: 8px;
+  margin-top: 10px;
+}
+.sub__label {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-style: italic;
+  text-align: right;
+  padding-top: 1px;
+}
+.sub__marks {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8pt;
+  text-align: right;
+  color: var(--ink-muted);
+  font-style: italic;
+  padding-top: 3px;
+}
+
+/* roman sub-sub parts */
+.sub--roman .sub__label { font-size: 10.5pt; }
+
+/* answer regions — parametric on question marks */
+.lines {
+  background-image: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 23px,
+    var(--rule) 23px, var(--rule) 23.5px);
+  background-size: 100% 24px;
+  min-height: 48px;
+}
+.lines--1 { min-height: 24px; }
+.lines--2 { min-height: 48px; }
+.lines--3 { min-height: 72px; }
+.lines--4 { min-height: 96px; }
+.lines--5 { min-height: 120px; }
+.lines--6 { min-height: 144px; }
+.lines--8 { min-height: 192px; }
+
+.workbox {
+  border: .5pt solid var(--rule);
+  border-radius: 2px;
+  min-height: 80px;
+  margin-top: 4px;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 23px, #eee7d5 23px, #eee7d5 23.5px);
+  background-size: 100% 24px;
+}
+.workbox--blank { background: none; }
+.workbox--sm { min-height: 52px; }
+.workbox--md { min-height: 88px; }
+.workbox--lg { min-height: 140px; }
+.workbox--xl { min-height: 190px; }
+
+.finalans {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+  font-family: 'Cormorant Garamond', serif;
+}
+.finalans__label {
+  font-weight: 600;
+  font-style: italic;
+  min-width: 70px;
+  text-align: right;
+  color: var(--ink-soft);
+}
+.finalans__line {
+  flex: 1;
+  border-bottom: .75pt solid var(--ink);
+  height: 1.4em;
+}
+.finalans__unit {
+  font-style: italic;
+  color: var(--ink-muted);
+  font-size: 10pt;
+}
+
+/* MCQ on paper */
+.mcq { margin-top: 6px; display: grid; gap: 6px; }
+.mcq__row {
+  display: grid;
+  grid-template-columns: 18px 16px 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+}
+.mcq__box {
+  width: 14px; height: 14px;
+  border: .75pt solid var(--ink-soft);
+  background: #fff;
+  margin-top: 3px;
+}
+.mcq__letter {
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+/* figure */
+.figure {
+  margin: 10px 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.figure__caption {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8pt;
+  color: var(--ink-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* math */
+.math { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+.display-math {
+  text-align: center;
+  margin: 8px 0;
+  font-size: 13pt;
+  font-style: italic;
+}
+
+/* ---------- Mark scheme specifics ---------- */
+.ms-q {
+  display: grid;
+  grid-template-columns: 26px 1fr 220px 48px;
+  column-gap: 14px;
+  padding: 14px 0;
+  border-top: .5pt solid var(--rule-soft);
+  page-break-inside: avoid;
+}
+.ms-q:first-of-type { border-top: .75pt solid var(--ink-soft); }
+.ms-q__num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 12pt;
+  text-align: right;
+  padding-top: 2px;
+}
+.ms-q__body { min-width: 0; }
+.ms-q__stem {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--ink-muted);
+  font-size: 10pt;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: .25pt dashed var(--rule);
+  text-wrap: pretty;
+}
+.ms-q__answer { font-size: 11pt; }
+.ms-q__answer p { margin: 0 0 6px; }
+
+.ms-q__guide {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-left: 1.5pt solid var(--rule);
+  padding-left: 10px;
+}
+.ms-q__guide h5 {
+  margin: 0 0 3px;
+  font-size: 7.5pt;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+.ms-q__guide p { margin: 0 0 6px; }
+.ms-q__guide ul { margin: 0; padding-left: 14px; }
+.ms-q__guide li { margin: 1px 0; }
+
+.ms-q__total {
+  text-align: center;
+  padding-top: 2px;
+}
+.ms-q__total-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 22pt;
+  line-height: 1;
+  color: var(--ink);
+}
+.ms-q__total-lbl {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 7pt;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* credit pills — M1 / A1 / B1 etc */
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: 1.5px 5px 1.5px 4px;
+  border-radius: 2px;
+  background: var(--credit-soft);
+  color: var(--credit);
+  vertical-align: baseline;
+  margin: 0 0 0 3px;
+  white-space: nowrap;
+}
+.mark--m { background: #e9efe4; color: #2e4a2b; }       /* method */
+.mark--a { background: #e4ecf1; color: #1f4158; }       /* accuracy */
+.mark--b { background: #f2ecdd; color: #6b4617; }       /* unconditional */
+.mark--dm { background: #efe4e8; color: #5b1f35; }      /* dependent */
+.mark__n { font-weight: 600; opacity: .85; }
+
+.stepcheck {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  column-gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: .25pt dotted var(--rule);
+}
+.stepcheck:last-child { border-bottom: none; }
+.stepcheck__tick {
+  color: var(--credit);
+  font-weight: 700;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 10pt;
+  line-height: 1;
+  padding-top: 2px;
+}
+.stepcheck__text { font-size: 10.5pt; }
+
+/* accept / reject */
+.ar {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  column-gap: 10px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8pt;
+  padding: 2px 0;
+}
+.ar__lbl {
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 7pt;
+  padding-top: 2px;
+}
+.ar--accept .ar__lbl { color: var(--credit); }
+.ar--reject .ar__lbl { color: var(--accent); }
+
+/* watermark */
+.wmk {
+  position: absolute;
+  right: 64px;
+  top: 76px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 7.5pt;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  border-left: 1.5pt solid var(--accent);
+  padding-left: 6px;
+  height: 90px;
+}
+
+/* small-caps label */
+.smcap {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 8pt;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.muted { color: var(--ink-muted); }
+.italic { font-style: italic; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Print: drop the on-screen preview shadow and frame. */
+@media print {
+  .paper {
+    box-shadow: none;
+    width: auto;
+    height: auto;
+  }
+}
