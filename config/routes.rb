@@ -29,10 +29,10 @@ Rails.application.routes.draw do
                              constraints: { format: /yaml|yml|json/ },
                              as: :openapi
 
-    # Browsable docs UI (Scalar). Served as a static file from
-    # public/api/docs.html; this route is a convenience redirect so
-    # /api/docs works without the extension.
-    get 'docs', to: redirect('/api/docs.html'), as: :docs
+    # Note: browsable docs UI (Scalar) is served as a static file from
+    # public/api/docs.html. Rails' static-file middleware resolves
+    # /api/docs -> /api/docs.html automatically via extension fallback,
+    # so no route is needed here.
 
     resources :topics, only: %i[create show index update destroy] do
       resources :learning_objectives, only: %i[create update destroy]

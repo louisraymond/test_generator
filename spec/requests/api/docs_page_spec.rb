@@ -16,9 +16,13 @@ RSpec.describe 'API docs page (Scalar)', type: :request do
   end
 
   describe 'GET /api/docs' do
-    it 'redirects to the static docs page' do
+    # The static-file middleware resolves /api/docs -> /api/docs.html
+    # automatically via extension fallback; no explicit route needed.
+    it 'serves the docs page without the .html extension' do
       get '/api/docs'
-      expect(response).to redirect_to('/api/docs.html')
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to start_with('text/html')
+      expect(response.body).to include('@scalar/api-reference')
     end
   end
 end
