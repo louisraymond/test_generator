@@ -11,6 +11,8 @@ class ApplicationController < ActionController::Base
       # still require auth.
       unless: -> {
         request.path == "/up" ||
+          # Public OpenAPI spec + docs page (see Api::DocsController).
+          request.path.start_with?("/api/openapi", "/api/docs") ||
           request.path.match?(%r{\A/assets/.+-[a-f0-9]{8,}\.\w+\z}) ||
           request.path.match?(%r{\A/assets/.+\.\w+\z})
       }
