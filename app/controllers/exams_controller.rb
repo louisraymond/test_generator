@@ -65,11 +65,21 @@ class ExamsController < ApplicationController
     respond_to do |format|
       format.html
       format.pdf do
-        html = render_to_string(template: 'exams/show', layout: 'pdf', formats: [:html])
+        # Phase 1: PDF render uses the paper-style redesigned template
+        # (`exams/paper`) rather than the web-chrome show template.
+        html = render_to_string(template: 'exams/paper', layout: 'pdf', formats: [:html])
         pdf = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
         send_data pdf, filename: "exam_#{@exam.id}.pdf", type: 'application/pdf'
       end
     end
+  end
+
+  # Phase 1: HTML preview of the redesigned paper (served at /exams/:id/paper).
+  # Uses the same `layout: 'pdf'` wrapper as the PDF render, so what you see
+  # here is exactly what Grover will snapshot.
+  def paper
+    @exam = Exam.includes(exam_questions: :question).find(params[:id])
+    render template: 'exams/paper', layout: 'pdf'
   end
 
   def marking_scheme

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resources :exams, only: %i[index new create show] do
     member do
       get :marking_scheme
+      get :paper
     end
     collection do
       get :preview_counts

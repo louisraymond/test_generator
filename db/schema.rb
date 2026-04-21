@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_17_045857) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -37,6 +37,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_17_045857) do
     t.jsonb "question_type_filter", default: []
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "letter"
     t.index ["exam_template_id", "position"], name: "index_exam_sections_on_exam_template_id_and_position", unique: true
     t.index ["exam_template_id"], name: "index_exam_sections_on_exam_template_id"
   end
@@ -49,6 +50,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_17_045857) do
     t.datetime "last_used_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "subject"
+    t.string "paper_number"
+    t.string "tier"
+    t.string "subtitle"
+    t.text "rubric"
+    t.jsonb "candidate_fields", default: [], null: false
+    t.jsonb "grade_boundaries", default: {}, null: false
+    t.string "centre_name"
+    t.boolean "sections_have_letters", default: true, null: false
     t.index ["last_used_at"], name: "index_exam_templates_on_last_used_at"
     t.index ["name"], name: "index_exam_templates_on_name", unique: true
   end
@@ -59,6 +69,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_17_045857) do
     t.datetime "updated_at", null: false
     t.integer "duration_minutes"
     t.bigint "exam_template_id"
+    t.date "exam_date"
+    t.integer "seed"
+    t.string "subject_override"
+    t.string "paper_number_override"
+    t.string "tier_override"
+    t.string "centre_name_override"
+    t.integer "lock_version", default: 0, null: false
     t.index ["created_at"], name: "index_exams_on_created_at"
     t.index ["exam_template_id"], name: "index_exams_on_exam_template_id"
   end

@@ -1,0 +1,102 @@
+<%#
+  Redesigned student-paper cover page.
+  Consumes `exam` local (Exam instance). Reads inherited template fields
+  via Exam#subject/#paper_number/#tier/#centre_name (falls back to the
+  exam_template when no per-exam override is set).
+%>
+<% candidate_fields = (exam.exam_template&.candidate_fields.presence || ['Full name', 'Centre number', 'Candidate number']) %>
+<% paper_structure  = exam.exam_template&.exam_sections.to_a %>
+
+<div class="paper">
+  <div class="runhead">
+    <b><%= (exam.centre_name.presence || 'Exam paper') %></b>
+    <span>Candidate no. ________</span>
+  </div>
+
+  <div class="cover">
+    <div class="cover__eyebrow"><%= paper_eyebrow(exam).presence || 'Examination paper' %></div>
+    <h1 class="cover__title"><%= exam.title %></h1>
+    <% if exam.exam_template&.subtitle.present? %>
+      <p class="cover__sub"><%= exam.exam_template.subtitle %></p>
+    <% end %>
+
+    <div class="cover__grid">
+      <div class="cover__cell">
+        <span>Date</span>
+        <b><%= (exam.exam_date || exam.created_at.to_date).strftime('%-d %B %Y') %></b>
+      </div>
+      <div class="cover__cell">
+        <span>Duration</span>
+        <b><%= exam.duration_minutes.present? ? "#{exam.duration_minutes} minutes" : '—' %></b>
+      </div>
+      <div class="cover__cell">
+        <span>Total marks</span>
+        <b><%= exam.total_marks %></b>
+      </div>
+      <div class="cover__cell">
+        <span>Questions</span>
+        <b><%= exam.exam_questions.size %></b>
+      </div>
+    </div>
+  </div>
+
+  <% if exam.exam_template&.rubric.present? %>
+    <div class="rubric">
+      <h4>Instructions to candidates</h4>
+      <%= simple_format(exam.exam_template.rubric, {}, wrapper_tag: 'ul') %>
+    </div>
+  <% end %>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 6px;">
+    <% if paper_structure.any? %>
+      <div>
+        <div class="smcap" style="margin-bottom: 8px;">Paper structure</div>
+        <table style="width: 100%; font-family: 'Source Sans 3', sans-serif; font-size: 9pt; border-collapse: collapse;">
+          <tbody>
+            <% paper_structure.each do |section| %>
+              <tr style="border-top: .5pt solid var(--rule-soft);">
+                <td style="padding: 5px 8px 5px 0; color: var(--accent); font-weight: 700;"><%= section.letter.presence || ('A'.ord + section.position).chr %></td>
+                <td style="padding: 5px 0;"><%= section.name %></td>
+                <td style="padding: 5px 0; text-align: right; color: var(--ink-muted);"><%= pluralize(section.question_count, 'q') %></td>
+                <% if section.duration_minutes %>
+                  <td style="padding: 5px 0 5px 16px; text-align: right;"><%= section.duration_minutes %>m</td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <div>
+      <div class="smcap" style="margin-bottom: 8px;">Candidate details</div>
+      <% candidate_fields.each do |label| %>
+        <div style="display: grid; grid-template-columns: 120px 1fr; align-items: baseline; margin-bottom: 11px; font-family: 'Source Sans 3', sans-serif; font-size: 9pt;">
+          <span style="color: var(--ink-muted);"><%= label %></span>
+          <span style="border-bottom: .5pt solid var(--ink-soft); height: 1.6em;"></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Examiner-use grid — one cell per question. %>
+  <% if exam.exam_questions.any? %>
+    <div style="margin-top: 38px; border-top: .5pt solid var(--ink-soft); padding-top: 14px; font-family: 'Source Sans 3', sans-serif; font-size: 8.5pt; color: var(--ink-muted);">
+      <div class="smcap" style="color: var(--accent); margin-bottom: 10px;">Examiner use only</div>
+      <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;">
+        <% exam.exam_questions.each_with_index do |eq, i| %>
+          <div style="border: .5pt solid var(--rule); padding: 4px 6px;">
+            <div style="font-size: 7pt; letter-spacing: .1em;">Q<%= i + 1 %></div>
+            <div style="height: 16px; border-bottom: .5pt solid var(--rule-soft);"></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="wmk">Specimen · do not redistribute</div>
+  <div class="runfoot">
+    <span><%= [exam.subject, "P#{exam.paper_number}#{exam.tier&.first&.upcase}"].compact.join(' / ').presence || 'Exam' %> · <%= (exam.exam_date || exam.created_at.to_date).strftime('%d.%m.%Y') %></span>
+    <span>Page 1 · turn over ▶</span>
+  </div>
+</div>
