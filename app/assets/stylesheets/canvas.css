@@ -1,0 +1,146 @@
+/* Canvas tab — 3-column editor (Phase 5 shell, Phase 6 rail, Phase 7 paper-editor).
+ * Column widths match the design handoff: 280px question list, fluid centre,
+ * 360px inspector rail. Only the centre column scrolls.
+ */
+
+.canvas {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  height: calc(100vh - 60px);  /* minus meta-nav */
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+
+.canvas__qlist,
+.canvas__rail {
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  background: var(--paper);
+}
+.canvas__rail {
+  border-right: none;
+  border-left: 1px solid var(--rule);
+  background: #1a1915;   /* dark charcoal rail — Phase 6 wires its contents */
+  color: #e8e5de;
+}
+
+.canvas__preview {
+  overflow-y: auto;
+  background: var(--paper-2);
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+}
+.canvas__preview-inner {
+  max-width: 100%;
+}
+.canvas__preview-loading {
+  font-family: var(--mono);
+  color: var(--ink-3);
+  text-align: center;
+  padding: 64px 0;
+}
+
+/* Question list */
+.qlist__header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.qlist__header .eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: var(--tr-pill);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.qlist__title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.qlist {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+.qlist-item {
+  display: grid;
+  grid-template-columns: 16px 24px 1fr auto;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.qlist-item:hover {
+  background: var(--paper-2);
+  border-bottom-color: var(--rule);
+}
+.qlist-item.is-active {
+  background: var(--paper-3);
+  color: var(--ink);
+}
+.qlist-item .drag-handle {
+  color: var(--ink-4);
+  font-family: var(--mono);
+  font-size: 14px;
+  cursor: grab;
+}
+.qlist-item__num {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--ink-3);
+  text-align: right;
+}
+.qlist-item__type {
+  display: none;  /* shown on hover/active via JS when Phase 6 wires it */
+}
+.qlist-item__stem {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.qlist-item__marks {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+/* Rail (Phase 6 fills this in) */
+.rail__header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid #2d2a23;
+}
+.rail__header .eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #9a9287;
+  letter-spacing: var(--tr-pill);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.rail__hint {
+  font-size: 13px;
+  color: #9a9287;
+  font-style: italic;
+}
+.rail__body {
+  padding: 16px;
+  font-size: 13px;
+}
+
+/* Turbo-frame host */
+#paper-preview {
+  display: block;
+  /* paper.css owns the .paper box sizing inside this frame */
+}

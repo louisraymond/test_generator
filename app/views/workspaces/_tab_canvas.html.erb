@@ -1,16 +1,50 @@
-<section class="tab-stub" data-tab="canvas">
-  <div class="tab-stub__eyebrow">Canvas</div>
-  <h1 class="tab-stub__title">Edit the paper</h1>
-  <% if @exam %>
+<% if @exam %>
+  <section class="canvas" data-controller="canvas" data-canvas-exam-id-value="<%= @exam.id %>">
+    <%# Left: question list %>
+    <aside class="canvas__qlist" aria-label="Question list">
+      <header class="qlist__header">
+        <div class="eyebrow">Questions</div>
+        <div class="qlist__title"><%= @exam.title %></div>
+      </header>
+      <ol class="qlist" role="list">
+        <% @exam.exam_questions.each_with_index do |eq, i| %>
+          <% q = eq.question %>
+          <li class="qlist-item" data-eq-id="<%= eq.id %>">
+            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+            <span class="qlist-item__num"><%= i + 1 %></span>
+            <span class="qlist-item__type"><%= q.question_type %></span>
+            <span class="qlist-item__stem"><%= truncate(strip_tags(q.content.to_s), length: 48) %></span>
+            <span class="qlist-item__marks"><%= q.points %>m</span>
+          </li>
+        <% end %>
+      </ol>
+    </aside>
+
+    <%# Centre: live paper preview (Turbo Frame reloads on edit) %>
+    <main class="canvas__preview">
+      <div class="canvas__preview-inner">
+        <turbo-frame id="paper-preview" src="<%= preview_frame_exam_path(@exam) %>" data-canvas-target="frame">
+          <p class="canvas__preview-loading">Loading preview…</p>
+        </turbo-frame>
+      </div>
+    </main>
+
+    <%# Right: inspector rail (populated in Phase 6) %>
+    <aside class="canvas__rail" data-canvas-target="rail">
+      <header class="rail__header">
+        <div class="eyebrow">Inspector</div>
+        <div class="rail__hint">Select a question on the left</div>
+      </header>
+      <div class="rail__body" data-canvas-target="railBody"></div>
+    </aside>
+  </section>
+<% else %>
+  <section class="tab-stub" data-tab="canvas">
+    <div class="tab-stub__eyebrow">Canvas</div>
+    <h1 class="tab-stub__title">No exam selected</h1>
     <p class="tab-stub__body">
-      Previewing <strong><%= @exam.title %></strong>. Jump to the
-      <%= link_to 'redesigned paper', paper_exam_path(@exam) %> or the
-      <%= link_to 'mark scheme', marking_scheme_exam_path(@exam) %>.
+      Open this tab with <code>?exam=ID</code> to start editing a paper.
+      Pick an exam from the <%= link_to 'Exam History', exams_path %> list.
     </p>
-  <% else %>
-    <p class="tab-stub__body">
-      Select an exam via <code>?exam=ID</code>. The three-column editor with paper-is-editor
-      interactions lands in Phases 5–7.
-    </p>
-  <% end %>
-</section>
+  </section>
+<% end %>

@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     member do
       get :marking_scheme
       get :paper
+      get :preview_frame
     end
     collection do
       get :preview_counts

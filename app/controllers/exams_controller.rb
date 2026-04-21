@@ -82,6 +82,14 @@ class ExamsController < ApplicationController
     render template: 'exams/paper', layout: 'pdf'
   end
 
+  # Phase 5: Turbo Frame target for the Canvas tab's live paper preview.
+  # Same paper.html.erb content, wrapped in <turbo-frame id="paper-preview">
+  # so editor actions re-render without a full page reload.
+  def preview_frame
+    @exam = Exam.includes(exam_questions: :question).find(params[:id])
+    render template: 'exams/preview_frame', layout: 'pdf'
+  end
+
   def marking_scheme
     @exam = Exam.includes(exam_questions: { question: :marking_steps }).find(params[:id])
     @variant = params[:variant].presence || 'marker'
