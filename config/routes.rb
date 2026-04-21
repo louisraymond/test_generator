@@ -22,6 +22,10 @@ Rails.application.routes.draw do
   resources :questions, only: %i[index new create edit update]
   resources :topics, only: %i[index show new create edit update]
 
+  # Redesign workspace (Phases 3-10). Single route; tab selected by ?tab=.
+  get  '/workspace', to: 'workspaces#show'
+  post '/workspace', to: 'workspaces#update'
+
   namespace :api do
     # OpenAPI spec — public (no BasicAuth). Serves `docs/openapi.yml` as
     # YAML by default, JSON on request. See Api::DocsController.

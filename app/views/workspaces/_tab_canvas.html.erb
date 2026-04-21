@@ -1,0 +1,16 @@
+<section class="tab-stub" data-tab="canvas">
+  <div class="tab-stub__eyebrow">Canvas</div>
+  <h1 class="tab-stub__title">Edit the paper</h1>
+  <% if @exam %>
+    <p class="tab-stub__body">
+      Previewing <strong><%= @exam.title %></strong>. Jump to the
+      <%= link_to 'redesigned paper', paper_exam_path(@exam) %> or the
+      <%= link_to 'mark scheme', marking_scheme_exam_path(@exam) %>.
+    </p>
+  <% else %>
+    <p class="tab-stub__body">
+      Select an exam via <code>?exam=ID</code>. The three-column editor with paper-is-editor
+      interactions lands in Phases 5–7.
+    </p>
+  <% end %>
+</section>

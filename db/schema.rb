@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -59,6 +59,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
     t.jsonb "grade_boundaries", default: {}, null: false
     t.string "centre_name"
     t.boolean "sections_have_letters", default: true, null: false
+    t.text "principles_of_marking"
     t.index ["last_used_at"], name: "index_exam_templates_on_last_used_at"
     t.index ["name"], name: "index_exam_templates_on_name", unique: true
   end
@@ -95,6 +96,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
     t.index ["topic_module_id"], name: "index_learning_objectives_on_topic_module_id"
   end
 
+  create_table "marking_steps", force: :cascade do |t|
+    t.bigint "question_id", null: false
+    t.integer "position", null: false
+    t.string "kind", null: false
+    t.integer "n", default: 1, null: false
+    t.text "text", null: false
+    t.text "accepts", default: [], array: true
+    t.text "rejects", default: [], array: true
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["question_id", "position"], name: "index_marking_steps_on_question_id_and_position", unique: true
+    t.index ["question_id"], name: "index_marking_steps_on_question_id"
+  end
+
   create_table "question_learning_objectives", force: :cascade do |t|
     t.bigint "question_id", null: false
     t.bigint "learning_objective_id", null: false
@@ -121,6 +137,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
     t.datetime "updated_at", null: false
     t.bigint "topic_module_id"
     t.string "bloom_level"
+    t.text "marker_notes"
     t.index ["bloom_level"], name: "index_questions_on_bloom_level"
     t.index ["question_type"], name: "index_questions_on_question_type"
     t.index ["source_id"], name: "index_questions_on_source_id"
@@ -194,6 +211,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_090200) do
   add_foreign_key "exams", "exam_templates"
   add_foreign_key "learning_objectives", "topic_modules"
   add_foreign_key "learning_objectives", "topics"
+  add_foreign_key "marking_steps", "questions"
   add_foreign_key "question_learning_objectives", "learning_objectives"
   add_foreign_key "question_learning_objectives", "questions"
   add_foreign_key "questions", "sources"
