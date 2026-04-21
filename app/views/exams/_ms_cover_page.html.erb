@@ -1,0 +1,68 @@
+<%#
+  Marker's-copy cover page. Pairs with _cover_page (student paper) —
+  same typography, paper--ms tint, maroon "Marker's copy" running head.
+%>
+<div class="paper paper--ms">
+  <div class="runhead">
+    <b style="color: var(--accent);">Marker's copy · confidential</b>
+    <span>Examiner initials ________</span>
+  </div>
+
+  <div class="cover">
+    <div class="cover__eyebrow" style="color: var(--accent);">
+      <%= paper_eyebrow(exam).presence || 'Examination paper' %> — Mark scheme
+    </div>
+    <h1 class="cover__title" style="color: var(--accent);"><%= exam.title %></h1>
+    <% if exam.exam_template&.subtitle.present? %>
+      <p class="cover__sub"><%= exam.exam_template.subtitle %></p>
+    <% end %>
+
+    <div class="cover__grid">
+      <div class="cover__cell">
+        <span>Paper</span>
+        <b><%= (exam.exam_date || exam.created_at.to_date).strftime('%-d %b %Y') %></b>
+      </div>
+      <div class="cover__cell">
+        <span>Total</span>
+        <b><%= exam.total_marks %> marks</b>
+      </div>
+      <div class="cover__cell">
+        <span>Grade boundaries</span>
+        <b>
+          <%= (exam.exam_template&.grade_boundaries.presence || {}).map { |g, m| "#{g} #{m}" }.join(' · ').presence || '—' %>
+        </b>
+      </div>
+      <div class="cover__cell">
+        <span>Moderator</span>
+        <b>________</b>
+      </div>
+    </div>
+  </div>
+
+  <% principles = exam.exam_template&.principles_of_marking %>
+  <% if principles.present? %>
+    <div class="rubric" style="background: linear-gradient(to right, var(--credit-soft) 0%, var(--credit-soft) 4px, transparent 4px);">
+      <h4 style="color: var(--credit);">Principles of marking</h4>
+      <%= simple_format(principles, {}, wrapper_tag: 'ul') %>
+    </div>
+  <% end %>
+
+  <div style="font-family: 'Source Sans 3', sans-serif; font-size: 9pt;">
+    <div class="smcap" style="margin-bottom: 8px;">Credit codes used in this scheme</div>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); column-gap: 30px; row-gap: 6px; margin: 0 0 14px;">
+      <div><%= render 'shared/mark', kind: 'm', n: 1 %> <span style="margin-left: 4px;">Method — awarded for a correct approach, independent of the answer.</span></div>
+      <div><%= render 'shared/mark', kind: 'a', n: 1 %> <span style="margin-left: 4px;">Accuracy — awarded only after the corresponding method mark.</span></div>
+      <div><%= render 'shared/mark', kind: 'b', n: 1 %> <span style="margin-left: 4px;">Unconditional — a standalone correct fact or final result.</span></div>
+      <div><%= render 'shared/mark', kind: 'dm', n: 1 %> <span style="margin-left: 4px;">Dependent method — requires a prior mark to be earned.</span></div>
+    </div>
+  </div>
+
+  <div class="wmk">Marker's copy</div>
+  <div class="runfoot">
+    <span>
+      <%= [exam.subject, (exam.paper_number.present? ? "P#{exam.paper_number}#{exam.tier&.first&.upcase}" : nil), 'MS'].compact.join(' / ') %>
+      · <%= (exam.exam_date || exam.created_at.to_date).strftime('%d.%m.%Y') %>
+    </span>
+    <span>Page 1 · contents ▶</span>
+  </div>
+</div>

@@ -31,6 +31,14 @@ class Question < ApplicationRecord
   has_many :exams, through: :exam_questions
   has_many :question_learning_objectives, dependent: :destroy
   has_many :learning_objectives, through: :question_learning_objectives
+  has_many :marking_steps, -> { ordered }, dependent: :destroy
+
+  # True when the question has one or more structured credit events.
+  # The mark-scheme renderer uses this to decide between the new card
+  # layout (with M/A/B/DM pills) and the legacy free-text fallback.
+  def has_structured_marking?
+    marking_steps.any?
+  end
 
   validates :content, :answer, :points, presence: true
   validates :points, numericality: { greater_than: 0, less_than_or_equal_to: 100 }

@@ -83,12 +83,16 @@ class ExamsController < ApplicationController
   end
 
   def marking_scheme
-    @exam = Exam.includes(exam_questions: :question).find(params[:id])
+    @exam = Exam.includes(exam_questions: { question: :marking_steps }).find(params[:id])
+    @variant = params[:variant].presence || 'marker'
+    template = @variant == 'legacy' ? 'exams/marking_scheme' : 'exams/marker_paper'
 
     respond_to do |format|
-      format.html
+      format.html do
+        render template: template, layout: 'pdf'
+      end
       format.pdf do
-        html = render_to_string(template: 'exams/marking_scheme', layout: 'pdf', formats: [:html])
+        html = render_to_string(template: template, layout: 'pdf', formats: [:html])
         pdf = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
         send_data pdf, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
       end

@@ -1,0 +1,108 @@
+<%#
+  Redesigned marker's-copy mark scheme.
+  Renders on the same paper.css A4 stock as the student paper (Phase 1).
+  Layout: cover plate (grade boundaries, credit legend, principles) +
+  one card per question (`.ms-q` grid) with credit pills and
+  Accept/Reject/Notes guidance column.
+
+  Backward-compatible: questions without structured marking_steps render
+  a free-text fallback block using their legacy `answer` column.
+%>
+
+<%= render 'ms_cover_page', exam: @exam %>
+
+<%
+  sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
+  global_counter = 0
+%>
+
+<% sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions| %>
+  <% section = section_number ? @exam.section_info(section_number) : nil %>
+  <% section_letter = section&.letter.presence || (section_number ? ('A'.ord + section_number).chr : nil) %>
+
+  <div class="paper paper--ms">
+    <div class="runhead">
+      <% if section %>
+        <b style="color: var(--accent);">Section <%= section_letter %> · <%= section.name %></b>
+      <% else %>
+        <b style="color: var(--accent);">Mark scheme</b>
+      <% end %>
+      <span>Examiner initials ________</span>
+    </div>
+
+    <% if section %>
+      <div class="section-head">
+        <div class="section-head__num" style="color: var(--accent);"><%= section_letter %></div>
+        <div class="section-head__title">
+          <%= section.name %>
+          <span style="font-weight: 400; color: var(--ink-muted); font-style: italic; font-size: 11pt;">— mark scheme</span>
+        </div>
+        <div class="section-head__meta"><%= pluralize(section.question_count, 'question') %></div>
+      </div>
+    <% end %>
+
+    <% exam_questions.each do |eq| %>
+      <% question = eq.question %>
+      <% global_counter += 1 %>
+
+      <div class="ms-q">
+        <div class="ms-q__num"><%= global_counter %></div>
+        <div class="ms-q__body">
+          <p class="ms-q__stem"><%= truncate(strip_tags(question.content.to_s), length: 140) %></p>
+
+          <% if question.has_structured_marking? %>
+            <div class="ms-q__answer">
+              <% question.marking_steps.ordered.each do |step| %>
+                <div class="stepcheck">
+                  <div class="stepcheck__tick">✓</div>
+                  <div class="stepcheck__text"><%= step.text %></div>
+                  <div><%= render 'shared/mark', kind: step.kind, n: step.n %></div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <%# Legacy fallback: question has no structured steps, render free-text answer. %>
+            <div class="ms-q__answer" style="font-family: 'Cormorant Garamond', serif; color: var(--ink-muted); font-style: italic;">
+              <%= simple_format(question.answer.to_s) %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="ms-q__guide">
+          <h5>Notes to marker</h5>
+          <% question.marking_steps.ordered.each do |step| %>
+            <% step.accepts.each do |a| %>
+              <div class="ar ar--accept"><div class="ar__lbl">Accept</div><div><%= a %></div></div>
+            <% end %>
+            <% step.rejects.each do |r| %>
+              <div class="ar ar--reject"><div class="ar__lbl">Reject</div><div><%= r %></div></div>
+            <% end %>
+            <% if step.notes.present? %>
+              <p style="margin: 6px 0 0;"><%= step.notes %></p>
+            <% end %>
+          <% end %>
+          <% if question.marker_notes.present? %>
+            <p style="margin: 6px 0 0;"><%= question.marker_notes %></p>
+          <% end %>
+        </div>
+
+        <div class="ms-q__total">
+          <span class="ms-q__total-num"><%= question.points %></span>
+          <span class="ms-q__total-lbl">Marks</span>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="wmk">Marker's copy</div>
+    <div class="runfoot">
+      <span>
+        <%= [@exam.subject, (@exam.paper_number.present? ? "P#{@exam.paper_number}#{@exam.tier&.first&.upcase}" : nil), 'MS'].compact.join(' / ') %>
+        · <%= (@exam.exam_date || @exam.created_at.to_date).strftime('%d.%m.%Y') %>
+      </span>
+      <span>
+        <% if section %>Section <%= section_letter %> · <% end %>
+        turn over ▶
+      </span>
+    </div>
+  </div>
+<% end %>
