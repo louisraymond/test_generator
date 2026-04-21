@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>test_generator API — reference</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Scalar API reference. Reads the OpenAPI spec from /api/openapi.yaml
+      (see Api::DocsController). "Try it" requests against the real API
+      will prompt for BasicAuth in the browser.
+    -->
+    <script
+      id="api-reference"
+      data-url="/api/openapi.yaml"
+      data-configuration='{"theme": "default", "hideDownloadButton": false}'
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>
