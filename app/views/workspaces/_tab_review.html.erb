@@ -1,7 +1,64 @@
-<section class="tab-stub" data-tab="review">
-  <div class="tab-stub__eyebrow">Review & export</div>
-  <h1 class="tab-stub__title">Side-by-side preview</h1>
-  <p class="tab-stub__body">
-    Student paper · Mark scheme, per-page thumbnails, export rail. Lands in Phase 9.
-  </p>
-</section>
+<% if @exam %>
+  <section class="review">
+    <main class="review__panes">
+      <div class="review__pane review__student">
+        <header class="review__pane-header">
+          <div class="eyebrow">Student paper</div>
+          <div class="review__pane-title"><%= @exam.title %></div>
+        </header>
+        <iframe src="<%= paper_exam_path(@exam) %>" title="Student paper preview" loading="lazy"></iframe>
+      </div>
+
+      <div class="review__pane review__marker">
+        <header class="review__pane-header">
+          <div class="eyebrow">Mark scheme</div>
+          <div class="review__pane-title">Marker's copy</div>
+        </header>
+        <iframe src="<%= marking_scheme_exam_path(@exam, variant: 'marker') %>" title="Mark scheme preview" loading="lazy"></iframe>
+      </div>
+    </main>
+
+    <aside class="review-export" aria-label="Export rail">
+      <header class="review-export__header">
+        <div class="eyebrow">Export</div>
+        <div class="review-export__title">Download or share</div>
+      </header>
+
+      <section class="review-export__group">
+        <div class="review-export__label">Formats</div>
+        <%= link_to 'Student paper · PDF', exam_path(@exam, format: :pdf), class: 'review-export__btn' %>
+        <%= link_to "Marker's copy · PDF",
+                    marking_scheme_exam_path(@exam, format: :pdf, variant: 'marker'),
+                    class: 'review-export__btn' %>
+      </section>
+
+      <section class="review-export__group">
+        <div class="review-export__label">Shuffle seed</div>
+        <%= form_with url: exam_path(@exam), method: :get, class: 'review-export__seed' do %>
+          <input type="number" name="seed" value="<%= @exam.seed %>" class="review-export__seed-input" />
+          <span class="review-export__hint">
+            MCQ options shuffle deterministically from the seed.
+          </span>
+        <% end %>
+      </section>
+
+      <section class="review-export__group">
+        <div class="review-export__label">Answers</div>
+        <%= link_to 'Without answers (student)', exam_path(@exam, format: :pdf, answers: 'hidden'),
+                    class: 'review-export__btn' %>
+        <%= link_to "With answers (marker)",
+                    marking_scheme_exam_path(@exam, format: :pdf, variant: 'marker'),
+                    class: 'review-export__btn review-export__btn--accent' %>
+      </section>
+    </aside>
+  </section>
+<% else %>
+  <section class="tab-stub" data-tab="review">
+    <div class="tab-stub__eyebrow">Review & export</div>
+    <h1 class="tab-stub__title">No exam selected</h1>
+    <p class="tab-stub__body">
+      Open this tab with <code>?exam=ID</code> to preview the student paper and
+      mark scheme side-by-side.
+    </p>
+  </section>
+<% end %>
