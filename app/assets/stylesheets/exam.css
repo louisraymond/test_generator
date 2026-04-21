@@ -571,8 +571,13 @@ h1 {
 /* Lined answer space */
 
 .answer-lines {
-    /* Blank reserved writing space (no ruled lines — Louis's preference). */
-    background-image: none;
+    /* Ruled writing lines for prose answer space (short answer, markdown,
+       code-analysis, composite, etc). Calculation questions use the blank
+       .answer-box instead — Louis's "blank space for math" preference is
+       carried by that class, not by stripping lines globally. */
+    background-image: repeating-linear-gradient( to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 6.65mm, rgba(0, 0, 0, 0.26) 6.65mm, rgba(0, 0, 0, 0.26) 7mm);
+    background-size: 100% 7mm;
+    /* Uniform stroke thickness; stable cadence. */
     min-height: 20mm;
     /* Keep the whole writing block together: better to bump to next page than
        to split the candidate's answer area across the page boundary. */
