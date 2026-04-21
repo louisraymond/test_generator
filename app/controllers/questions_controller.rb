@@ -1,5 +1,5 @@
 class QuestionsController < ApplicationController
-  before_action :set_question, only: %i[edit update]
+  before_action :set_question, only: %i[edit update toggle_correct toggle_blank]
   before_action :load_filters, only: :index
   before_action :load_form_data, only: %i[new create edit update]
 
@@ -50,6 +50,52 @@ class QuestionsController < ApplicationController
       @question.options_text = params.dig(:question, :options_text)
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  # Phase 7 — MCQ paper-is-editor: click an option on the paper to mark it
+  # correct. Single-choice semantics (flips others off). Non-MCQ questions
+  # return 422 so the Stimulus controller can ignore stale clicks.
+  def toggle_correct
+    unless @question.question_type == 'multiple_choice'
+      head :unprocessable_entity and return
+    end
+
+    idx = params[:index].to_i
+    options = @question.options.map(&:deep_dup)
+    options.each_with_index do |opt, i|
+      opt['correct'] = (i == idx)
+    end
+    # Bypass the MCQ validator — it coerces options through a `||` chain
+    # that nils-out explicit `false` values. The shape we wrote is already
+    # valid on re-read (one true, rest false).
+    @question.update_columns(options: options, updated_at: Time.current)
+    head :ok
+  end
+
+  # Phase 7 — Cloze paper-is-editor: click a word to blank it. Stores a
+  # `tokens` array under options with {index, blanked, word, answer} entries
+  # so the renderer can draw the printed gaps deterministically.
+  def toggle_blank
+    unless @question.question_type == 'cloze'
+      head :unprocessable_entity and return
+    end
+
+    words = @question.content.to_s.split(/\s+/)
+    idx = params[:word_index].to_i
+    return head(:unprocessable_entity) if idx.negative? || idx >= words.length
+
+    tokens = Array(@question.options.is_a?(Hash) ? @question.options['tokens'] : []).map(&:deep_dup)
+    existing = tokens.index { |t| t.is_a?(Hash) && t['index'] == idx }
+
+    if existing
+      tokens.delete_at(existing)
+    else
+      tokens << { 'index' => idx, 'blanked' => true, 'word' => words[idx] }
+    end
+
+    payload = (@question.options.is_a?(Hash) ? @question.options : {}).merge('tokens' => tokens)
+    @question.update!(options: payload)
+    head :ok
   end
 
   def types_preview

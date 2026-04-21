@@ -1,0 +1,52 @@
+<%#
+  Phase 7 — per-type body rendering for a single question on the redesigned
+  paper. Controllers attach when rendered in a Canvas preview-frame (same
+  markup, but the Stimulus controllers are enabled). In PDF output the
+  controllers don't connect, so output is static.
+
+  Locals: question, counter, exam_question (optional).
+%>
+<div class="q" data-controller="<%= 'mcq-paper' if question.question_type == 'multiple_choice' %><%= 'cloze-paper' if question.question_type == 'cloze' %>"
+     data-mcq-paper-question-id-value="<%= question.id if question.question_type == 'multiple_choice' %>"
+     data-cloze-paper-question-id-value="<%= question.id if question.question_type == 'cloze' %>">
+  <div class="q__num"><%= counter %></div>
+  <div class="q__body">
+    <% case question.question_type %>
+    <% when 'multiple_choice' %>
+      <div class="q__stem"><%= question.content.to_s.html_safe %></div>
+      <ol class="opts">
+        <% question.options.each_with_index do |opt, i| %>
+          <li class="opt-li <%= 'is-correct' if ActiveModel::Type::Boolean.new.cast(opt['correct']) %>"
+              data-mcq-paper-target="option"
+              data-option-index="<%= i %>"
+              data-action="click->mcq-paper#markCorrect">
+            <span data-edit><%= opt['text'] %></span>
+          </li>
+        <% end %>
+      </ol>
+    <% when 'cloze' %>
+      <% words = question.content.to_s.split(/\s+/) %>
+      <% tokens = (question.options.is_a?(Hash) ? (question.options['tokens'] || []) : []) %>
+      <% blanked = tokens.select { |t| t['blanked'] }.map { |t| t['index'] }.to_set %>
+      <% blank_counter = 0 %>
+      <div class="q__stem" style="line-height: 2;">
+        <% words.each_with_index do |w, i| %>
+          <% is_blank = blanked.include?(i) %>
+          <% blank_counter += 1 if is_blank %>
+          <span class="w <%= 'is-blanked' if is_blank %>"
+                data-word-index="<%= i %>"
+                <% if is_blank %>data-blank-n="<%= blank_counter %>"<% end %>
+                data-action="click->cloze-paper#toggleBlank"><%= w %></span><%= ' ' %>
+        <% end %>
+      </div>
+    <% else %>
+      <%# Default/fallback — matches Phase 1 shape %>
+      <div class="q__stem"><%= question.content.to_s.html_safe %></div>
+      <div class="<%= marks_to_workspace(question.points) %>"></div>
+      <% if question.points.to_i >= 5 %>
+        <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
+      <% end %>
+    <% end %>
+  </div>
+  <div class="q__marks"><i>[<b><%= question.points %></b> <%= 'mark'.pluralize(question.points.to_i) %>]</i></div>
+</div>

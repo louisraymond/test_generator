@@ -45,21 +45,8 @@
     <% end %>
 
     <% exam_questions.each do |eq| %>
-      <% question = eq.question %>
       <% global_counter += 1 %>
-      <% points = question.points.to_i %>
-
-      <div class="q">
-        <div class="q__num"><%= global_counter %></div>
-        <div class="q__body">
-          <div class="q__stem"><%= question.content.to_s.html_safe %></div>
-          <div class="<%= marks_to_workspace(points) %>"></div>
-          <% if points >= 5 %>
-            <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
-          <% end %>
-        </div>
-        <div class="q__marks"><i>[<b><%= points %></b> <%= 'mark'.pluralize(points) %>]</i></div>
-      </div>
+      <%= render 'paper_question', question: eq.question, counter: global_counter, exam_question: eq %>
     <% end %>
 
     <div class="wmk">Specimen · do not redistribute</div>

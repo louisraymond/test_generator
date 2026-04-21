@@ -20,7 +20,12 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :questions, only: %i[index new create edit update]
+  resources :questions, only: %i[index new create edit update] do
+    member do
+      post :toggle_correct # MCQ paper-editor click
+      post :toggle_blank   # Cloze paper-editor click
+    end
+  end
   resources :topics, only: %i[index show new create edit update]
 
   # Phase 6 — inspector rail content for a given exam_question. Drop-in

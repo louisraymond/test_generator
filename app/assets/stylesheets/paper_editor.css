@@ -1,0 +1,62 @@
+/* Paper-is-editor affordances (Phase 7).
+ * Only active inside the Canvas preview-frame (where the Stimulus
+ * controllers attach). In PDF output, hover affordances don't fire so
+ * the surface renders identically to Phase 1.
+ */
+
+.paper-editable {
+  transition: background-color var(--dur) var(--ease);
+  border-radius: 2px;
+}
+.paper-editable:hover {
+  background-color: rgba(180, 83, 42, 0.08);
+  cursor: text;
+  outline: 1px dashed rgba(180, 83, 42, 0.35);
+  outline-offset: 1px;
+}
+
+/* MCQ — clickable option row */
+.paper .opt-li {
+  list-style-position: outside;
+  padding: 6px 10px 6px 6px;
+  margin: 2px 0;
+  position: relative;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color var(--dur) var(--ease);
+}
+.paper .opt-li:hover { background: rgba(180, 83, 42, 0.05); }
+.paper .opt-li.is-correct::before {
+  content: "✓";
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  color: var(--credit);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Cloze — word tokens */
+.paper .w {
+  display: inline-block;
+  padding: 0 1px;
+  margin: 0 1px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.paper .w:hover { background: rgba(180, 83, 42, 0.08); }
+.paper .w.is-blanked {
+  background: var(--gap, #f3efe4);
+  border-bottom: 1.5pt solid var(--ink);
+  color: transparent;
+  padding: 0 6px;
+}
+.paper .w.is-blanked::after {
+  content: attr(data-blank-n);
+  display: inline;
+  color: var(--ink-muted);
+  font-size: 8pt;
+  vertical-align: super;
+  margin-left: 2px;
+}
