@@ -1,6 +1,8 @@
+<% size_class = question.answer_size.presence || 'short' %>
 <div class="markdown-body">
   <%= render_markdown(local_assigns[:content] || question.content) %>
-  <% if question.answer_size.present? %>
-    <div class="answer-lines answer-lines-<%= question.answer_size %>"></div>
-  <% end %>
+  <%# Always render ruled writing space for markdown questions; defaults to
+      'short' (25mm) when no answer_size is set. Same pattern as _code_analysis
+      and _composite. %>
+  <div class="answer-lines answer-lines-<%= size_class %>"></div>
 </div>
