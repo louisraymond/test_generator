@@ -39,10 +39,10 @@
       <% if body.present? %>
         <%= render 'questions/markdown', question: question, content: body %>
       <% else %>
-        <%# No fenced body; just show answer lines if requested %>
-        <% if question.answer_size.present? %>
-          <div class="answer-lines answer-lines-<%= size_class %>"></div>
-        <% end %>
+        <%# No fenced body — render a default ruled writing space. size_class
+            is defined at the top of this partial and defaults to 'short'
+            when answer_size is nil. %>
+        <div class="answer-lines answer-lines-<%= size_class %>"></div>
       <% end %>
     <% when 'composite' %>
       <%= render 'questions/composite', question: question %>

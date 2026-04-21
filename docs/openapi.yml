@@ -315,10 +315,29 @@ paths:
                       learning_objective_ids:
                         type: array
                         items: { type: integer }
-                      answer_size: { type: string }
+                      answer_size:
+                        type: string
+                        enum: [short, medium, long]
+                        nullable: true
+                        description: |
+                          Controls the height of the ruled writing space rendered below the question
+                          in exam PDFs. Applies to free-text question types (markdown, short_answer,
+                          calculation's working box, code_analysis, composite). Heights:
+                            - short  ≈ 25mm
+                            - medium ≈ 70mm
+                            - long   ≈ 140mm
+                          When omitted, defaults to 'short' at render time.
                       source_reference: { type: string }
-                      answer_label: { type: string }
-                      unit: { type: string }
+                      answer_label:
+                        type: string
+                        description: |
+                          Label shown next to the final-answer line in calculation questions (e.g. "x =", "t =").
+                          Defaults to "answer" when omitted. Ignored by other question types.
+                      unit:
+                        type: string
+                        description: |
+                          Unit string rendered after the final-answer line in calculation questions
+                          (e.g. "m/s", "kg"). Ignored by other question types.
       responses:
         '200':
           description: Questions created (possibly with partial errors)
