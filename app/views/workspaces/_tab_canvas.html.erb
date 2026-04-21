@@ -9,13 +9,15 @@
       <ol class="qlist" role="list">
         <% @exam.exam_questions.each_with_index do |eq, i| %>
           <% q = eq.question %>
-          <li class="qlist-item" data-eq-id="<%= eq.id %>">
+          <%= link_to rail_exam_question_path(eq),
+                      class: 'qlist-item',
+                      data: { eq_id: eq.id, action: 'click->canvas#selectQuestion', 'turbo-frame': 'rail-body' } do %>
             <span class="drag-handle" aria-hidden="true">⋮⋮</span>
             <span class="qlist-item__num"><%= i + 1 %></span>
             <span class="qlist-item__type"><%= q.question_type %></span>
             <span class="qlist-item__stem"><%= truncate(strip_tags(q.content.to_s), length: 48) %></span>
             <span class="qlist-item__marks"><%= q.points %>m</span>
-          </li>
+          <% end %>
         <% end %>
       </ol>
     </aside>
@@ -29,13 +31,14 @@
       </div>
     </main>
 
-    <%# Right: inspector rail (populated in Phase 6) %>
+    <%# Right: inspector rail (Phase 6 wires it, Phase 7 fills per-type) %>
     <aside class="canvas__rail" data-canvas-target="rail">
-      <header class="rail__header">
-        <div class="eyebrow">Inspector</div>
-        <div class="rail__hint">Select a question on the left</div>
-      </header>
-      <div class="rail__body" data-canvas-target="railBody"></div>
+      <turbo-frame id="rail-body">
+        <header class="rail__header">
+          <div class="eyebrow">Inspector</div>
+          <div class="rail__hint">Select a question on the left</div>
+        </header>
+      </turbo-frame>
     </aside>
   </section>
 <% else %>

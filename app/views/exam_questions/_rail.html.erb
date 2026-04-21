@@ -1,0 +1,64 @@
+<turbo-frame id="rail-body" data-controller="rail">
+  <div class="rail-tabs" role="tablist">
+    <button type="button" class="rail-tab is-active" role="tab" data-action="click->rail#switch" data-rail-tab="content" aria-selected="true">Content</button>
+    <button type="button" class="rail-tab" role="tab" data-action="click->rail#switch" data-rail-tab="marking" aria-selected="false">Marking</button>
+    <button type="button" class="rail-tab" role="tab" data-action="click->rail#switch" data-rail-tab="metadata" aria-selected="false">Metadata</button>
+  </div>
+
+  <%= form_with model: question, url: question_path(question), method: :patch,
+                data: { controller: 'rail-form', 'rail-form-exam-id-value': exam_question.exam_id } do |f| %>
+
+    <section class="rail-panel is-active" data-rail-panel="content">
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_content">Stem</label>
+        <%= f.text_area :content, id: 'question_content', rows: 6, class: 'rail-input', placeholder: 'Question stem (Markdown + KaTeX supported)' %>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_answer">Answer</label>
+        <%= f.text_area :answer, id: 'question_answer', rows: 4, class: 'rail-input', placeholder: 'Free-text answer (fallback if no structured marking steps)' %>
+      </div>
+    </section>
+
+    <section class="rail-panel" data-rail-panel="marking">
+      <div class="rail-field">
+        <label class="rail-field__label">Credit events</label>
+        <p class="rail-hint">
+          <%= pluralize(question.marking_steps.count, 'marking step') %> recorded.
+          Phase 7 adds inline editing here.
+        </p>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_marker_notes">Notes to marker</label>
+        <%= f.text_area :marker_notes, id: 'question_marker_notes', rows: 3, class: 'rail-input' %>
+      </div>
+    </section>
+
+    <section class="rail-panel" data-rail-panel="metadata">
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_bloom_level">Bloom level</label>
+        <%= f.select :bloom_level, Question::BLOOM_LEVELS.map { |b| [b.capitalize, b] }, { include_blank: '—' }, class: 'rail-input', id: 'question_bloom_level' %>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_points">Marks</label>
+        <%= f.number_field :points, id: 'question_points', min: 1, max: 100, class: 'rail-input' %>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_answer_label">Answer label</label>
+        <%= f.text_field :answer_label, id: 'question_answer_label', class: 'rail-input', placeholder: 'e.g. θ =' %>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="question_unit">Unit</label>
+        <%= f.text_field :unit, id: 'question_unit', class: 'rail-input', placeholder: 'e.g. °, m/s' %>
+      </div>
+    </section>
+
+    <footer class="rail-footer">
+      <%= f.submit 'Save', class: 'rail-btn' %>
+    </footer>
+  <% end %>
+</turbo-frame>

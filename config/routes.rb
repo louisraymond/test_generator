@@ -23,6 +23,12 @@ Rails.application.routes.draw do
   resources :questions, only: %i[index new create edit update]
   resources :topics, only: %i[index show new create edit update]
 
+  # Phase 6 — inspector rail content for a given exam_question. Drop-in
+  # <turbo-frame id="rail-body">.
+  resources :exam_questions, only: [] do
+    member { get :rail }
+  end
+
   # Redesign workspace (Phases 3-10). Single route; tab selected by ?tab=.
   get  '/workspace', to: 'workspaces#show'
   post '/workspace', to: 'workspaces#update'

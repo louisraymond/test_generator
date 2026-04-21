@@ -1,0 +1,97 @@
+/* Inspector rail (Phase 6) — dark charcoal surface on the Canvas right column.
+ * Colours from the design handoff: rail bg #1a1915, rail ink #e8e5de,
+ * muted ink #a89c82.
+ */
+
+.canvas__rail { background: #1a1915; color: #e8e5de; }
+
+.rail-tabs {
+  display: flex;
+  border-bottom: 1px solid #2d2a23;
+  padding: 0 8px;
+}
+.rail-tab {
+  background: transparent;
+  border: none;
+  color: #9a9287;
+  padding: 12px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.rail-tab:hover { color: #e8e5de; }
+.rail-tab.is-active {
+  color: #f7f4ee;
+  border-bottom-color: var(--accent);
+}
+
+.rail-panel { display: none; padding: 16px; }
+.rail-panel.is-active { display: block; }
+
+.rail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.rail-field__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #a89c82;
+  text-transform: uppercase;
+}
+.rail-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3a342c;
+  color: #e8e5de;
+  padding: 6px 2px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-bottom-color var(--dur) var(--ease);
+}
+.rail-input:focus {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--accent);
+  padding-bottom: 5px;
+}
+textarea.rail-input {
+  min-height: 72px;
+  resize: vertical;
+  line-height: 1.5;
+}
+select.rail-input {
+  appearance: none;
+}
+
+.rail-hint {
+  font-size: 12px;
+  font-style: italic;
+  color: #9a9287;
+  margin: 0;
+}
+
+.rail-footer {
+  padding: 16px;
+  border-top: 1px solid #2d2a23;
+  display: flex;
+  justify-content: flex-end;
+}
+.rail-btn {
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--r-inner);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.rail-btn:hover { background: var(--accent-ink); }
