@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  root 'exams#new'
+  root to: redirect('/workspace')
 
   resources :exams, only: %i[index new create show] do
     member do

@@ -24,6 +24,9 @@
         </button>
 
         <%= link_to 'Exam Generator', root_path, class: 'app-logo', data: { action: 'menu#close' } %>
+
+        <%= link_to 'New workspace →', '/workspace',
+                    style: 'margin-left:auto; padding:6px 12px; background:#b4532a; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:500;' %>
       </header>
 
       <div class="nav-backdrop" data-menu-target="backdrop" data-action="click->menu#close"></div>
