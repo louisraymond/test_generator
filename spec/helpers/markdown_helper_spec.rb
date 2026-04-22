@@ -63,43 +63,10 @@ RSpec.describe MarkdownHelper, type: :helper do
     end
   end
 
-  describe '#auto_wrap_math' do
-    it 'leaves plain prose untouched' do
-      text = 'The quick brown fox jumps over the lazy dog.'
+  describe '#auto_wrap_math (reverted — no-op identity)' do
+    it 'returns text unchanged' do
+      text = 'H(P, Q) = −Σ P(x) log Q(x). θ > 0.'
       expect(helper.auto_wrap_math(text)).to eq(text)
-    end
-
-    it 'leaves already-delimited LaTeX alone' do
-      text = 'Given $x^2 + y^2 = r^2$, find r.'
-      expect(helper.auto_wrap_math(text)).to eq(text)
-    end
-
-    it 'wraps a clause containing Greek sigma' do
-      text = 'H(P, Q) = −Σ P(x) log Q(x).'
-      out = helper.auto_wrap_math(text)
-      expect(out).to start_with('$H(P, Q)')
-      expect(out).to include('\\sum')       # unicode Σ → LaTeX \sum
-      expect(out).to include('-')           # unicode minus → ascii minus
-      expect(out).to end_with('$.')
-    end
-
-    it 'translates unicode inequality to LaTeX' do
-      text = 'Assert x ≥ 3 and y ≤ 5. But π > 0.'
-      out = helper.auto_wrap_math(text)
-      expect(out).to include('\\ge').and include('\\le')
-    end
-
-    it 'leaves plain subscripts/superscripts alone (Redcarpet <sup>)' do
-      text = 'Compute D_KL across x_1, x_2.'
-      expect(helper.auto_wrap_math(text)).to eq(text)
-    end
-
-    it 'works clause-by-clause so non-math sentences stay plain' do
-      text = 'The quick fox. Σ runs over all pixels. Another plain sentence.'
-      out = helper.auto_wrap_math(text)
-      expect(out).to start_with('The quick fox.')
-      expect(out).to include('$\\sum runs over all pixels$')
-      expect(out).to end_with('Another plain sentence.')
     end
   end
 end

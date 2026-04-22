@@ -96,15 +96,10 @@ module MarkdownHelper
   # math spans are extracted before Redcarpet runs so its extensions
   # (superscript, strikethrough, emphasis) don't mangle `x^2`, `a~b`, or `a_1`
   # inside formulas — while still processing `^` as superscript in plain prose.
-  #
-  # Wave 5: a pre-pass detects math-heavy clauses in author prose that
-  # weren't wrapped in `$...$` delimiters (common in seeded content —
-  # "H(P, Q) = −Σ P(x) log Q(x)") and wraps them so KaTeX can render +
-  # the `.paper .katex` style makes them pop out of the serif body.
   def render_markdown(text)
     return '' if text.blank?
 
-    with_math_protected(auto_wrap_math(text)) do |t|
+    with_math_protected(text) do |t|
       sanitize(BLOCK_MARKDOWN.render(t), tags: BLOCK_ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
     end
   end
@@ -126,39 +121,22 @@ module MarkdownHelper
   def render_markdown_inline(text)
     return '' if text.blank?
 
-    with_math_protected(auto_wrap_math(text)) do |t|
+    with_math_protected(text) do |t|
       html = INLINE_MARKDOWN.render(t).sub(/\A<p>/, '').sub(%r{</p>\s*\z}, '')
       html = html.gsub('<code>', '<code class="md-inline">')
       sanitize(html, tags: INLINE_ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
     end
   end
 
-  # Wrap math-heavy clauses in `$...$` delimiters so the paper's KaTeX
-  # auto-render picks them up. Works clause-by-clause (split on
-  # sentence-ish punctuation) — if a clause contains any math sigil
-  # (Greek letter, math operator, or subscript/superscript pattern)
-  # AND the clause is not already wrapped in $...$, the whole clause
-  # becomes inline math. Inside the wrapped span, known-problematic
-  # Unicode math chars are swapped for their LaTeX equivalents.
+  # Wave 5: the earlier auto_wrap_math helper was deliberately reverted.
+  # It wrapped entire sentence-long clauses that contained any Greek
+  # letter or math operator in `$...$`. KaTeX then rendered those
+  # clauses as math mode — turning multi-sentence prose that happened
+  # to mention `θ*` or `∥` into a wall of one-letter-per-line italic
+  # variables ("At that plateau" → Atthatplateau with no spacing).
+  # Wrapping is left to explicit `$…$` from seed authors.
   def auto_wrap_math(text)
-    return text if text.blank?
-
-    # Split by sentence-ish punctuation but KEEP the delimiters so join
-    # is lossless. `(?=\s|$)` guards against blowing up abbreviations.
-    parts = text.to_s.split(/([.?!](?=\s|$)|\n\n+)/)
-    parts.map.with_index do |part, i|
-      next part unless i.even?          # odd indices are delimiters
-      next part if part.include?('$')   # already contains LaTeX — leave alone
-      next part unless part.match?(GREEK_AND_MATH_SIGILS)
-
-      leading  = part[/\A\s*/]
-      trailing = part[/\s*\z/]
-      core     = part.strip
-      next part if core.empty?
-
-      transliterated = core.gsub(Regexp.union(UNICODE_MATH_MAP.keys)) { |c| UNICODE_MATH_MAP[c] }
-      "#{leading}$#{transliterated}$#{trailing}"
-    end.join
+    text
   end
 
   private
