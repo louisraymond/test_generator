@@ -1,0 +1,84 @@
+<%#
+  Wave 3 — per-type rail Content panel. Surfaces the interactions /
+  summaries that don't fit naturally on the printed paper: shuffle seeds,
+  distractor counts, pin lists, answer-format switches, etc.
+  Locals: question, exam_question, descriptor
+%>
+<% opts = question.typed_options %>
+<div class="rail-typeblock" data-controller="rail-type">
+  <% case question.question_type %>
+  <% when 'multiple_choice' %>
+    <p class="rail-hint">
+      <%= pluralize(Array(question.options).length, 'option') %> ·
+      <%= pluralize(opts&.correct_indices&.length || 0, 'correct answer') %>
+    </p>
+    <p class="rail-hint">Click an option on the paper to mark correct. Shift-click to eliminate.</p>
+
+  <% when 'cloze' %>
+    <% tokens = Array(question.options.is_a?(Hash) ? question.options['tokens'] : []) %>
+    <% blanked = tokens.count { |t| t['blanked'] } %>
+    <p class="rail-hint">
+      <%= pluralize(blanked, 'blanked word') %> in the stem.
+    </p>
+    <p class="rail-hint">Click a word on the paper to blank it.</p>
+
+  <% when 'matching' %>
+    <% left = Array((question.options.is_a?(Hash) ? question.options['left'] : [])) %>
+    <p class="rail-hint"><%= pluralize(left.length, 'pair') %>.</p>
+    <div class="rail-field">
+      <label class="rail-field__label">Shuffle seed</label>
+      <p class="rail-hint rail-mono"><%= (question.options.is_a?(Hash) ? question.options['seed'] : nil) || question.id %></p>
+      <button type="button" class="rail-btn rail-btn--ghost"
+              data-action="click->rail-type#reseed"
+              data-rail-type-question-id-param="<%= question.id %>">Re-seed</button>
+    </div>
+
+  <% when 'ordering', 'ranking' %>
+    <% items = Array(question.options) %>
+    <p class="rail-hint"><%= pluralize(items.length, 'item') %> · drag on the paper to reorder.</p>
+
+  <% when 'calculation' %>
+    <% calc = opts %>
+    <p class="rail-hint">
+      <% if calc %>
+        Answer format: <%= calc.answer_format %>
+        <%= "· unit #{calc.unit}" if calc.unit %>
+      <% end %>
+      Working room scales with marks (see paper).
+    </p>
+
+  <% when 'code_analysis' %>
+    <% code = question.options.is_a?(Hash) ? question.options : {} %>
+    <p class="rail-hint">
+      Language: <strong><%= code['language'] || 'text' %></strong> ·
+      answers: <strong><%= code['answer_format'] || 'lines' %></strong>
+    </p>
+    <p class="rail-hint">Click a code line on the paper to highlight (marks the bug).</p>
+    <p class="rail-hint">
+      <%= pluralize(Array(code['highlighted_lines']).length, 'highlighted line') %>.
+    </p>
+
+  <% when 'diagram_label' %>
+    <% pins = Array(question.options.is_a?(Hash) ? question.options['pins'] : []) %>
+    <p class="rail-hint">
+      <%= pluralize(pins.length, 'pin') %> placed on the figure.
+      Click the figure to drop a new pin; click a pin to remove.
+    </p>
+
+  <% when 'image_occlusion' %>
+    <% masks = Array(question.options.is_a?(Hash) ? question.options['masks'] : []) %>
+    <p class="rail-hint">
+      <%= pluralize(masks.length, 'mask') %>. Drag on the figure to draw a new mask.
+    </p>
+
+  <% when 'composite' %>
+    <% parts = question.question_parts.count %>
+    <% parts = Array(question.options.is_a?(Hash) ? question.options['parts'] : []).length if parts.zero? %>
+    <p class="rail-hint">
+      <%= pluralize(parts, 'sub-part') %>. Option-Return on a part to append.
+    </p>
+
+  <% else %>
+    <p class="rail-hint">Free-form written answer. Stem edits below flow into the paper live.</p>
+  <% end %>
+</div>

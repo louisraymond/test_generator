@@ -25,6 +25,13 @@ export default class extends Controller {
     })
   }
 
+  // Wave 3 — collapse the rail to a 32px handle. Re-click to expand.
+  collapse() {
+    const rail = document.querySelector(".canvas__rail") || this.element.closest(".canvas__rail")
+    if (!rail) return
+    rail.classList.toggle("is-collapsed")
+  }
+
   _onKey(event) {
     if (!(event.metaKey || event.ctrlKey)) return
     const map = { "1": "content", "2": "marking", "3": "metadata" }
