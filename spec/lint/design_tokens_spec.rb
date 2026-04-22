@@ -34,9 +34,13 @@ RSpec.describe 'Design tokens & font manifest' do
       expect(css).to include('--accent: #7a1d1a')
     end
 
-    it 'declares A4 @page size with redesign margins' do
+    it 'declares A4 @page with zero margin (the .paper block owns the inset)' do
       expect(css).to match(/@page\s*\{[^}]*size:\s*A4/m)
-      expect(css).to match(/margin:\s*22mm\s+18mm\s+22mm\s+24mm/)
+      # `@page` margin is 0 by design — stacking a second margin on top
+      # of the .paper element's own padding would force each .paper to
+      # overflow into a ghost second page holding only the absolute-
+      # positioned runfoot. See paper.css for full context.
+      expect(css).to match(/@page\s*\{[^}]*margin:\s*0/m)
     end
 
     it 'sizes the .paper box to A4 @ 96dpi' do

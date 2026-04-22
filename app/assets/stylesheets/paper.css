@@ -6,7 +6,13 @@
 
 @page {
   size: A4;
-  margin: 22mm 18mm 22mm 24mm;
+  /* `.paper` owns all whitespace via its own padding (76px top /
+   * 64px sides / 64px bottom ≈ 20mm / 17mm / 17mm). Declaring a
+   * second margin layer on @page would stack on top of the paper's
+   * own inset and force every .paper block to spill a ghost second
+   * page with only the absolute-positioned runfoot. Zero @page margin
+   * lets each .paper map 1:1 onto one printed A4 sheet. */
+  margin: 0;
 }
 
 /* Centre every .paper horizontally in the browser preview so the page
