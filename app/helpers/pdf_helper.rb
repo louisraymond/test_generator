@@ -107,7 +107,11 @@ module PdfHelper
         if text[i, 2] == '$$' && (m = text[i..].match(/\A\$\$.*?\$\$/m))
           tokens << { type: :math, text: m[0] }
           i += m[0].length
-        elsif (m = text[i..].match(/\A\$[^$\n\d][^$\n]*?\$(?![0-9])/))
+        elsif (m = text[i..].match(/\A\$[^$\n\d][^$\n]*?\$(?![0-9])/)) &&
+              !m[0].match?(/\[\[|\{\{/)
+          # Extra guard: if the candidate span contains autoblank markup
+          # ([[x]] or {{x}}), an author has almost certainly used `$` as
+          # decoration rather than math. Fall through so the blanks survive.
           tokens << { type: :math, text: m[0] }
           i += m[0].length
         else

@@ -159,5 +159,16 @@ RSpec.describe PdfHelper, type: :helper do
       toks = helper.tokenize_cloze('Given $x^2$, derive the root.')
       expect(toks.any? { |t| t[:type] == :math && t[:text] == '$x^2$' }).to be true
     end
+
+    it 'does not swallow [[ ]] autoblank markup inside a stray $...$' do
+      # Seeded Q5 in exam 48: author wrapped non-math text in $...$ around
+      # a [[3.50]] autoblank. The math branch was eating the whole span,
+      # rendering [[3.50]] as literal text. Bracket-aware guard disables
+      # the math branch in this case so the blank survives.
+      toks = helper.tokenize_cloze('Scialom reported $[[3.50]] per comparison versus $ [[25]] more.')
+      autoblanks = toks.select { |t| t[:type] == :autoblank }
+      expect(autoblanks.map { |t| t[:answer] }).to include('3.50', '25')
+      expect(toks.none? { |t| t[:type] == :math }).to be true
+    end
   end
 end
