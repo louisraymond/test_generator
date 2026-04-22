@@ -91,6 +91,37 @@
           <% end %>
         <% end %>
       </div>
+    <% when 'code_analysis' %>
+      <%#
+        Code analysis — the question stem above the snippet, the code itself
+        rendered as a fenced block (Rouge highlighting via MarkdownHelper),
+        followed by either MCQ options (answer_format=multiple_choice) or a
+        workbox / ruled lines (answer_format=lines).
+      %>
+      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
+      <% opts = question.options.is_a?(Hash) ? question.options : {} %>
+      <% code = opts['code'].to_s %>
+      <% lang = opts['language'].presence || 'text' %>
+      <% if code.present? %>
+        <div class="q__code markdown-content">
+          <%= render_markdown("```#{lang}\n#{code}\n```") %>
+        </div>
+      <% end %>
+      <% if opts['answer_format'] == 'multiple_choice' && opts['choices'].is_a?(Array) %>
+        <ol class="opts">
+          <% opts['choices'].each do |choice| %>
+            <% text = choice.is_a?(Hash) ? choice['text'] : choice.to_s %>
+            <li class="opt-li">
+              <span class="markdown-content"><%= render_markdown_inline(text) %></span>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <div class="<%= marks_to_workspace(question) %>"></div>
+        <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
+          <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
+        <% end %>
+      <% end %>
     <% else %>
       <%# Default/fallback — matches Phase 1 shape %>
       <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>

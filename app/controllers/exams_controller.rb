@@ -1,9 +1,17 @@
 class ExamsController < ApplicationController
   def index
-    @pagy, @exams = pagy(
-      Exam.includes(exam_questions: { question: :topic }).order(created_at: :desc),
-      items: 25
-    )
+    # Classic index (hamburger + blue chrome) is a duplicate of
+    # /workspace?tab=review (exam picker in the redesign). Redirect to
+    # consolidate. ?ui=classic keeps the old list view for anyone who
+    # bookmarked it.
+    if params[:ui] == 'classic'
+      @pagy, @exams = pagy(
+        Exam.includes(exam_questions: { question: :topic }).order(created_at: :desc),
+        items: 25
+      )
+    else
+      redirect_to workspace_path(tab: 'review')
+    end
   end
 
   def new
