@@ -1,0 +1,56 @@
+<%#
+  Question creation — type picker (Phase A).
+  Wave 5: picking a type creates a stub Question and redirects to the
+  paper-is-editor at /questions/:id/edit. The ?ui=classic hamburger
+  form is still reachable via the "Use the classic form" escape hatch
+  at the bottom.
+%>
+<section class="screen-q-picker">
+  <div class="breadcrumb">
+    <span class="s">Library</span> /
+    <%= link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb' %>
+    / New question
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h1>What <em>kind of question</em>?</h1>
+      <p class="sub">
+        Pick a type to start. You'll land in the paper editor — stem, options,
+        marking steps and metadata live right on the paper.
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'Cancel', workspace_path(tab: 'questions'), class: 'btn ghost sm' %>
+    </div>
+  </div>
+
+  <% %i[choice interactive written].each do |group| %>
+    <% descriptors = Array(QuestionTypes.grouped[group]) %>
+    <% next if descriptors.empty? %>
+    <section class="q-picker-group">
+      <div class="q-picker-group__label"><%= group.to_s.capitalize %></div>
+      <div class="q-picker-grid">
+        <% descriptors.each do |d| %>
+          <%= link_to new_question_path(type: d.key, learning_objective_id: params[:learning_objective_id]),
+                      class: 'q-picker-card',
+                      data: { type: d.key } do %>
+            <div class="q-picker-card__glyph"><%= d.icon %></div>
+            <div class="q-picker-card__body">
+              <div class="q-picker-card__label"><%= d.label %></div>
+              <div class="q-picker-card__hint">
+                <%= q_picker_blurb(d.key) %>
+              </div>
+            </div>
+            <div class="q-picker-card__arrow">→</div>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <div class="q-picker-escape">
+    <%= link_to 'Use the classic form →', new_question_path(ui: 'classic'),
+                class: 'btn ghost sm' %>
+  </div>
+</section>

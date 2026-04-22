@@ -1,0 +1,110 @@
+/* Wave 5 — standalone question paper-is-editor.
+ * The page is a two-column grid: the paper preview on the left (same
+ * .paper block the PDF renders, shrunk ~0.8 for on-screen comfort),
+ * and the dark rail on the right.
+ */
+
+/* Type-picker (/questions/new) */
+.screen-q-picker .q-picker-group {
+  margin-bottom: 28px;
+}
+.screen-q-picker .q-picker-group__label {
+  font-family: var(--mono, monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3, #8b8479);
+  margin-bottom: 10px;
+}
+.screen-q-picker .q-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.screen-q-picker .q-picker-card {
+  display: grid;
+  grid-template-columns: 40px 1fr 20px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--paper, #f7f4ee);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.screen-q-picker .q-picker-card:hover {
+  border-color: var(--accent, #b4532a);
+  transform: translateY(-1px);
+}
+.screen-q-picker .q-picker-card__glyph {
+  font-family: var(--serif, serif);
+  font-size: 22px;
+  color: var(--accent, #b4532a);
+  text-align: center;
+}
+.screen-q-picker .q-picker-card__label {
+  font-family: var(--serif, serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink, #1a1915);
+}
+.screen-q-picker .q-picker-card__hint {
+  font-size: 12px;
+  color: var(--ink-3, #8b8479);
+  margin-top: 2px;
+}
+.screen-q-picker .q-picker-card__arrow {
+  font-family: var(--mono, monospace);
+  color: var(--ink-3, #8b8479);
+}
+.screen-q-picker .q-picker-escape {
+  padding-top: 24px;
+  border-top: 1px solid var(--rule, #d8d0c0);
+}
+
+/* Paper editor (/questions/:id/edit) */
+.q-editor-single__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+@media (max-width: 1080px) {
+  .q-editor-single__grid { grid-template-columns: 1fr; }
+}
+
+.q-editor-single__paper {
+  background: var(--paper-2, #efeae0);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 6px;
+  padding: 20px;
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+}
+.q-editor-single__paper .paper {
+  transform: scale(0.82);
+  transform-origin: top center;
+  margin: 0 auto;
+}
+@media (max-width: 1280px) {
+  .q-editor-single__paper .paper { transform: scale(0.7); }
+}
+
+.q-editor-single__rail {
+  background: #1a1915;
+  color: #e8e5de;
+  border-radius: 6px;
+  overflow: hidden;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+}
+.q-editor-single__rail .rail-panel {
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+}

@@ -1,0 +1,48 @@
+<%#
+  Paper-is-editor for a single Question (standalone — not inside an
+  Exam). Reuses Wave 3 _paper_question.html.erb for the body; the
+  rail reuses the same rail partial but with `exam_question: nil`
+  (which the rail was already prepared for via null-guards).
+%>
+<section class="screen-q-editor q-editor-single">
+  <div class="breadcrumb">
+    <span class="s">Library</span> /
+    <%= link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb' %>
+    /
+    <%= link_to 'New question', new_question_path, class: 'breadcrumb__crumb' %>
+    / Edit
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h1><em>Edit</em> <%= QuestionTypes.for(@question.question_type)&.label&.downcase || 'question' %></h1>
+      <p class="sub">
+        Q#<%= @question.id %>
+        · <%= pluralize(@question.points, 'mark') %>
+        · <%= @question.topic&.name || 'no topic' %>
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'Done', workspace_path(tab: 'questions'), class: 'btn sm' %>
+      <%= link_to 'Classic editor', edit_question_path(@question, ui: 'classic'), class: 'btn ghost sm' %>
+    </div>
+  </div>
+
+  <div class="q-editor-single__grid">
+    <main class="q-editor-single__paper">
+      <div class="paper">
+        <div class="paper__inner">
+          <%= render 'exams/paper_question',
+                     question: @question,
+                     counter: 1,
+                     exam_question: nil,
+                     editable: true %>
+        </div>
+      </div>
+    </main>
+
+    <aside class="q-editor-single__rail">
+      <%= render 'exam_questions/rail_standalone', question: @question %>
+    </aside>
+  </div>
+</section>

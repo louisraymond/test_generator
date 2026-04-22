@@ -1,0 +1,24 @@
+<%# Legacy multi-section form — preserved behind ?ui=classic. %>
+<div class="screen-q-editor">
+  <div class="breadcrumb">
+    <span class="s">Library</span> /
+    <%= link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb' %>
+    / Edit (classic)
+  </div>
+
+  <div class="page-head">
+    <div>
+      <h1><em>Edit</em> question</h1>
+      <p class="sub">Classic multi-section form.</p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'Switch to paper editor',
+                  edit_question_path(@question),
+                  class: 'btn sm' %>
+    </div>
+  </div>
+
+  <%= form_with(model: @question) do |form| %>
+    <%= render 'form', form: form, question: @question %>
+  <% end %>
+</div>

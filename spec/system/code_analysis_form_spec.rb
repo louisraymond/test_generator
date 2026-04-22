@@ -17,7 +17,7 @@ RSpec.describe 'code_analysis form', type: :system do
 
   describe 'creating a lines-variant question' do
     it 'persists with the right options JSON' do
-      visit new_question_path
+      visit new_question_path(ui: 'classic')
       fill_in_shared_fields
 
       fill_in 'ca-language', with: 'python'
@@ -25,7 +25,7 @@ RSpec.describe 'code_analysis form', type: :system do
       choose 'Ruled lines (prose answer)'
 
       click_button 'Create Question'
-      expect(page).to have_content('Question created successfully')
+      expect(page).to have_content('Question created')
 
       q = Question.last
       expect(q.question_type).to eq('code_analysis')
@@ -38,7 +38,7 @@ RSpec.describe 'code_analysis form', type: :system do
 
   describe 'creating a multiple_choice-variant question' do
     it 'shows the choices builder only when MC is selected, and persists with choices' do
-      visit new_question_path
+      visit new_question_path(ui: 'classic')
       fill_in_shared_fields
 
       fill_in 'ca-language', with: 'ruby'
@@ -65,7 +65,7 @@ RSpec.describe 'code_analysis form', type: :system do
       rows[2].fill_in('Choice C', with: 'Raises NoMethodError')
 
       click_button 'Create Question'
-      expect(page).to have_content('Question created successfully')
+      expect(page).to have_content('Question created')
 
       q = Question.last
       expect(q.options['answer_format']).to eq('multiple_choice')
@@ -88,7 +88,7 @@ RSpec.describe 'code_analysis form', type: :system do
     end
 
     it 'pre-populates the form fields' do
-      visit edit_question_path(existing)
+      visit edit_question_path(existing, ui: 'classic')
       expect(page).to have_field('ca-language', with: 'python')
       expect(page).to have_field('ca-code', with: 'print("old")')
       expect(page).to have_checked_field('Ruled lines (prose answer)', visible: :all)

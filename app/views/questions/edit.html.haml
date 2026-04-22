@@ -1,18 +1,9 @@
-.screen-q-editor
-  .breadcrumb
-    %span.s Library
-    \/
-    = link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb'
-    \/ Edit
-
-  .page-head
-    %div
-      %h1
-        %em Edit
-        \question
-      %p.sub Adjust the prompt, update the answer, or re-align the learning outcomes.
-    .page-head__actions
-      = link_to 'Back to question bank', workspace_path(tab: 'questions'), class: 'btn ghost sm'
-
-  = form_with(model: @question) do |form|
-    = render 'form', form: form, question: @question
+-#
+  /questions/:id/edit — single-question paper-is-editor (Wave 5).
+  Left pane: the question rendered as editable paper (same partial the
+  Canvas tab uses). Right rail: content / marking / metadata, driven by
+  QuestionTypes registry. Classic multi-section form stays at ?ui=classic.
+- if params[:ui] == 'classic'
+  = render 'classic_edit'
+- else
+  = render 'paper_edit'

@@ -14,25 +14,50 @@ class QuestionsController < ApplicationController
     @pagy, @questions = pagy(scope.order(created_at: :desc), items: 50)
   end
 
+  # /questions/new
+  #
+  # Two-phase flow so the new paper-is-editor (Wave 5) can load a
+  # real Question record:
+  #   Phase A — no ?type=   → show the type-picker screen
+  #   Phase B — ?type=<key> → create a stub Question of that type with
+  #                           sensible defaults, then redirect to its
+  #                           edit page where the paper-is-editor lives.
+  # ?ui=classic keeps the old multi-section form alive for anyone who
+  # bookmarked it.
   def new
-    @question = Question.new(points: 1, question_type: 'written')
-    @question.options_text = ''
-    
-    # Pre-populate from learning objective if provided
     if params[:learning_objective_id].present?
       @learning_objective = LearningObjective.includes(:topic).find_by(id: params[:learning_objective_id])
+    end
+
+    if params[:ui] == 'classic'
+      @question = Question.new(points: 1, question_type: 'written')
+      @question.options_text = ''
       if @learning_objective
         @question.topic = @learning_objective.topic
         @question.learning_objective_ids = [@learning_objective.id]
       end
+      render :new and return
     end
+
+    if params[:type].present? && Question::QUESTION_TYPES.include?(params[:type])
+      question = build_stub_question(params[:type], learning_objective: @learning_objective)
+      if question.save
+        redirect_to edit_question_path(question) and return
+      else
+        flash[:alert] = question.errors.full_messages.join('; ')
+      end
+    end
+
+    # Type picker (Phase A).
+    @question_types = QuestionTypes.all
+    render :new_picker
   end
 
   def create
     @question = Question.new(question_params)
 
     if @question.save
-      redirect_to questions_path, notice: 'Question created successfully.'
+      redirect_to edit_question_path(@question), notice: 'Question created.'
     else
       @question.options_text = params.dig(:question, :options_text)
       render :new, status: :unprocessable_entity
@@ -201,6 +226,62 @@ class QuestionsController < ApplicationController
 
   def set_question
     @question = Question.find(params[:id])
+  end
+
+  # Wave 5 — stub Question used by the type-picker flow. We have to
+  # satisfy presence/points/answer validations on save but don't want
+  # to prompt for them up-front — the paper-is-editor fills them in
+  # interactively. Defaults are deliberately neutral so nothing about
+  # the seeded stub leaks into the real content.
+  def build_stub_question(type, learning_objective: nil)
+    topic = learning_objective&.topic || Topic.order(:name).first
+    q = Question.new(
+      question_type: type,
+      topic: topic,
+      content: default_stub_content(type),
+      answer: 'Model answer — edit in the rail.',
+      points: default_stub_points(type),
+      options: default_stub_options(type)
+    )
+    q.learning_objective_ids = [learning_objective.id] if learning_objective
+    q
+  end
+
+  def default_stub_content(_type)
+    'New question. Click to edit.'
+  end
+
+  def default_stub_points(type)
+    case type
+    when 'multiple_choice', 'cloze' then 1
+    when 'ranking', 'ordering', 'matching' then 3
+    when 'composite' then 6
+    else 2
+    end
+  end
+
+  def default_stub_options(type)
+    case type
+    when 'multiple_choice' then [
+      { 'text' => 'Option A', 'correct' => true },
+      { 'text' => 'Option B', 'correct' => false }
+    ]
+    when 'matching' then { 'left' => %w[A B], 'right' => %w[1 2] }
+    when 'ordering' then [{ 'text' => 'First' }, { 'text' => 'Second' }]
+    when 'ranking' then [
+      { 'text' => 'First',  'rank' => 1 },
+      { 'text' => 'Second', 'rank' => 2 }
+    ]
+    when 'code_analysis' then {
+      'language' => 'python',
+      'code' => "# click to edit\nprint('hello')",
+      'answer_format' => 'lines'
+    }
+    when 'diagram_label'   then { 'image' => '', 'pins' => [] }
+    when 'image_occlusion' then { 'image' => '', 'masks' => [] }
+    when 'cloze'           then { 'tokens' => [] }
+    else []
+    end
   end
 
   def load_filters
