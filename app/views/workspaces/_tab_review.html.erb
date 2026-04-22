@@ -53,12 +53,32 @@
     </aside>
   </section>
 <% else %>
-  <section class="tab-stub" data-tab="review">
-    <div class="tab-stub__eyebrow">Review & export</div>
-    <h1 class="tab-stub__title">No exam selected</h1>
-    <p class="tab-stub__body">
-      Open this tab with <code>?exam=ID</code> to preview the student paper and
-      mark scheme side-by-side.
-    </p>
+  <section class="workspace-picker">
+    <header>
+      <div class="eyebrow">Review & export · pick an exam</div>
+      <h1>Preview a paper</h1>
+    </header>
+
+    <% if @recent_exams.any? %>
+      <ul class="picker-list">
+        <% @recent_exams.each do |e| %>
+          <li class="picker-row">
+            <div class="picker-row__meta">
+              <div class="picker-row__title"><%= e.title %></div>
+              <div class="picker-row__sub">
+                <%= e.exam_questions.size %> questions · <%= e.created_at.to_date.strftime('%-d %b %Y') %>
+              </div>
+            </div>
+            <div class="picker-row__actions">
+              <%= link_to 'Open in Review', workspace_path(tab: 'review', exam: e.id), class: 'primary-btn' %>
+              <%= link_to 'Student PDF', exam_path(e, format: :pdf), class: 'ghost-btn' %>
+              <%= link_to "Marker's PDF", marking_scheme_exam_path(e, format: :pdf), class: 'ghost-btn' %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="picker-empty">No exams yet. <%= link_to 'Create one', new_exam_path %>.</p>
+    <% end %>
   </section>
 <% end %>

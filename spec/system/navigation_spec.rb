@@ -7,7 +7,7 @@ RSpec.describe 'Navigation', type: :system do
 
   describe 'Hamburger Menu' do
     it 'opens when clicking the toggle button' do
-      visit root_path
+      visit exams_path
 
       # Menu should be closed initially
       expect(page).to have_css('button[aria-expanded="false"]')
@@ -23,7 +23,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'closes when clicking the toggle button again' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -39,7 +39,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'closes when clicking the backdrop' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -54,7 +54,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'closes when pressing Escape key' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -93,8 +93,8 @@ RSpec.describe 'Navigation', type: :system do
         click_link 'Exam Generator'
       end
 
-      # Should navigate to root path
-      expect(page).to have_current_path(root_path)
+      # Should navigate to the new-exam path
+      expect(page).to have_current_path(new_exam_path)
       expect(page).to have_css('h1', text: 'Generate Exam')
 
       # Menu should be closed
@@ -102,7 +102,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'navigates to Topics page' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -121,7 +121,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'navigates to Question Bank page' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -157,8 +157,8 @@ RSpec.describe 'Navigation', type: :system do
       end
     end
 
-    it 'highlights Exam Generator on root path' do
-      visit root_path
+    it 'highlights Exam Generator on the new-exam path' do
+      visit new_exam_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -192,11 +192,11 @@ RSpec.describe 'Navigation', type: :system do
       end
 
       # Should navigate to root path
-      expect(page).to have_current_path(root_path)
+      expect(page).to have_current_path(exams_path)
     end
 
     it 'closes menu when clicking logo' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -214,7 +214,7 @@ RSpec.describe 'Navigation', type: :system do
 
   describe 'Z-Index Stacking' do
     it 'allows clicks on navigation links when menu is open' do
-      visit root_path
+      visit exams_path
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -234,7 +234,7 @@ RSpec.describe 'Navigation', type: :system do
 
   describe 'Responsive Behavior' do
     it 'displays hamburger menu on all screen sizes' do
-      visit root_path
+      visit exams_path
 
       # Hamburger should always be visible
       expect(page).to have_css('.menu-toggle', visible: :visible)

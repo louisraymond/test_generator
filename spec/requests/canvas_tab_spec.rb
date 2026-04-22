@@ -33,7 +33,7 @@ RSpec.describe 'Workspace canvas tab', type: :request do
     it 'shows an empty-state when no exam is selected' do
       get '/workspace?tab=canvas'
       expect(response).to have_http_status(:ok)
-      expect(response.body).to match(/Select an exam|No exam selected/i)
+      expect(response.body).to match(/Open a paper|Pick an exam|Select an exam|No exam selected/i)
     end
 
     it 'exposes a turbo-frame for the live paper preview' do

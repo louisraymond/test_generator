@@ -17,7 +17,10 @@
 
 /* Premium Page Header Styling */
 
-main {
+/* Classic-app main pane. Scoped to .app-shell so the redesigned
+ * /workspace pages (which use the workspace layout, no .app-shell wrapper)
+ * don't inherit the gradient and show the warm paper background instead. */
+.app-shell main {
     background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #fce7f3 100%);
     min-height: 100vh;
     padding: 3rem 2rem;

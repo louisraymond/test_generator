@@ -7,15 +7,15 @@
 
     <ul class="topic-tree" role="tree">
       <% @topics.each do |topic| %>
-        <li class="topic-tree__topic" data-topic-id="<%= topic.id %>">
-          <button type="button" class="topic-row" data-action="click->topic-tree#toggle">
+        <li class="topic-tree__topic <%= 'is-selected' if @selected_topic&.id == topic.id %>" data-topic-id="<%= topic.id %>">
+          <%= link_to workspace_path(tab: 'kb', topic: topic.id), class: 'topic-row' do %>
             <span class="topic-row__caret">▸</span>
             <span class="topic-row__name"><%= topic.name %></span>
             <span class="topic-row__count"><%= @question_counts[topic.id] || 0 %></span>
-          </button>
+          <% end %>
 
           <% if topic.topic_modules.any? %>
-            <ul class="topic-tree__modules" hidden>
+            <ul class="topic-tree__modules">
               <% topic.topic_modules.each do |mod| %>
                 <li class="topic-tree__module">
                   <a href="<%= topic_path(topic) %>" class="module-row">
@@ -31,19 +31,54 @@
   </aside>
 
   <main class="kb__resources" aria-label="Resources">
-    <header class="kb__resources-header">
-      <div class="eyebrow">Resources</div>
-      <div class="kb__resources-title">Select a topic to view its files</div>
-    </header>
+    <% if @selected_topic %>
+      <header class="kb__resources-header">
+        <div class="eyebrow">Topic</div>
+        <div class="kb__resources-title"><%= @selected_topic.name %></div>
+        <div class="kb__resources-meta">
+          <%= pluralize(@topic_questions.size, 'question') %>
+          <% if @selected_topic.topic_modules.any? %>
+            · <%= pluralize(@selected_topic.topic_modules.size, 'module') %>
+          <% end %>
+          · <%= link_to 'Open topic page', topic_path(@selected_topic), class: 'kb__link' %>
+        </div>
+      </header>
 
-    <%# Phase 8 stub upload zone — ActiveStorage wiring lands in a follow-up. %>
-    <div class="kb-upload drop-zone" data-controller="file-upload">
-      <div class="kb-upload__message">
-        Drop files here or <button type="button" class="kb-upload__browse">browse</button>
+      <% if @topic_questions.any? %>
+        <ul class="kb__questions">
+          <% @topic_questions.each do |q| %>
+            <li class="kb__question">
+              <span class="kb__question-type"><%= q.question_type %></span>
+              <span class="kb__question-stem"><%= truncate(strip_tags(q.content.to_s), length: 120) %></span>
+              <span class="kb__question-marks"><%= q.points %>m</span>
+              <span class="kb__question-actions">
+                <%= link_to 'Edit', edit_question_path(q), class: 'ghost-btn' %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="picker-empty">No questions in this topic yet.</p>
+      <% end %>
+
+      <div class="kb__resources-actions">
+        <%= link_to '+ New question in this topic', new_question_path(topic_id: @selected_topic.id), class: 'primary-btn' %>
       </div>
-      <div class="kb-upload__hint">
-        PDFs, DOCX, images. Attached to the selected topic.
+    <% else %>
+      <header class="kb__resources-header">
+        <div class="eyebrow">Topics</div>
+        <div class="kb__resources-title">Select a topic on the left</div>
+        <div class="kb__resources-meta">Questions and modules for the topic will appear here.</div>
+      </header>
+
+      <div class="kb-upload drop-zone" data-controller="file-upload">
+        <div class="kb-upload__message">
+          Drop files here or <button type="button" class="kb-upload__browse">browse</button>
+        </div>
+        <div class="kb-upload__hint">
+          ActiveStorage wiring lands in a follow-up PR. Upload stub for now.
+        </div>
       </div>
-    </div>
+    <% end %>
   </main>
 </section>

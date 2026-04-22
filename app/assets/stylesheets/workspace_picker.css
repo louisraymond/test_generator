@@ -1,0 +1,140 @@
+/* Empty-state exam/question picker used by Canvas & Review tabs
+ * when no ?exam= is given. Also styles the KB topic-selected pane. */
+
+.workspace-picker {
+  max-width: 960px;
+  margin: 48px auto;
+  padding: 0 32px;
+}
+.workspace-picker header { margin-bottom: 24px; }
+.workspace-picker .eyebrow {
+  font-family: var(--mono);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tr-eyebrow);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.workspace-picker h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  background: var(--card);
+  overflow: hidden;
+}
+.picker-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.picker-row:last-child { border-bottom: none; }
+.picker-row__title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.picker-row__sub {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.picker-row__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.workspace-picker__footer {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.picker-empty {
+  padding: 36px;
+  border: 1px dashed var(--rule-2);
+  border-radius: var(--r-inner);
+  color: var(--ink-3);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Shared button variants used across picker + kb pane */
+.ghost-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: var(--r-inner);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.ghost-btn:hover { border-color: var(--accent); background: var(--paper-2); }
+
+/* KB selected-topic pane */
+.kb__resources-meta {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-top: 6px;
+}
+.kb__link { color: var(--accent); text-decoration: none; }
+.kb__link:hover { text-decoration: underline; }
+
+.kb__questions {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  background: var(--card);
+  overflow: hidden;
+}
+.kb__question {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.kb__question:last-child { border-bottom: none; }
+.kb__question-type {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.kb__question-stem { color: var(--ink-2); }
+.kb__question-marks {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.kb__resources-actions { margin-top: 20px; display: flex; gap: 10px; }
+
+.topic-tree__topic.is-selected .topic-row {
+  background: var(--paper-2);
+  border-left: 2px solid var(--accent);
+}

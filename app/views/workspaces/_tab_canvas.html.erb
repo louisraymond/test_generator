@@ -42,12 +42,39 @@
     </aside>
   </section>
 <% else %>
-  <section class="tab-stub" data-tab="canvas">
-    <div class="tab-stub__eyebrow">Canvas</div>
-    <h1 class="tab-stub__title">No exam selected</h1>
-    <p class="tab-stub__body">
-      Open this tab with <code>?exam=ID</code> to start editing a paper.
-      Pick an exam from the <%= link_to 'Exam History', exams_path %> list.
-    </p>
+  <section class="workspace-picker">
+    <header>
+      <div class="eyebrow">Canvas · pick an exam to edit</div>
+      <h1>Open a paper</h1>
+    </header>
+
+    <% if @recent_exams.any? %>
+      <ul class="picker-list">
+        <% @recent_exams.each do |e| %>
+          <li class="picker-row">
+            <div class="picker-row__meta">
+              <div class="picker-row__title"><%= e.title %></div>
+              <div class="picker-row__sub">
+                <%= e.exam_questions.size %> questions
+                <% if e.exam_template %> · <%= e.exam_template.name %><% end %>
+                · <%= e.created_at.to_date.strftime('%-d %b %Y') %>
+              </div>
+            </div>
+            <div class="picker-row__actions">
+              <%= link_to 'Open in Canvas', workspace_path(tab: 'canvas', exam: e.id), class: 'primary-btn' %>
+              <%= link_to 'Preview', paper_exam_path(e), class: 'ghost-btn', target: '_blank' %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="picker-empty">No exams yet. <%= link_to 'Create one', new_exam_path %>.</p>
+    <% end %>
+
+    <footer class="workspace-picker__footer">
+      <%= link_to '+ New exam (classic form)', new_exam_path, class: 'ghost-btn' %>
+      <%= link_to 'Question bank', questions_path, class: 'ghost-btn' %>
+      <%= link_to 'New question', new_question_path, class: 'ghost-btn' %>
+    </footer>
   </section>
 <% end %>

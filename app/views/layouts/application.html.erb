@@ -23,7 +23,7 @@
           <span class="visually-hidden">Toggle navigation</span>
         </button>
 
-        <%= link_to 'Exam Generator', root_path, class: 'app-logo', data: { action: 'menu#close' } %>
+        <%= link_to 'Exam Generator', exams_path, class: 'app-logo', data: { action: 'menu#close' } %>
 
         <%= link_to 'New workspace →', '/workspace',
                     style: 'margin-left:auto; padding:6px 12px; background:#b4532a; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:500;' %>
@@ -32,7 +32,7 @@
       <div class="nav-backdrop" data-menu-target="backdrop" data-action="click->menu#close"></div>
 
       <nav class="app-nav" id="primary-navigation" data-menu-target="nav">
-        <%= nav_link_to 'Exam Generator', root_path %>
+        <%= nav_link_to 'Exam Generator', new_exam_path %>
         <%= nav_link_to 'Exam History', exams_path %>
         <%= nav_link_to 'Exam Templates', exam_templates_path %>
         <%= nav_link_to 'Topics', topics_path %>

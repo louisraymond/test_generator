@@ -31,7 +31,7 @@ RSpec.describe 'Workspace review & export tab', type: :request do
     it 'shows an empty state when no exam is selected' do
       get '/workspace?tab=review'
       expect(response).to have_http_status(:ok)
-      expect(response.body).to match(/No exam selected|Select an exam/i)
+      expect(response.body).to match(/Preview a paper|Pick an exam|No exam selected|Select an exam/i)
     end
   end
 end
