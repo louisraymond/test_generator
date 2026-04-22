@@ -9,7 +9,64 @@ module MarkdownHelper
   end
 
   # Matches a LaTeX math span: $$...$$ (longest first) or single $...$ on one line.
-  MATH_SPAN_PATTERN = /\$\$(?:[^$]|\$(?!\$))*?\$\$|\$[^$\n]+?\$/m
+  # The inline form explicitly refuses to open on `$N` (literal currency —
+  # "$25") and refuses to close right before a digit, so seed text like
+  # "[[3.50]] per comparison versus $25 per written response" stays as
+  # prose rather than becoming a runaway math span.
+  MATH_SPAN_PATTERN = /\$\$(?:[^$]|\$(?!\$))*?\$\$|\$(?!\d)[^$\n]+?\$(?!\d)/m
+
+  # Unicode math sigils we treat as "this phrase is math". We deliberately
+  # exclude bare sub/superscript patterns (x_1, K^T) — Redcarpet's
+  # `superscript: true` already renders those as <sup>/<sub>, and
+  # wrapping prose with carets would break existing content. An author
+  # who wants full math control should use `$...$` explicitly.
+  GREEK_AND_MATH_SIGILS = /[θμσπΔΣΠλαβγδεφψωρτχξζΘΜΦΨΩ∑∏∫∥≈≠≤≥∘⊗⊙∈∉⊆⊇∪∩∂∇ℝℕℤℚℂ⋅→←⇒⇔]/.freeze
+  # Unicode math chars KaTeX can't render; replace with LaTeX so the
+  # auto-wrapped clause renders cleanly.
+  UNICODE_MATH_MAP = {
+    # operators
+    '−' => '-',
+    '×' => '\\times',
+    '÷' => '\\div',
+    '≈' => '\\approx',
+    '≠' => '\\ne',
+    '≤' => '\\le',
+    '≥' => '\\ge',
+    '∥' => '\\parallel',
+    '∑' => '\\sum',
+    '∏' => '\\prod',
+    '∫' => '\\int',
+    '∂' => '\\partial',
+    '∇' => '\\nabla',
+    '∈' => '\\in',
+    '∉' => '\\notin',
+    '⊆' => '\\subseteq',
+    '⊇' => '\\supseteq',
+    '∪' => '\\cup',
+    '∩' => '\\cap',
+    '→' => '\\to',
+    '←' => '\\leftarrow',
+    '⇒' => '\\Rightarrow',
+    '⇔' => '\\Leftrightarrow',
+    'ℝ' => '\\mathbb{R}',
+    'ℕ' => '\\mathbb{N}',
+    'ℤ' => '\\mathbb{Z}',
+    'ℚ' => '\\mathbb{Q}',
+    'ℂ' => '\\mathbb{C}',
+    # Greek capitals that double as operators in ML/stats prose
+    'Σ' => '\\sum',
+    'Π' => '\\prod',
+    # Greek letters — KaTeX renders these from the LaTeX escapes
+    # prettier than it does from raw unicode.
+    'α' => '\\alpha', 'β' => '\\beta', 'γ' => '\\gamma', 'δ' => '\\delta',
+    'ε' => '\\epsilon', 'ζ' => '\\zeta', 'η' => '\\eta', 'θ' => '\\theta',
+    'ι' => '\\iota',  'κ' => '\\kappa', 'λ' => '\\lambda', 'μ' => '\\mu',
+    'ν' => '\\nu',    'ξ' => '\\xi',    'ο' => 'o',        'π' => '\\pi',
+    'ρ' => '\\rho',   'σ' => '\\sigma', 'τ' => '\\tau',    'υ' => '\\upsilon',
+    'φ' => '\\phi',   'χ' => '\\chi',   'ψ' => '\\psi',    'ω' => '\\omega',
+    'Δ' => '\\Delta', 'Θ' => '\\Theta', 'Λ' => '\\Lambda',
+    'Φ' => '\\Phi',   'Ψ' => '\\Psi',   'Ω' => '\\Omega'
+  }.freeze
 
   MARKDOWN_EXTENSIONS = {
     autolink: true,
@@ -39,10 +96,15 @@ module MarkdownHelper
   # math spans are extracted before Redcarpet runs so its extensions
   # (superscript, strikethrough, emphasis) don't mangle `x^2`, `a~b`, or `a_1`
   # inside formulas — while still processing `^` as superscript in plain prose.
+  #
+  # Wave 5: a pre-pass detects math-heavy clauses in author prose that
+  # weren't wrapped in `$...$` delimiters (common in seeded content —
+  # "H(P, Q) = −Σ P(x) log Q(x)") and wraps them so KaTeX can render +
+  # the `.paper .katex` style makes them pop out of the serif body.
   def render_markdown(text)
     return '' if text.blank?
 
-    with_math_protected(text) do |t|
+    with_math_protected(auto_wrap_math(text)) do |t|
       sanitize(BLOCK_MARKDOWN.render(t), tags: BLOCK_ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
     end
   end
@@ -64,11 +126,39 @@ module MarkdownHelper
   def render_markdown_inline(text)
     return '' if text.blank?
 
-    with_math_protected(text) do |t|
+    with_math_protected(auto_wrap_math(text)) do |t|
       html = INLINE_MARKDOWN.render(t).sub(/\A<p>/, '').sub(%r{</p>\s*\z}, '')
       html = html.gsub('<code>', '<code class="md-inline">')
       sanitize(html, tags: INLINE_ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
     end
+  end
+
+  # Wrap math-heavy clauses in `$...$` delimiters so the paper's KaTeX
+  # auto-render picks them up. Works clause-by-clause (split on
+  # sentence-ish punctuation) — if a clause contains any math sigil
+  # (Greek letter, math operator, or subscript/superscript pattern)
+  # AND the clause is not already wrapped in $...$, the whole clause
+  # becomes inline math. Inside the wrapped span, known-problematic
+  # Unicode math chars are swapped for their LaTeX equivalents.
+  def auto_wrap_math(text)
+    return text if text.blank?
+
+    # Split by sentence-ish punctuation but KEEP the delimiters so join
+    # is lossless. `(?=\s|$)` guards against blowing up abbreviations.
+    parts = text.to_s.split(/([.?!](?=\s|$)|\n\n+)/)
+    parts.map.with_index do |part, i|
+      next part unless i.even?          # odd indices are delimiters
+      next part if part.include?('$')   # already contains LaTeX — leave alone
+      next part unless part.match?(GREEK_AND_MATH_SIGILS)
+
+      leading  = part[/\A\s*/]
+      trailing = part[/\s*\z/]
+      core     = part.strip
+      next part if core.empty?
+
+      transliterated = core.gsub(Regexp.union(UNICODE_MATH_MAP.keys)) { |c| UNICODE_MATH_MAP[c] }
+      "#{leading}$#{transliterated}$#{trailing}"
+    end.join
   end
 
   private

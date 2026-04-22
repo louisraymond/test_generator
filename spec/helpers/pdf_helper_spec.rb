@@ -129,4 +129,35 @@ RSpec.describe PdfHelper, type: :helper do
         .to eq(options.sort_by { |o| o['text'] })
     end
   end
+
+  describe '#tokenize_cloze' do
+    it 'recognises {{answer}} as an autoblank' do
+      toks = helper.tokenize_cloze('Paris is the capital of {{France}}.')
+      autoblanks = toks.select { |t| t[:type] == :autoblank }
+      expect(autoblanks.length).to eq(1)
+      expect(autoblanks.first[:answer]).to eq('France')
+    end
+
+    it 'recognises [[answer]] as an autoblank (Wave 5 — seeded content)' do
+      toks = helper.tokenize_cloze('During the [[prefill]] phase, tokens are [[parallel]].')
+      autoblanks = toks.select { |t| t[:type] == :autoblank }
+      expect(autoblanks.map { |t| t[:answer] }).to eq(%w[prefill parallel])
+    end
+
+    it 'strips whitespace inside [[ answer ]] markup' do
+      toks = helper.tokenize_cloze('Perform a [[ O(n) ]] scan.')
+      autoblanks = toks.select { |t| t[:type] == :autoblank }
+      expect(autoblanks.first[:answer]).to eq('O(n)')
+    end
+
+    it 'does not treat literal $N currency as a math span' do
+      toks = helper.tokenize_cloze('Price is $25 at the shop and $100 online.')
+      expect(toks.none? { |t| t[:type] == :math }).to be true
+    end
+
+    it 'still treats $x^2$ as a math span' do
+      toks = helper.tokenize_cloze('Given $x^2$, derive the root.')
+      expect(toks.any? { |t| t[:type] == :math && t[:text] == '$x^2$' }).to be true
+    end
+  end
 end

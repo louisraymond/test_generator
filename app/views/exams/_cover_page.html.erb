@@ -90,18 +90,29 @@
     </div>
   </div>
 
-  <%# Examiner-use grid — one cell per question. %>
+  <%# Examiner-use grid — one cell per question.
+      Cap the grid at 48 tiles so the cover always fits in one A4 page;
+      for larger exams we summarise and move the full tile grid to a
+      dedicated marks sheet (not yet built — shipping the cap first). %>
   <% if exam.exam_questions.any? %>
+    <% max_cover_tiles = 48 %>
+    <% tiles_to_show = exam.exam_questions.first(max_cover_tiles) %>
+    <% overflow = exam.exam_questions.size - tiles_to_show.size %>
     <div style="margin-top: 38px; border-top: .5pt solid var(--ink-soft); padding-top: 14px; font-family: 'Source Sans 3', sans-serif; font-size: 8.5pt; color: var(--ink-muted);">
       <div class="smcap" style="color: var(--accent); margin-bottom: 10px;">Examiner use only</div>
       <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;">
-        <% exam.exam_questions.each_with_index do |eq, i| %>
+        <% tiles_to_show.each_with_index do |eq, i| %>
           <div style="border: .5pt solid var(--rule); padding: 4px 6px;">
             <div style="font-size: 7pt; letter-spacing: .1em;">Q<%= i + 1 %></div>
             <div style="height: 16px; border-bottom: .5pt solid var(--rule-soft);"></div>
           </div>
         <% end %>
       </div>
+      <% if overflow.positive? %>
+        <div style="margin-top: 8px; font-size: 8pt; font-style: italic;">
+          +<%= overflow %> more — full marks sheet continues inside the paper.
+        </div>
+      <% end %>
     </div>
   <% end %>
 

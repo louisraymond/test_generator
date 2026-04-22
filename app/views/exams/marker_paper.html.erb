@@ -12,12 +12,33 @@
 <%= render 'ms_cover_page', exam: @exam %>
 
 <%
+  # Chunk questions into multiple .paper blocks so each sheet maps to
+  # one printed A4 page (same fix as the student paper). 2 cards/page
+  # fits comfortably; the card layout with credit pills + notes column
+  # is vertically dense.
+  ms_questions_per_page = 2
   sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
   global_counter = 0
+  ms_pages = []
+  sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions|
+    section = section_number ? @exam.section_info(section_number) : nil
+    chunks  = exam_questions.each_slice(ms_questions_per_page).to_a
+    chunks.each_with_index do |chunk, i|
+      ms_pages << {
+        section: section,
+        section_number: section_number,
+        first_in_section: i.zero?,
+        questions: chunk,
+        page_in_section: i + 1,
+        total_pages_in_section: chunks.size
+      }
+    end
+  end
 %>
 
-<% sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions| %>
-  <% section = section_number ? @exam.section_info(section_number) : nil %>
+<% ms_pages.each do |pg| %>
+  <% section = pg[:section] %>
+  <% section_number = pg[:section_number] %>
   <% section_letter = section&.letter.presence || (section_number ? ('A'.ord + section_number).chr : nil) %>
 
   <div class="paper paper--ms">
@@ -30,7 +51,7 @@
       <span>Examiner initials ________</span>
     </div>
 
-    <% if section %>
+    <% if section && pg[:first_in_section] %>
       <div class="section-head">
         <div class="section-head__num" style="color: var(--accent);"><%= section_letter %></div>
         <div class="section-head__title">
@@ -41,7 +62,7 @@
       </div>
     <% end %>
 
-    <% exam_questions.each do |eq| %>
+    <% pg[:questions].each do |eq| %>
       <% question = eq.question %>
       <% global_counter += 1 %>
 
@@ -99,7 +120,11 @@
         · <%= (@exam.exam_date || @exam.created_at.to_date).strftime('%d.%m.%Y') %>
       </span>
       <span>
-        <% if section %>Section <%= section_letter %> · <% end %>
+        <% if section %>
+          Section <%= section_letter %>
+          <% if pg[:total_pages_in_section] > 1 %> · p.<%= pg[:page_in_section] %>/<%= pg[:total_pages_in_section] %><% end %>
+          ·
+        <% end %>
         turn over ▶
       </span>
     </div>

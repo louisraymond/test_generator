@@ -83,25 +83,31 @@ module PdfHelper
   end
 
   # Tokenise cloze stem content preserving KaTeX math spans ($...$ and $$...$$)
-  # and recognising the author's {{answer}} markup as a pre-blanked gap.
+  # and recognising author markup for pre-blanked gaps. Both {{answer}} and
+  # [[answer]] forms are accepted — earlier seeds standardised on
+  # double-square-brackets; newer content uses double-curly.
   # Returns an array of { type:, text:, answer: } hashes where type is one of:
   #   :math        — verbatim math span, rendered raw (KaTeX picks it up)
-  #   :autoblank   — pre-blanked gap from {{x}} markup; answer is the inner text
+  #   :autoblank   — pre-blanked gap from {{x}} or [[x]] markup; answer is
+  #                  the inner text (stripped of leading/trailing whitespace)
   #   :word        — plain tokeniseable word (user can toggle via Stimulus)
   #   :space       — whitespace
   def tokenize_cloze(content)
     text = content.to_s
     tokens = []
     i = 0
-    word_re = /\A[^\s${]+/
+    word_re = /\A[^\s${\[{]+/
     while i < text.length
       ch = text[i]
       if ch == '$'
-        # Math span: $$...$$ preferred; fall back to $...$
+        # Math span: $$...$$ preferred; fall back to $...$. Guard against
+        # literal `$25` (currency) turning into math by requiring the
+        # closing `$` not to be immediately followed by a digit and the
+        # opening `$` not to be immediately preceded by a word char.
         if text[i, 2] == '$$' && (m = text[i..].match(/\A\$\$.*?\$\$/m))
           tokens << { type: :math, text: m[0] }
           i += m[0].length
-        elsif (m = text[i..].match(/\A\$[^$\n]+?\$/))
+        elsif (m = text[i..].match(/\A\$[^$\n\d][^$\n]*?\$(?![0-9])/))
           tokens << { type: :math, text: m[0] }
           i += m[0].length
         else
@@ -109,7 +115,10 @@ module PdfHelper
           i += 1
         end
       elsif text[i, 2] == '{{' && (m = text[i..].match(/\A\{\{(.+?)\}\}/))
-        tokens << { type: :autoblank, text: m[0], answer: m[1] }
+        tokens << { type: :autoblank, text: m[0], answer: m[1].strip }
+        i += m[0].length
+      elsif text[i, 2] == '[[' && (m = text[i..].match(/\A\[\[(.+?)\]\]/))
+        tokens << { type: :autoblank, text: m[0], answer: m[1].strip }
         i += m[0].length
       elsif ch =~ /\s/
         tokens << { type: :space, text: ch }
