@@ -203,13 +203,13 @@ RSpec.describe 'Navigation', type: :system do
       find('button', text: 'Toggle navigation').click
       expect(page).to have_css('button[aria-expanded="true"]')
 
-      # Click logo
+      # Click logo — app-logo goes to /exams which now redirects to the
+      # workspace layout (no hamburger). Just verify we navigated off.
       within('.app-header') do
         click_link 'Exam Generator'
       end
 
-      # Menu should be closed
-      expect(page).to have_css('button[aria-expanded="false"]')
+      expect(page).to have_current_path(/\/(exams|workspace)/, wait: 2)
     end
   end
 

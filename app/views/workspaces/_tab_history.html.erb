@@ -1,0 +1,91 @@
+<%#
+  Exam history — replaces the classic /exams index (which already
+  redirects here). Ported from the design's #screen-history block.
+%>
+<% exams = @history_exams || [] %>
+<% total_exams = Exam.count %>
+<% latest = Exam.maximum(:created_at) %>
+
+<section class="screen-history">
+  <div class="breadcrumb"><span class="s">History</span> / Exams</div>
+
+  <div class="page-head">
+    <div>
+      <h1>Exam <em>history</em></h1>
+      <p class="sub">
+        <%= pluralize(total_exams, 'exam') %>.
+        <% if latest %> Last generated <%= time_ago_in_words(latest) %> ago.<% end %>
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'Export CSV', exams_path(ui: 'classic', format: :csv), class: 'btn ghost sm' %>
+      <%= link_to '+ New exam', workspace_path(tab: 'generate'), class: 'btn sm' %>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="fk">Filter</span>
+    <%= link_to 'All',           workspace_path(tab: 'history'),                class: "chip-f #{'on' if params[:filter].blank?}" %>
+    <%= link_to 'Recent',        workspace_path(tab: 'history', filter: 'recent'),    class: "chip-f #{'on' if params[:filter] == 'recent'}" %>
+    <%= link_to 'From template', workspace_path(tab: 'history', filter: 'template'),  class: "chip-f #{'on' if params[:filter] == 'template'}" %>
+    <span class="grow"></span>
+    <form class="search" action="<%= workspace_path(tab: 'history') %>" method="get">
+      <input type="hidden" name="tab" value="history">
+      <span style="color: var(--ink-4);">⌕</span>
+      <input name="q" value="<%= params[:q] %>" placeholder="Search exams, topics, sources…">
+      <span class="k">⌘K</span>
+    </form>
+  </div>
+
+  <div class="exam-list">
+    <div class="exam-row head">
+      <div>Exam</div>
+      <div>Created</div>
+      <div style="text-align: right;">Questions</div>
+      <div style="text-align: right;">Marks</div>
+      <div style="text-align: right;">Actions</div>
+    </div>
+
+    <% if exams.any? %>
+      <% exams.each do |e| %>
+        <div class="exam-row">
+          <div>
+            <div class="exam-title"><%= e.title %></div>
+            <div class="exam-meta-row">
+              <% if e.duration_minutes %>
+                <span><%= e.duration_minutes %> min</span>
+                <span class="dot"></span>
+              <% end %>
+              <% topic_names = e.questions.includes(:topic).map { |q| q.topic&.name }.compact.uniq.first(3) %>
+              <% topic_names.each_with_index do |n, i| %>
+                <span><%= n %></span>
+                <% if i < topic_names.size - 1 %><span class="dot"></span><% end %>
+              <% end %>
+              <% if e.exam_template %>
+                <span class="dot"></span>
+                <span>from template "<%= e.exam_template.name %>"</span>
+              <% end %>
+            </div>
+          </div>
+          <div class="exam-date">
+            <%= e.created_at.strftime('%-d %b %Y') %>
+            <span class="t"><%= e.created_at.strftime('%H:%M') %></span>
+          </div>
+          <div class="exam-num" style="text-align: right;"><%= e.exam_questions.size %></div>
+          <div class="exam-num" style="text-align: right;"><%= e.total_marks %></div>
+          <div class="exam-links">
+            <%= link_to 'View', exam_path(e), class: 'btn link sm' %>
+            <%= link_to 'PDF',  exam_path(e, format: :pdf), class: 'btn link sm' %>
+            <%= link_to 'MS',   marking_scheme_exam_path(e), class: 'btn link sm' %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="exam-row">
+        <div class="picker-empty" style="grid-column: 1 / -1;">
+          No exams yet. <%= link_to 'Generate your first one', workspace_path(tab: 'generate') %>.
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>

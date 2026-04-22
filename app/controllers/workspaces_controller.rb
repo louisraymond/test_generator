@@ -9,7 +9,13 @@
 class WorkspacesController < ApplicationController
   layout 'workspace'
 
-  TABS = %w[dashboard setup kb canvas review].freeze
+  TABS = %w[
+    dashboard
+    topics questions
+    templates generate
+    history
+    setup kb canvas review
+  ].freeze
   DEFAULT_TAB = 'dashboard'
 
   def show
@@ -27,6 +33,31 @@ class WorkspacesController < ApplicationController
       @question_counts = Question.group(:topic_id).count
       @selected_topic = Topic.find_by(id: params[:topic]) if params[:topic].present?
       @topic_questions = @selected_topic&.questions&.order(:question_type, :id) || []
+    end
+
+    if @tab == 'history'
+      @pagy, @history_exams = pagy(
+        Exam.includes(exam_questions: { question: :topic }).order(created_at: :desc),
+        items: 30
+      )
+    end
+
+    if @tab == 'templates'
+      @templates = ExamTemplate.includes(:exam_sections).order(created_at: :desc)
+    end
+
+    if @tab == 'questions'
+      scope = Question.includes(:topic, :source)
+      scope = scope.where(topic_id: params[:topic_id]) if params[:topic_id].present?
+      scope = scope.where(question_type: params[:question_type]) if params[:question_type].present?
+      @pagy, @questions = pagy(scope.order(created_at: :desc), items: 50)
+      @topics_for_filter = Topic.order(:name)
+      @question_type_counts = Question.group(:question_type).count
+    end
+
+    if @tab == 'topics'
+      @topics = Topic.includes(:topic_modules, :questions, :learning_objectives).order(:name)
+      @question_counts = Question.group(:topic_id).count
     end
   end
 

@@ -1,0 +1,60 @@
+<%#
+  Templates list — ported from the design's #screen-templates.
+%>
+<% templates = @templates || [] %>
+
+<section class="screen-templates">
+  <div class="breadcrumb"><span class="s">Build</span> / Templates</div>
+
+  <div class="page-head">
+    <div>
+      <h1><em>Templates</em></h1>
+      <p class="sub">
+        <%= pluralize(templates.size, 'template') %>. Reusable exam blueprints — subject, tier, section structure.
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to '+ New template', new_exam_template_path, class: 'btn sm' %>
+    </div>
+  </div>
+
+  <div class="exam-list">
+    <div class="tmpl-row head">
+      <div>Template</div>
+      <div>Sections</div>
+      <div style="text-align: right;">Used</div>
+      <div style="text-align: right;">Actions</div>
+    </div>
+
+    <% if templates.any? %>
+      <% templates.each do |t| %>
+        <div class="tmpl-row">
+          <div>
+            <div class="tmpl-title"><%= t.name %></div>
+            <div class="exam-meta-row">
+              <% if t.subject %><span><%= t.subject %></span><span class="dot"></span><% end %>
+              <% if t.tier %><span><%= t.tier.capitalize %></span><span class="dot"></span><% end %>
+              <% if t.duration_minutes %><span><%= t.duration_minutes %> min</span><% end %>
+            </div>
+          </div>
+          <div class="exam-num" style="font-size: 16px;">
+            <%= t.exam_sections.size %>
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3);">secs</span>
+          </div>
+          <div class="exam-num" style="text-align: right; font-size: 16px;"><%= t.use_count %></div>
+          <div class="exam-links">
+            <%= link_to 'Open', exam_template_path(t), class: 'btn link sm' %>
+            <%= link_to 'Edit', edit_exam_template_path(t), class: 'btn link sm' %>
+            <%= button_to 'Generate', generate_exam_template_path(t), method: :post, class: 'btn link sm', form: { style: 'display:inline' } %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="tmpl-row">
+        <div class="picker-empty" style="grid-column: 1 / -1;">
+          No templates yet. <%= link_to 'Create one', new_exam_template_path %>.
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>

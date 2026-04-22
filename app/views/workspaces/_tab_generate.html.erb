@@ -1,0 +1,23 @@
+<%#
+  Generate — placeholder until the full 3-step wizard lands in Wave 2.
+  For now links through to the classic /exams/new form so the sidebar
+  item isn't a dead link.
+%>
+<section class="screen-generate">
+  <div class="breadcrumb"><span class="s">Build</span> / Generate</div>
+  <div class="page-head">
+    <div>
+      <h1>Generate <em>an exam</em></h1>
+      <p class="sub">Pick topics, weights, and question types. Full wizard lands soon.</p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'Open classic form', new_exam_path, class: 'btn sm' %>
+    </div>
+  </div>
+
+  <div class="picker-empty" style="max-width: 760px;">
+    The design's 3-step generator wizard is on the way — replaces the classic form
+    with live topic weighting, a live preview pane, and a blueprint summary.
+    Click "Open classic form" above to generate an exam now using the existing flow.
+  </div>
+</section>

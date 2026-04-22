@@ -1,0 +1,226 @@
+/* Sidebar shell — ported from the design's `.app` grid + `.sidebar`.
+ * 260px fixed left column with brand + grouped nav + user footer;
+ * main content fills the rest. Replaces the top pill-tabs meta-nav.
+ */
+
+body.workspace-shell {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+.sidebar {
+  background: var(--paper);
+  border-right: 1px solid var(--rule);
+  padding: 32px 24px;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 40px;
+  padding: 0 4px;
+  text-decoration: none;
+  color: inherit;
+}
+.brand .mark {
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 16px;
+  border-radius: 4px;
+  transform: translateY(2px);
+}
+.brand .name {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.navgroup-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 0 10px;
+  margin: 24px 0 8px;
+}
+.navgroup-label:first-of-type { margin-top: 0; }
+
+.nav { display: flex; flex-direction: column; }
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 1px;
+}
+.nav a:hover { background: var(--paper-2); color: var(--ink); }
+.nav a.active { background: var(--ink); color: var(--paper); }
+.nav a.active .dot { background: var(--accent); }
+.nav .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ink-4);
+}
+.nav .k {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-4);
+  background: var(--paper-2);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.nav a.active .k {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--paper-3);
+}
+
+/* Sidebar footer: user + autosave pill + Classic escape */
+.sidebar-foot {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.sidebar-foot .user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-foot .avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--paper-3);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: var(--ink-2);
+  font-size: 11px;
+}
+.sidebar-foot .user-name { color: var(--ink); font-weight: 500; }
+.sidebar-foot .user-sub  { color: var(--ink-3); }
+
+.sidebar-foot__links {
+  display: flex;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.sidebar-foot__links a {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+.sidebar-foot__links a:hover { color: var(--accent); }
+
+.sidebar-foot__autosave {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+.sidebar-foot__autosave[data-state="dirty"]   { color: var(--accent); }
+.sidebar-foot__autosave[data-state="saving"]  { color: var(--blue); }
+.sidebar-foot__autosave[data-state="error"]   { color: var(--red); }
+
+/* Main pane — the content area. Each screen's partial drives its own
+ * page-head + breadcrumb. */
+.app > .main {
+  padding: 48px 56px 96px;
+  max-width: 1280px;
+}
+
+/* Responsive collapse: on narrow widths, stack sidebar on top */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 20px 24px;
+  }
+  .brand { margin-bottom: 20px; }
+  .sidebar-foot { display: none; }
+}
+
+/* + New menu surfaced in the sidebar footer as a proper dropdown */
+.sidebar-new {
+  margin-top: 12px;
+}
+.sidebar-new__btn {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 13px;
+  text-align: center;
+  display: block;
+}
+.sidebar-new__btn::-webkit-details-marker { display: none; }
+.sidebar-new[open] .sidebar-new__btn { background: var(--ink-2); }
+.sidebar-new__panel {
+  margin-top: 6px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.sidebar-new__section {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 6px 8px 2px;
+}
+.sidebar-new__item {
+  padding: 6px 10px;
+  border-radius: 3px;
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: none;
+}
+.sidebar-new__item:hover { background: var(--paper-2); color: var(--accent); }

@@ -1,0 +1,94 @@
+<%#
+  Question bank — ported from the design's #screen-questions.
+%>
+<% questions = @questions || [] %>
+<% topics = @topics_for_filter || [] %>
+<% type_counts = @question_type_counts || {} %>
+
+<section class="screen-questions">
+  <div class="breadcrumb"><span class="s">Library</span> / Question bank</div>
+
+  <div class="page-head">
+    <div>
+      <h1><em>Question bank</em></h1>
+      <p class="sub">
+        <%= pluralize(Question.count, 'question') %>.
+        Filter by topic, type, or search the stems.
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to '+ New question', new_question_path, class: 'btn sm' %>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="fk">Type</span>
+    <%= link_to 'All', workspace_path(tab: 'questions'),
+                class: "chip-f #{'on' if params[:question_type].blank?}" %>
+    <% %w[written multiple_choice calculation cloze matching ordering composite markdown code_analysis].each do |t| %>
+      <% count = type_counts[t].to_i %>
+      <% next if count.zero? %>
+      <%= link_to "#{t.humanize} · #{count}",
+                  workspace_path(tab: 'questions', question_type: t, topic_id: params[:topic_id]),
+                  class: "chip-f #{'on' if params[:question_type] == t}" %>
+    <% end %>
+    <span class="grow"></span>
+    <form class="search" action="<%= workspace_path(tab: 'questions') %>" method="get">
+      <input type="hidden" name="tab" value="questions">
+      <span style="color: var(--ink-4);">⌕</span>
+      <input name="q" value="<%= params[:q] %>" placeholder="Search stems…">
+      <span class="k">⌘K</span>
+    </form>
+  </div>
+
+  <% if topics.any? %>
+    <div class="filter-bar" style="padding-top: 0;">
+      <span class="fk">Topic</span>
+      <%= link_to 'All', workspace_path(tab: 'questions', question_type: params[:question_type]),
+                  class: "chip-f #{'on' if params[:topic_id].blank?}" %>
+      <% topics.first(8).each do |topic| %>
+        <%= link_to topic.name,
+                    workspace_path(tab: 'questions', question_type: params[:question_type], topic_id: topic.id),
+                    class: "chip-f #{'on' if params[:topic_id].to_s == topic.id.to_s}" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="qbank-list">
+    <div class="qbank-row head">
+      <div>Type</div>
+      <div>Stem</div>
+      <div style="text-align: right;">Marks</div>
+      <div style="text-align: right;">Actions</div>
+    </div>
+
+    <% if questions.any? %>
+      <% questions.each do |q| %>
+        <div class="qbank-row">
+          <div class="qbank-type"><%= q.question_type %></div>
+          <div class="qbank-stem"><%= truncate(strip_tags(q.content.to_s), length: 160) %></div>
+          <div class="qbank-marks"><%= q.points %></div>
+          <div class="exam-links">
+            <%= link_to 'Edit', edit_question_path(q), class: 'btn link sm' %>
+            <% if q.topic %>
+              <%= link_to q.topic.name.truncate(18), workspace_path(tab: 'topics'), class: 'btn link sm' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="qbank-row">
+        <div class="picker-empty" style="grid-column: 1 / -1;">
+          No questions match. <%= link_to 'Clear filters', workspace_path(tab: 'questions') %>
+          or <%= link_to 'add one', new_question_path %>.
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @pagy && @pagy.pages > 1 %>
+    <div style="margin-top: 20px; font-family: var(--mono); font-size: 12px; color: var(--ink-3);">
+      Page <%= @pagy.page %> of <%= @pagy.pages %> · <%= @pagy.count %> total
+    </div>
+  <% end %>
+</section>

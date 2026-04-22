@@ -1,0 +1,49 @@
+<%#
+  Topics card grid — ported from the design's #screen-topics.
+%>
+<% topics = @topics || [] %>
+<% counts = @question_counts || {} %>
+
+<section class="screen-topics">
+  <div class="breadcrumb"><span class="s">Library</span> / Topics</div>
+
+  <div class="page-head">
+    <div>
+      <h1><em>Topics</em> &amp; modules</h1>
+      <p class="sub">
+        <%= pluralize(topics.size, 'topic') %> covering <%= TopicModule.count %> modules and
+        <%= pluralize(Question.count, 'question') %>.
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to '+ New topic', new_topic_path, class: 'btn sm' %>
+    </div>
+  </div>
+
+  <% if topics.any? %>
+    <div class="topics-grid">
+      <% topics.each do |t| %>
+        <%= link_to topic_path(t), class: 'topic-card' do %>
+          <div class="topic-card__title"><%= t.name %></div>
+          <div class="topic-card__meta">
+            <span><%= pluralize(counts[t.id] || 0, 'question') %></span>
+            <span><%= pluralize(t.topic_modules.size, 'module') %></span>
+            <span><%= pluralize(t.learning_objectives.size, 'LO') %></span>
+          </div>
+          <div class="topic-card__modules">
+            <% t.topic_modules.first(5).each do |m| %>
+              <span class="topic-card__mod"><%= m.name %></span>
+            <% end %>
+            <% if t.topic_modules.size > 5 %>
+              <span class="topic-card__mod">+<%= t.topic_modules.size - 5 %> more</span>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="picker-empty">
+      No topics yet. <%= link_to 'Create one', new_topic_path %>.
+    </div>
+  <% end %>
+</section>

@@ -1,51 +1,99 @@
-<% tabs = [
-  ['dashboard', 'Dashboard',      'Activity & quick actions'],
-  ['setup',     'Setup',          'Spec the exam'],
-  ['kb',        'Knowledge base', 'Topics, objectives, resources'],
-  ['canvas',    'Canvas',         'Edit the paper'],
-  ['review',    'Review',         'Preview & export']
-] %>
+<%#
+  Workspace shell — sidebar + main grid (Phase 13).
+  Replaces the pill-tab meta-nav with the design's left sidebar. The
+  sidebar's "Workspace/Library/Build/History" groups map onto Rails
+  routes via ?tab=.
 
-<header class="meta-nav"
-        data-controller="<%= 'autosave' if @exam %>"
-        data-autosave-exam-id-value="<%= @exam&.id %>"
-        data-autosave-debounce-value="3000">
-  <div class="meta-nav__brand">
-    <a class="meta-nav__wordmark" href="<%= root_path %>">ExamGen</a>
-    <span class="meta-nav__tag">v0.9 · alpha</span>
-  </div>
+  `@tab` is the active tab slug (from WorkspacesController::TABS).
+  Each tab partial owns its breadcrumb + page-head; this file is pure
+  shell.
+%>
+<%
+  sidebar_groups = [
+    ['Workspace', [
+      ['dashboard', 'Dashboard', 'G D']
+    ]],
+    ['Library', [
+      ['topics',    'Topics',        'G T'],
+      ['questions', 'Question bank', 'G Q'],
+      ['kb',        'Knowledge base', nil]
+    ]],
+    ['Build', [
+      ['templates', 'Templates',     'G P'],
+      ['generate',  'Generate exam', 'G N'],
+      ['setup',     'Template setup', nil]
+    ]],
+    ['Edit', [
+      ['canvas', 'Canvas',  nil],
+      ['review', 'Review',  nil]
+    ]],
+    ['History', [
+      ['history', 'Exam history', 'G H']
+    ]]
+  ]
+%>
 
-  <nav class="meta-tabs" aria-label="Workspace tabs">
-    <% tabs.each do |id, label, _hint| %>
-      <%= link_to label,
-                  workspace_path(tab: id, exam: params[:exam]),
-                  class: ['meta-tabs__btn', ('is-active' if @tab == id)].compact.join(' '),
-                  'aria-current': (@tab == id ? 'page' : nil) %>
+<div class="app" data-controller="<%= 'autosave' if @exam %>"
+     data-autosave-exam-id-value="<%= @exam&.id %>"
+     data-autosave-debounce-value="3000">
+
+  <aside class="sidebar">
+    <%= link_to workspace_path, class: 'brand' do %>
+      <span class="mark">E</span>
+      <span class="name">ExamGenerator</span>
     <% end %>
-  </nav>
 
-  <details class="meta-new">
-    <summary class="meta-new__btn" aria-label="Create new">+ New</summary>
-    <div class="meta-new__panel">
-      <div class="meta-new__section">Content</div>
-      <%= link_to 'New question',  new_question_path,      class: 'meta-new__item' %>
-      <%= link_to 'Question bank', questions_path,         class: 'meta-new__item' %>
-      <%= link_to 'Topics',        topics_path,            class: 'meta-new__item' %>
-      <div class="meta-new__section">Exam</div>
-      <%= link_to 'New exam',      new_exam_path,          class: 'meta-new__item' %>
-      <%= link_to 'New template',  new_exam_template_path, class: 'meta-new__item' %>
-      <%= link_to 'Template list', exam_templates_path,    class: 'meta-new__item' %>
-    </div>
-  </details>
+    <nav class="nav" aria-label="Primary navigation">
+      <% sidebar_groups.each do |group_label, items| %>
+        <div class="navgroup-label"><%= group_label %></div>
+        <% items.each do |id, label, hotkey| %>
+          <%= link_to workspace_path(tab: id, exam: params[:exam]),
+                      class: ['nav-link', ('active' if @tab == id)].compact.join(' '),
+                      'data-tab-id': id do %>
+            <span class="dot"></span>
+            <%= label %>
+            <% if hotkey %><span class="k"><%= hotkey %></span><% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </nav>
 
-  <span class="meta-nav__state" data-meta-autosave data-state="idle">Idle</span>
-  <%= link_to 'Classic →', exams_path(ui: 'classic'),
-              style: 'margin-left:12px; font-size:12px; color:#6b6358; font-family:var(--mono); text-decoration:none;' %>
-  <% if @exam %>
-    <span hidden data-exam-lock-version="<%= @exam.lock_version %>"></span>
-  <% end %>
-</header>
+    <footer class="sidebar-foot">
+      <details class="sidebar-new">
+        <summary class="sidebar-new__btn">+ New</summary>
+        <div class="sidebar-new__panel">
+          <div class="sidebar-new__section">Content</div>
+          <%= link_to 'New question',  new_question_path,      class: 'sidebar-new__item' %>
+          <%= link_to 'Question bank', workspace_path(tab: 'questions'), class: 'sidebar-new__item' %>
+          <%= link_to 'Topics',        workspace_path(tab: 'topics'),    class: 'sidebar-new__item' %>
+          <div class="sidebar-new__section">Exam</div>
+          <%= link_to 'New exam',      workspace_path(tab: 'generate'),  class: 'sidebar-new__item' %>
+          <%= link_to 'New template',  new_exam_template_path,           class: 'sidebar-new__item' %>
+          <%= link_to 'Template list', workspace_path(tab: 'templates'), class: 'sidebar-new__item' %>
+        </div>
+      </details>
 
-<main class="workspace-shell__main">
-  <%= render "workspaces/tab_#{@tab}", tab: @tab %>
-</main>
+      <% if @exam %>
+        <span class="sidebar-foot__autosave" data-meta-autosave data-state="idle">Idle</span>
+        <span hidden data-exam-lock-version="<%= @exam.lock_version %>"></span>
+      <% end %>
+
+      <div class="user">
+        <div class="avatar"><%= dashboard_user_name.to_s.first(2).upcase %></div>
+        <div>
+          <div class="user-name"><%= dashboard_user_name %></div>
+          <div class="user-sub">ExamGen workspace</div>
+        </div>
+      </div>
+
+      <div class="sidebar-foot__links">
+        <%= link_to 'Classic →', exams_path(ui: 'classic') %>
+        <%= link_to 'API', '/api/docs.html', target: '_blank' %>
+      </div>
+    </footer>
+  </aside>
+
+  <main class="main">
+    <%= render "workspaces/tab_#{@tab}", tab: @tab %>
+  </main>
+</div>
