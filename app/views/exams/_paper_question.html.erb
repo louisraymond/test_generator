@@ -1,49 +1,101 @@
 <%#
   Phase 7 — per-type body rendering for a single question on the redesigned
-  paper. Controllers attach when rendered in a Canvas preview-frame (same
-  markup, but the Stimulus controllers are enabled). In PDF output the
-  controllers don't connect, so output is static.
+  paper. Stems and option text run through MarkdownHelper so `**bold**`,
+  fenced code, and KaTeX-wrapped math ($x^2$) render correctly; KaTeX
+  auto-render (loaded in pdf.html.erb) picks up dollar-delimited spans.
 
-  Locals: question, counter, exam_question (optional).
+  Locals:
+    - question   — Question instance
+    - counter    — question number in the paper
+    - exam_question — optional ExamQuestion instance
+    - editable   — when true (Canvas editor) attach paper-is-editor Stimulus
+                    controllers; when false (PDF preview, print) render
+                    static markup so clicks don't mutate the database.
 %>
-<div class="q" data-controller="<%= 'mcq-paper' if question.question_type == 'multiple_choice' %><%= 'cloze-paper' if question.question_type == 'cloze' %>"
-     data-mcq-paper-question-id-value="<%= question.id if question.question_type == 'multiple_choice' %>"
-     data-cloze-paper-question-id-value="<%= question.id if question.question_type == 'cloze' %>">
+<% editable = local_assigns.fetch(:editable, false) %>
+<%
+  # Guard against malformed/legacy option shapes. MCQ options should be an
+  # array of {text, correct} hashes, but production seed rows sometimes carry
+  # plain strings or arrays — coerce to a uniform [{text, correct}] shape so
+  # the paper never crashes when rendering a historic question.
+  def _paper_mcq_options(raw)
+    Array(raw).map do |opt|
+      if opt.is_a?(Hash)
+        { text: (opt['text'] || opt[:text]).to_s, correct: ActiveModel::Type::Boolean.new.cast(opt['correct'] || opt[:correct]) }
+      else
+        { text: opt.to_s, correct: false }
+      end
+    end
+  end
+%>
+<%
+  controllers = []
+  if editable
+    controllers << 'mcq-paper' if question.question_type == 'multiple_choice'
+    controllers << 'cloze-paper' if question.question_type == 'cloze'
+  end
+%>
+<div class="q <%= 'q--editable' if editable %>" data-controller="<%= controllers.join(' ') %>"
+     data-mcq-paper-question-id-value="<%= question.id if editable && question.question_type == 'multiple_choice' %>"
+     data-cloze-paper-question-id-value="<%= question.id if editable && question.question_type == 'cloze' %>">
   <div class="q__num"><%= counter %></div>
   <div class="q__body">
     <% case question.question_type %>
     <% when 'multiple_choice' %>
-      <div class="q__stem"><%= question.content.to_s.html_safe %></div>
+      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
       <ol class="opts">
-        <% question.options.each_with_index do |opt, i| %>
-          <li class="opt-li <%= 'is-correct' if ActiveModel::Type::Boolean.new.cast(opt['correct']) %>"
-              data-mcq-paper-target="option"
-              data-option-index="<%= i %>"
-              data-action="click->mcq-paper#markCorrect">
-            <span data-edit><%= opt['text'] %></span>
+        <% _paper_mcq_options(question.options).each_with_index do |opt, i| %>
+          <li class="opt-li <%= 'is-correct' if opt[:correct] %>"
+              <% if editable %>
+                data-mcq-paper-target="option"
+                data-option-index="<%= i %>"
+                data-action="click->mcq-paper#markCorrect"
+              <% end %>>
+            <span <%= 'data-edit' if editable %> class="markdown-content"><%= render_markdown_inline(opt[:text]) %></span>
           </li>
         <% end %>
       </ol>
     <% when 'cloze' %>
-      <% words = question.content.to_s.split(/\s+/) %>
-      <% tokens = (question.options.is_a?(Hash) ? (question.options['tokens'] || []) : []) %>
-      <% blanked = tokens.select { |t| t['blanked'] }.map { |t| t['index'] }.to_set %>
+      <%#
+        Cloze tokeniser that preserves $...$ math spans (so KaTeX can
+        render them) and recognises {{answer}} author-markup as a
+        pre-blanked gap. Plain words remain click-togglable via the
+        cloze-paper Stimulus controller.
+      %>
+      <% stored = (question.options.is_a?(Hash) ? (question.options['tokens'] || []) : []) %>
+      <% blanked_indices = stored.select { |t| t['blanked'] }.map { |t| t['index'] }.to_set %>
+      <% all_tokens = tokenize_cloze(question.content.to_s) %>
       <% blank_counter = 0 %>
+      <% word_index = 0 %>
       <div class="q__stem" style="line-height: 2;">
-        <% words.each_with_index do |w, i| %>
-          <% is_blank = blanked.include?(i) %>
-          <% blank_counter += 1 if is_blank %>
-          <span class="w <%= 'is-blanked' if is_blank %>"
-                data-word-index="<%= i %>"
-                <% if is_blank %>data-blank-n="<%= blank_counter %>"<% end %>
-                data-action="click->cloze-paper#toggleBlank"><%= w %></span><%= ' ' %>
+        <% all_tokens.each do |tok| %>
+          <% case tok[:type] %>
+          <% when :math %>
+            <%= tok[:text].html_safe %>
+          <% when :autoblank %>
+            <% blank_counter += 1 %>
+            <span class="w is-blanked" data-blank-n="<%= blank_counter %>"
+                  data-answer="<%= tok[:answer] %>"
+                  aria-label="blank"><%= tok[:answer] %></span>
+          <% when :space %>
+            <%= tok[:text] %>
+          <% when :word %>
+            <% this_idx = word_index %>
+            <% is_blank = blanked_indices.include?(this_idx) %>
+            <% blank_counter += 1 if is_blank %>
+            <span class="w <%= 'is-blanked' if is_blank %>"
+                  data-word-index="<%= this_idx %>"
+                  <% if is_blank %>data-blank-n="<%= blank_counter %>"<% end %>
+                  <% if editable %>data-action="click->cloze-paper#toggleBlank"<% end %>><%= tok[:text] %></span>
+            <% word_index += 1 %>
+          <% end %>
         <% end %>
       </div>
     <% else %>
       <%# Default/fallback — matches Phase 1 shape %>
-      <div class="q__stem"><%= question.content.to_s.html_safe %></div>
-      <div class="<%= marks_to_workspace(question.points) %>"></div>
-      <% if question.points.to_i >= 5 %>
+      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
+      <div class="<%= marks_to_workspace(question) %>"></div>
+      <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
         <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
       <% end %>
     <% end %>

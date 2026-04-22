@@ -11,9 +11,11 @@ export default class extends PaperEditorController {
     const idx = Number(li.dataset.optionIndex)
     if (Number.isNaN(idx)) return
 
-    // Optimistic UI: flip tick locally first.
+    // Optimistic UI: toggle semantics — clicking the currently-correct
+    // option removes it, otherwise flip this one on and others off.
+    const wasCorrect = li.classList.contains("is-correct")
     this.optionTargets.forEach((el) => el.classList.remove("is-correct"))
-    li.classList.add("is-correct")
+    if (!wasCorrect) li.classList.add("is-correct")
 
     await this._post(`/questions/${this.questionIdValue}/toggle_correct`, { index: idx })
   }

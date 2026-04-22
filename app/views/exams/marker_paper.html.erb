@@ -93,7 +93,6 @@
       </div>
     <% end %>
 
-    <div class="wmk">Marker's copy</div>
     <div class="runfoot">
       <span>
         <%= [@exam.subject, (@exam.paper_number.present? ? "P#{@exam.paper_number}#{@exam.tier&.first&.upcase}" : nil), 'MS'].compact.join(' / ') %>

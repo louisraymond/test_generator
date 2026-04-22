@@ -1,27 +1,47 @@
 <%#
   Phase 1 — redesigned student paper (used for both PDF rendering and
   HTML preview at /exams/:id/paper). The `layout: 'pdf'` wrapper loads
-  fonts.css, tokens.css, and paper.css so the cover and interior
-  typography render identically whether snapshotted by Grover or viewed
-  in a browser.
+  fonts.css, tokens.css, and paper.css.
 
-  Layout model: one `.paper` block per section (or one single block if the
-  exam has no sections). Each `.paper` owns its own running head/foot and
-  watermark. CSS `page-break-inside: avoid` on `.q` handles physical
-  pagination in print; on-screen, `.paper` grows past 1123px when a section
-  is long.
+  Layout model: one `.paper` block per *visible page*. Sections split
+  into multiple .paper blocks based on question density (see
+  PAPER_QUESTIONS_PER_PAGE) so the on-screen preview looks like stacked
+  A4 pages rather than one long ribbon. In print, CSS @page + each
+  `.paper` having `page-break-before: always` ensures the same breaks.
+%>
+
+<%
+  # Math questions now get ~half-page workboxes; 4/page overflows A4
+  # badly. 2/page keeps each .paper close to A4 height with room for
+  # a two-question section page.
+  questions_per_page = 2
+  sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
+  global_counter = 0
+
+  # Build an ordered list of .paper blocks to render. Each entry is a
+  # hash: { section:, first_in_section:, questions: [eq...] }.
+  paper_pages = []
+  sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions|
+    section = section_number ? @exam.section_info(section_number) : nil
+    chunks = exam_questions.each_slice(questions_per_page).to_a
+    chunks.each_with_index do |chunk, i|
+      paper_pages << {
+        section: section,
+        section_number: section_number,
+        first_in_section: i.zero?,
+        questions: chunk,
+        page_in_section: i + 1,
+        total_pages_in_section: chunks.size
+      }
+    end
+  end
 %>
 
 <%= render 'cover_page', exam: @exam %>
 
-<%
-  sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
-  global_counter = 0
-%>
-
-<% sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions| %>
-  <% section = section_number ? @exam.section_info(section_number) : nil %>
-  <% section_letter = section&.letter.presence || (section_number ? ('A'.ord + section_number).chr : nil) %>
+<% paper_pages.each_with_index do |pg, idx| %>
+  <% section = pg[:section] %>
+  <% section_letter = section&.letter.presence || (pg[:section_number] ? ('A'.ord + pg[:section_number]).chr : nil) %>
 
   <div class="paper">
     <div class="runhead">
@@ -33,7 +53,7 @@
       <span>Candidate: ________</span>
     </div>
 
-    <% if section %>
+    <% if section && pg[:first_in_section] %>
       <div class="section-head">
         <div class="section-head__num"><%= section_letter %></div>
         <div class="section-head__title"><%= section.name %></div>
@@ -44,20 +64,22 @@
       </div>
     <% end %>
 
-    <% exam_questions.each do |eq| %>
+    <% pg[:questions].each do |eq| %>
       <% global_counter += 1 %>
-      <%= render 'paper_question', question: eq.question, counter: global_counter, exam_question: eq %>
+      <%= render 'paper_question', question: eq.question, counter: global_counter, exam_question: eq, editable: (@editable == true) %>
     <% end %>
 
-    <div class="wmk">Specimen · do not redistribute</div>
     <div class="runfoot">
       <span>
         <%= [@exam.subject, (@exam.paper_number.present? ? "P#{@exam.paper_number}#{@exam.tier&.first&.upcase}" : nil)].compact.join(' / ').presence || 'Exam' %>
         · <%= (@exam.exam_date || @exam.created_at.to_date).strftime('%d.%m.%Y') %>
       </span>
       <span>
-        <% if section %>Section <%= section_letter %><% else %>Interior<% end %>
-        · turn over ▶
+        <% if section %>
+          Section <%= section_letter %>
+          <% if pg[:total_pages_in_section] > 1 %> · p.<%= pg[:page_in_section] %>/<%= pg[:total_pages_in_section] %><% end %>
+        <% else %>Interior<% end %>
+        · Page <%= idx + 2 %><% if idx + 1 < paper_pages.size %> · turn over ▶<% end %>
       </span>
     </div>
   </div>

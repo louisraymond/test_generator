@@ -84,9 +84,12 @@ class ExamsController < ApplicationController
 
   # Phase 5: Turbo Frame target for the Canvas tab's live paper preview.
   # Same paper.html.erb content, wrapped in <turbo-frame id="paper-preview">
-  # so editor actions re-render without a full page reload.
+  # so editor actions re-render without a full page reload. Only this
+  # render path enables paper-is-editor interactions — the plain /paper
+  # HTML preview and PDF output are read-only.
   def preview_frame
     @exam = Exam.includes(exam_questions: :question).find(params[:id])
+    @editable = true
     render template: 'exams/preview_frame', layout: 'pdf'
   end
 

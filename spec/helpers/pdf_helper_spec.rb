@@ -4,30 +4,49 @@ require 'rails_helper'
 
 RSpec.describe PdfHelper, type: :helper do
   describe '#marks_to_workspace' do
-    it 'returns a one-line rule for 1 mark' do
-      expect(helper.marks_to_workspace(1)).to eq('lines lines--1')
+    # Marks-based defaults (revised for maths: every question gets a real
+    # working box; anything 4+ marks is half-page minimum).
+    it 'returns a small working box for 1 mark' do
+      expect(helper.marks_to_workspace(1)).to eq('workbox workbox--sm')
     end
 
-    it 'returns two lines for 2 marks' do
-      expect(helper.marks_to_workspace(2)).to eq('lines lines--2')
+    it 'returns a medium working box for 2 marks' do
+      expect(helper.marks_to_workspace(2)).to eq('workbox workbox--md')
     end
 
-    it 'returns a small working box for 3 marks' do
-      expect(helper.marks_to_workspace(3)).to eq('workbox workbox--sm')
+    it 'returns a large working box for 3 marks' do
+      expect(helper.marks_to_workspace(3)).to eq('workbox workbox--lg')
     end
 
-    it 'returns a medium working box for 4 marks' do
-      expect(helper.marks_to_workspace(4)).to eq('workbox workbox--md')
+    it 'returns an extra-large (half-page) working box for 4+ marks' do
+      expect(helper.marks_to_workspace(4)).to eq('workbox workbox--xl')
+      expect(helper.marks_to_workspace(5)).to eq('workbox workbox--xl')
+      expect(helper.marks_to_workspace(12)).to eq('workbox workbox--xl')
     end
 
-    it 'returns a large working box for 5+ marks' do
-      expect(helper.marks_to_workspace(5)).to eq('workbox workbox--lg')
-      expect(helper.marks_to_workspace(12)).to eq('workbox workbox--lg')
+    it 'defaults to two lines for nil or zero' do
+      expect(helper.marks_to_workspace(nil)).to eq('lines lines--2')
+      expect(helper.marks_to_workspace(0)).to eq('lines lines--2')
     end
 
-    it 'defaults to one line for nil or zero' do
-      expect(helper.marks_to_workspace(nil)).to eq('lines lines--1')
-      expect(helper.marks_to_workspace(0)).to eq('lines lines--1')
+    describe 'answer_size override (Question-shaped argument)' do
+      Q = Struct.new(:points, :answer_size)
+
+      it "uses 'long' to force an XL workbox regardless of marks" do
+        expect(helper.marks_to_workspace(Q.new(1, 'long'))).to eq('workbox workbox--xl')
+      end
+
+      it "uses 'medium' to force a large workbox" do
+        expect(helper.marks_to_workspace(Q.new(1, 'medium'))).to eq('workbox workbox--lg')
+      end
+
+      it "uses 'short' to force one line regardless of marks" do
+        expect(helper.marks_to_workspace(Q.new(10, 'short'))).to eq('lines lines--1')
+      end
+
+      it 'falls back to marks when answer_size is nil' do
+        expect(helper.marks_to_workspace(Q.new(4, nil))).to eq('workbox workbox--xl')
+      end
     end
   end
 

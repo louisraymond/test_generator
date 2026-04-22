@@ -62,8 +62,12 @@ class QuestionsController < ApplicationController
 
     idx = params[:index].to_i
     options = @question.options.map(&:deep_dup)
+    already_correct = ActiveModel::Type::Boolean.new.cast(options.dig(idx, 'correct'))
     options.each_with_index do |opt, i|
-      opt['correct'] = (i == idx)
+      # Single-correct MCQ: flip all others off. If the clicked option
+      # was already the correct one, toggle it off so the author can
+      # return to an unmarked state.
+      opt['correct'] = (i == idx) && !already_correct
     end
     # Bypass the MCQ validator — it coerces options through a `||` chain
     # that nils-out explicit `false` values. The shape we wrote is already

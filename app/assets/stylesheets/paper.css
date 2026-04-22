@@ -9,6 +9,14 @@
   margin: 22mm 18mm 22mm 24mm;
 }
 
+/* Centre every .paper horizontally in the browser preview so the page
+ * stack sits in the middle of a wide viewport. Screen-only; print honors
+ * @page margins. */
+@media screen {
+  body { background: var(--paper-2, #efeae0); }
+  .paper { margin-left: auto; margin-right: auto; }
+}
+
 .paper {
   --ink: #1a1915;
   --ink-soft: #2d2a23;
@@ -35,7 +43,11 @@
   padding: 76px 64px 64px;
   position: relative;
   box-sizing: border-box;
-  overflow: hidden;
+  /* On-screen, allow content to grow past 1123px (the min-height keeps
+   * the A4 rectangle look for short pages). In print, overflow:hidden
+   * would clip; we rely on @page + page-break-inside:avoid on .q to
+   * paginate cleanly. */
+  overflow: visible;
 }
 
 .paper--ms {
@@ -247,16 +259,16 @@
 .workbox {
   border: .5pt solid var(--rule);
   border-radius: 2px;
-  min-height: 80px;
+  min-height: 200px;          /* generous default — math questions need room */
   margin-top: 4px;
   background: repeating-linear-gradient(to bottom, transparent 0, transparent 23px, #eee7d5 23px, #eee7d5 23.5px);
   background-size: 100% 24px;
 }
 .workbox--blank { background: none; }
-.workbox--sm { min-height: 52px; }
-.workbox--md { min-height: 88px; }
-.workbox--lg { min-height: 140px; }
-.workbox--xl { min-height: 190px; }
+.workbox--sm { min-height: 120px; }     /* ~5 ruled lines */
+.workbox--md { min-height: 200px; }     /* ~quarter page */
+.workbox--lg { min-height: 350px; }     /* ~third page */
+.workbox--xl { min-height: 550px; }     /* ~half page — default for 5+ mark math */
 
 .finalans {
   display: flex;

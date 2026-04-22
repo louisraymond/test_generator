@@ -37,6 +37,13 @@ RSpec.describe 'Paper-is-editor endpoints', type: :request do
       expect(question.options[2]['correct']).to be true
     end
 
+    it 'clicking the already-correct option toggles it off' do
+      # Start state has index 0 correct; clicking 0 again should clear it.
+      post toggle_correct_question_path(question), params: { index: 0 }
+      question.reload
+      expect(question.options[0]['correct']).to be false
+    end
+
     it 'rejects non-MCQ questions with 422' do
       other = create(:question, topic: topic, source: source, question_type: 'written')
       post toggle_correct_question_path(other), params: { index: 0 }

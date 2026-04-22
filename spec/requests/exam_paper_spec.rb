@@ -75,9 +75,10 @@ RSpec.describe 'Exams paper (student PDF redesign)', type: :request do
       expect(response.body).to include('runfoot')
     end
 
-    it 'renders a vertical watermark on every paper' do
+    it 'does not render the Specimen watermark (removed per product feedback)' do
       get paper_exam_path(exam)
-      expect(response.body).to match(/class="wmk"/)
+      expect(response.body).not_to match(/class="wmk"/)
+      expect(response.body).not_to include('Specimen · do not redistribute')
     end
 
     it 'falls back to sensible defaults for exams without a template' do

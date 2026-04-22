@@ -94,7 +94,6 @@
     </div>
   <% end %>
 
-  <div class="wmk">Specimen · do not redistribute</div>
   <div class="runfoot">
     <span><%= [exam.subject, "P#{exam.paper_number}#{exam.tier&.first&.upcase}"].compact.join(' / ').presence || 'Exam' %> · <%= (exam.exam_date || exam.created_at.to_date).strftime('%d.%m.%Y') %></span>
     <span>Page 1 · turn over ▶</span>
