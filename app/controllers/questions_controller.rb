@@ -94,18 +94,67 @@ class QuestionsController < ApplicationController
     head :ok
   end
 
-  # Wave 3 — generic per-type options merge. Stimulus controllers that
-  # mutate a single key (e.g. cloze adds a per-blank `accepts` array)
-  # PATCH here instead of defining a new action per mutation.
+  # Wave 3 — generic per-type options patcher. Stimulus controllers PATCH
+  # here with either:
+  #   { options: {key: value, ...} } — straight merge into jsonb (matching,
+  #     simple add/remove)
+  #   { options: {add_pin: {...}} }  — type-specific command keys handled
+  #     below (pin drops, mask draws, reorder, line highlight, part add).
   def options_patch
     patch = params[:options].permit!.to_h if params[:options].respond_to?(:permit!)
     patch ||= params[:options].to_unsafe_h if params[:options].respond_to?(:to_unsafe_h)
     patch ||= params[:options]
     return head(:unprocessable_entity) unless patch.is_a?(Hash)
+    patch = patch.deep_stringify_keys
 
-    current = @question.options.is_a?(Hash) ? @question.options : {}
-    merged = current.merge(patch.stringify_keys)
-    @question.update_columns(options: merged, updated_at: Time.current)
+    current = if @question.options.is_a?(Hash)
+                @question.options.deep_dup
+              elsif @question.options.is_a?(Array)
+                { 'items' => @question.options.deep_dup }
+              else
+                {}
+              end
+
+    patch.each do |key, value|
+      case key
+      when 'add_pin'
+        current['pins'] ||= []
+        current['pins'] << { 'x' => value['x'], 'y' => value['y'], 'answer' => '' }
+      when 'remove_pin'
+        current['pins'] ||= []
+        current['pins'].delete_at(value.to_i) if value.to_i.between?(0, current['pins'].length - 1)
+      when 'add_mask'
+        current['masks'] ||= []
+        current['masks'] << { 'x' => value['x'], 'y' => value['y'],
+                              'w' => value['w'], 'h' => value['h'],
+                              'answer' => '', 'shape' => 'rect' }
+      when 'remove_mask'
+        current['masks'] ||= []
+        current['masks'].delete_at(value.to_i) if value.to_i.between?(0, current['masks'].length - 1)
+      when 'reorder'
+        arr = @question.options.is_a?(Array) ? @question.options.deep_dup : Array(current['items'])
+        from, to = value['from'].to_i, value['to'].to_i
+        if arr[from] && arr[to] && from != to
+          item = arr.delete_at(from)
+          arr.insert(to, item)
+        end
+        @question.update_columns(options: arr, updated_at: Time.current)
+        head :ok and return
+      when 'toggle_highlighted_line'
+        current['highlighted_lines'] ||= []
+        if current['highlighted_lines'].include?(value.to_i)
+          current['highlighted_lines'].delete(value.to_i)
+        else
+          current['highlighted_lines'] << value.to_i
+        end
+      when 'add_part'
+        next # PR #8 handles via AR
+      else
+        current[key] = value
+      end
+    end
+
+    @question.update_columns(options: current, updated_at: Time.current)
     head :ok
   end
 

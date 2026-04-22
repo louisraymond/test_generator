@@ -129,14 +129,22 @@ module PdfHelper
   # on warm beige, gutter line numbers, no syntax highlighting (paper is
   # meant to be calm and print-friendly, not an IDE). Matches the
   # `pre.code` + `.ln` markup spec'd in the design explorations.
-  def render_paper_code(code, language: 'text')
+  def render_paper_code(code, language: 'text', editable: false)
     return '' if code.to_s.empty?
     lines = code.to_s.split("\n")
     html = lines.each_with_index.map { |line, i|
       number = tag.span((i + 1).to_s, class: 'ln')
-      "#{number} #{ERB::Util.html_escape(line)}"
+      line_body = if editable
+                    tag.span(line.presence || ' ',
+                             class: 'code__line',
+                             'data-line-index': i,
+                             'data-action': 'click->code-paper#toggleLine')
+                  else
+                    ERB::Util.html_escape(line)
+                  end
+      "#{number} #{line_body}"
     }.join("\n")
-    tag.pre(raw(html), class: "code code--#{language}")
+    tag.pre(raw(html), class: "code code--#{language} #{'code--editable' if editable}")
   end
 
   # Eyebrow text shown above the cover title: "SUBJECT · PAPER N · TIER".

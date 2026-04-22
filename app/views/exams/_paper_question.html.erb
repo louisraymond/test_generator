@@ -1,23 +1,20 @@
 <%#
-  Phase 7 — per-type body rendering for a single question on the redesigned
-  paper. Stems and option text run through MarkdownHelper so `**bold**`,
-  fenced code, and KaTeX-wrapped math ($x^2$) render correctly; KaTeX
-  auto-render (loaded in pdf.html.erb) picks up dollar-delimited spans.
+  Wave 3 — per-type body rendering for a single question on the redesigned
+  paper. When `editable: true` (Canvas preview), attaches paper-is-editor
+  Stimulus controllers:
+    - paper-editor (shared base — handles [data-edit] blur → autosave)
+    - <type>-paper  (per-type direct manipulation on top)
 
   Locals:
     - question   — Question instance
     - counter    — question number in the paper
-    - exam_question — optional ExamQuestion instance
+    - exam_question — optional ExamQuestion instance (gives exam-id value)
     - editable   — when true (Canvas editor) attach paper-is-editor Stimulus
                     controllers; when false (PDF preview, print) render
                     static markup so clicks don't mutate the database.
 %>
 <% editable = local_assigns.fetch(:editable, false) %>
 <%
-  # Guard against malformed/legacy option shapes. MCQ options should be an
-  # array of {text, correct} hashes, but production seed rows sometimes carry
-  # plain strings or arrays — coerce to a uniform [{text, correct}] shape so
-  # the paper never crashes when rendering a historic question.
   def _paper_mcq_options(raw)
     Array(raw).map do |opt|
       if opt.is_a?(Hash)
@@ -33,20 +30,48 @@
   end
 %>
 <%
-  controllers = []
-  if editable
-    controllers << 'mcq-paper' if question.question_type == 'multiple_choice'
-    controllers << 'cloze-paper' if question.question_type == 'cloze'
+  # Type-to-Stimulus-controller mapping (from QuestionTypes registry).
+  type_controller = {
+    'multiple_choice' => 'mcq-paper',
+    'cloze'           => 'cloze-paper',
+    'matching'        => 'match-paper',
+    'ordering'        => 'order-paper',
+    'ranking'         => 'order-paper',
+    'calculation'     => 'calc-paper',
+    'code_analysis'   => 'code-paper',
+    'diagram_label'   => 'diagram-paper',
+    'image_occlusion' => 'occlusion-paper',
+    'composite'       => 'composite-paper',
+    'written'         => 'paper-editor',
+    'markdown'        => 'paper-editor'
+  }
+  controllers = editable ? ['paper-editor', type_controller[question.question_type]].compact.uniq : []
+  controller_ids = controllers.each_with_object({}) do |ctrl, h|
+    key = ctrl.sub('-paper', '_paper').sub('paper-editor', 'paper_editor')
+    h["#{ctrl}_question_id_value".tr('_', '-')] = question.id
   end
 %>
-<div class="q <%= 'q--editable' if editable %>" data-controller="<%= controllers.join(' ') %>"
-     data-mcq-paper-question-id-value="<%= question.id if editable && question.question_type == 'multiple_choice' %>"
-     data-cloze-paper-question-id-value="<%= question.id if editable && question.question_type == 'cloze' %>">
+<div class="q <%= 'q--editable' if editable %>"
+     data-controller="<%= controllers.join(' ') %>"
+     <% if editable %>
+       data-paper-editor-question-id-value="<%= question.id %>"
+       <% if exam_question.present? %>data-paper-editor-exam-id-value="<%= exam_question.exam_id %>"<% end %>
+       data-mcq-paper-question-id-value="<%= question.id %>"
+       data-cloze-paper-question-id-value="<%= question.id %>"
+       data-match-paper-question-id-value="<%= question.id %>"
+       data-order-paper-question-id-value="<%= question.id %>"
+       data-calc-paper-question-id-value="<%= question.id %>"
+       data-code-paper-question-id-value="<%= question.id %>"
+       data-diagram-paper-question-id-value="<%= question.id %>"
+       data-occlusion-paper-question-id-value="<%= question.id %>"
+       data-composite-paper-question-id-value="<%= question.id %>"
+     <% end %>>
   <div class="q__num"><%= counter %></div>
   <div class="q__body">
     <% case question.question_type %>
     <% when 'multiple_choice' %>
-      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
       <ol class="opts">
         <% _paper_mcq_options(question.options).each_with_index do |opt, i| %>
           <li class="opt-li <%= 'is-correct' if opt[:correct] %> <%= 'is-eliminated' if opt[:eliminated] %>"
@@ -60,12 +85,6 @@
         <% end %>
       </ol>
     <% when 'cloze' %>
-      <%#
-        Cloze tokeniser that preserves $...$ math spans (so KaTeX can
-        render them) and recognises {{answer}} author-markup as a
-        pre-blanked gap. Plain words remain click-togglable via the
-        cloze-paper Stimulus controller.
-      %>
       <% stored = (question.options.is_a?(Hash) ? (question.options['tokens'] || []) : []) %>
       <% blanked_indices = stored.select { |t| t['blanked'] }.map { |t| t['index'] }.to_set %>
       <% all_tokens = tokenize_cloze(question.content.to_s) %>
@@ -95,19 +114,76 @@
           <% end %>
         <% end %>
       </div>
+
+    <% when 'matching' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <% opts = question.options.is_a?(Hash) ? question.options : {} %>
+      <% left = Array(opts['left']) %>
+      <% right = Array(opts['right']) %>
+      <% seed = opts['seed'].to_i.nonzero? || question.id.to_i %>
+      <% shuffled_right = right.each_with_index.to_a.shuffle(random: Random.new(seed)).map { |(v, original_idx)| [v, original_idx] } %>
+      <div class="match-grid" role="table" aria-label="Matching pairs">
+        <div class="match-grid__col match-grid__col--left">
+          <% left.each_with_index do |item, i| %>
+            <div class="match-row" data-match-paper-target="row" data-side="left" data-index="<%= i %>">
+              <span class="match-row__label"><%= ('A'.ord + i).chr %>.</span>
+              <span <% if editable %>data-edit data-field="options.left.<%= i %>"<% end %>
+                    class="match-row__text markdown-content"><%= render_markdown_inline(item.to_s) %></span>
+            </div>
+          <% end %>
+        </div>
+        <div class="match-grid__col match-grid__col--right">
+          <% shuffled_right.each_with_index do |(item, original_idx), display_i| %>
+            <div class="match-row" data-side="right" data-original-index="<%= original_idx %>">
+              <span class="match-row__label"><%= display_i + 1 %>.</span>
+              <span <% if editable %>data-edit data-field="options.right.<%= original_idx %>"<% end %>
+                    class="match-row__text markdown-content"><%= render_markdown_inline(item.to_s) %></span>
+              <span class="match-row__blank">__________</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+    <% when 'ordering', 'ranking' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <% items = Array(question.options).map do |row|
+           row.is_a?(Hash) ? (row['text'] || row[:text]).to_s : row.to_s
+         end %>
+      <% seed = question.id.to_i %>
+      <% presented = items.each_with_index.to_a.shuffle(random: Random.new(seed)) %>
+      <ol class="order-list" data-order-paper-target="list">
+        <% presented.each_with_index do |(text, original_idx), display_i| %>
+          <li class="order-item"
+              data-original-index="<%= original_idx %>"
+              <% if editable %>draggable="true"
+                 data-action="dragstart->order-paper#dragStart dragover->order-paper#dragOver drop->order-paper#drop"
+              <% end %>>
+            <span class="order-item__num"><%= display_i + 1 %></span>
+            <span <% if editable %>data-edit data-field="options.<%= original_idx %>.text"<% end %>
+                  class="markdown-content"><%= render_markdown_inline(text) %></span>
+            <span class="order-item__blank">__________</span>
+          </li>
+        <% end %>
+      </ol>
+
+    <% when 'calculation' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <div class="<%= marks_to_workspace(question) %>"></div>
+      <% if question.points.to_i >= 3 || question.answer_size == 'long' %>
+        <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
+      <% end %>
+
     <% when 'code_analysis' %>
-      <%#
-        Code analysis — the question stem above the snippet, the code itself
-        rendered as a fenced block (Rouge highlighting via MarkdownHelper),
-        followed by either MCQ options (answer_format=multiple_choice) or a
-        workbox / ruled lines (answer_format=lines).
-      %>
-      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
       <% opts = question.options.is_a?(Hash) ? question.options : {} %>
       <% code = opts['code'].to_s %>
       <% lang = opts['language'].presence || 'text' %>
       <% if code.present? %>
-        <%= render_paper_code(code, language: lang) %>
+        <%= render_paper_code(code, language: lang, editable: editable) %>
       <% end %>
       <% if opts['answer_format'] == 'multiple_choice' && opts['choices'].is_a?(Array) %>
         <ol class="opts">
@@ -120,13 +196,88 @@
         </ol>
       <% else %>
         <div class="<%= marks_to_workspace(question) %>"></div>
-        <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
-          <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
-        <% end %>
       <% end %>
+
+    <% when 'diagram_label' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <% opts = question.options.is_a?(Hash) ? question.options : {} %>
+      <% image = opts['image'].to_s %>
+      <% pins = Array(opts['pins'] || opts['markers']) %>
+      <figure class="diagram"
+              <% if editable %>data-action="click->diagram-paper#drop"
+                data-diagram-paper-target="figure"<% end %>>
+        <% if image.present? %>
+          <img src="<%= image %>" alt="Diagram" class="diagram__img">
+        <% else %>
+          <div class="diagram__placeholder">[ no image — upload via rail ]</div>
+        <% end %>
+        <% pins.each_with_index do |pin, i| %>
+          <span class="diagram__pin"
+                style="left: <%= pin['x'] %>%; top: <%= pin['y'] %>%;"
+                data-pin-index="<%= i %>"
+                <% if editable %>data-action="click->diagram-paper#removePin"<% end %>>
+            <%= i + 1 %>
+          </span>
+        <% end %>
+      </figure>
+      <ol class="diagram-answers">
+        <% pins.each_with_index do |pin, i| %>
+          <li class="diagram-answers__row">
+            <span class="diagram-answers__num"><%= i + 1 %></span>
+            <span <% if editable %>data-edit data-field="options.pins.<%= i %>.answer"<% end %>
+                  class="diagram-answers__text"><%= pin['answer'].to_s %></span>
+          </li>
+        <% end %>
+      </ol>
+
+    <% when 'image_occlusion' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <% opts = question.options.is_a?(Hash) ? question.options : {} %>
+      <% image = opts['image'].to_s %>
+      <% masks = Array(opts['masks']) %>
+      <figure class="occlusion"
+              <% if editable %>data-occlusion-paper-target="figure"
+                 data-action="mousedown->occlusion-paper#startMask mousemove->occlusion-paper#trackMask mouseup->occlusion-paper#endMask"<% end %>>
+        <% if image.present? %>
+          <img src="<%= image %>" alt="Image occlusion" class="occlusion__img">
+        <% else %>
+          <div class="occlusion__placeholder">[ no image — upload via rail ]</div>
+        <% end %>
+        <% masks.each_with_index do |m, i| %>
+          <span class="occlusion__mask"
+                style="left:<%= m['x'] %>%; top:<%= m['y'] %>%; width:<%= m['w'] %>%; height:<%= m['h'] %>%;"
+                data-mask-index="<%= i %>"
+                <% if editable %>data-action="click->occlusion-paper#removeMask"<% end %>>
+            <%= i + 1 %>
+          </span>
+        <% end %>
+      </figure>
+
+    <% when 'composite' %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
+      <% parts = question.question_parts.to_a
+         parts = (question.options.is_a?(Hash) ? Array(question.options['parts']) : []) if parts.empty? %>
+      <ol class="composite">
+        <% parts.each_with_index do |part, i| %>
+          <% stem = part.is_a?(QuestionPart) ? part.stem : (part.is_a?(Hash) ? (part['stem'] || part['content']) : '') %>
+          <% marks = part.is_a?(QuestionPart) ? part.marks : (part.is_a?(Hash) ? part['marks'] : 1) %>
+          <li class="composite__part">
+            <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
+            <span <% if editable %>data-edit data-field="parts.<%= i %>.stem"<% end %>
+                  class="markdown-content"><%= render_markdown_inline(stem.to_s) %></span>
+            <span class="composite__marks">[<%= marks %>]</span>
+            <div class="lines lines--2"></div>
+          </li>
+        <% end %>
+      </ol>
+
     <% else %>
-      <%# Default/fallback — matches Phase 1 shape %>
-      <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
+      <%# written / markdown / fallback — plain prose with ruled lines %>
+      <div class="q__stem markdown-content"
+           <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
       <div class="<%= marks_to_workspace(question) %>"></div>
       <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
         <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
