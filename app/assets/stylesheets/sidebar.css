@@ -149,6 +149,22 @@ body.workspace-shell {
 }
 .sidebar-foot__links a:hover { color: var(--accent); }
 
+.sidebar-foot__palette-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-4, #a89c82);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+.sidebar-foot__palette-hint kbd {
+  font-family: var(--mono);
+  background: rgba(180, 83, 42, 0.08);
+  color: var(--accent);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+
 .sidebar-foot__autosave {
   font-family: var(--mono);
   font-size: 11px;
@@ -156,8 +172,18 @@ body.workspace-shell {
   letter-spacing: 0.02em;
 }
 .sidebar-foot__autosave[data-state="dirty"]   { color: var(--accent); }
-.sidebar-foot__autosave[data-state="saving"]  { color: var(--blue); }
-.sidebar-foot__autosave[data-state="error"]   { color: var(--red); }
+.sidebar-foot__autosave[data-state="saving"]  { color: var(--blue, #2d6a8f); }
+.sidebar-foot__autosave[data-state="saved"]   { color: var(--credit, #2e4a2b); }
+.sidebar-foot__autosave[data-state="error"]   { color: var(--red, #b14646); }
+.sidebar-foot__autosave[data-state="conflict"] {
+  color: var(--red, #b14646);
+  font-weight: 500;
+  animation: pulse-warn 1.8s ease-in-out infinite;
+}
+@keyframes pulse-warn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
 
 /* Main pane — the content area. Each screen's partial drives its own
  * page-head + breadcrumb. */

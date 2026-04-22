@@ -1,23 +1,190 @@
 <%#
-  Generate — placeholder until the full 3-step wizard lands in Wave 2.
-  For now links through to the classic /exams/new form so the sidebar
-  item isn't a dead link.
+  Generator wizard (Wave 4.1) — 3 steps, rendered as a single form that
+  POSTs to /exams. Step panels show/hide via wizard_controller. The
+  existing exam-form controller wires /exams/preview_counts for the
+  live blueprint in the right rail.
 %>
-<section class="screen-generate">
+<section class="screen-generate wizard"
+         data-controller="wizard exam-form"
+         data-wizard-step-value="1">
+
   <div class="breadcrumb"><span class="s">Build</span> / Generate</div>
+
   <div class="page-head">
     <div>
       <h1>Generate <em>an exam</em></h1>
-      <p class="sub">Pick topics, weights, and question types. Full wizard lands soon.</p>
+      <p class="sub">Choose settings, pick question types, weight topics. Live blueprint on the right.</p>
     </div>
     <div class="page-head__actions">
-      <%= link_to 'Open classic form', new_exam_path, class: 'btn sm' %>
+      <%= link_to 'Open classic form', new_exam_path(ui: 'classic'), class: 'btn ghost sm' %>
     </div>
   </div>
 
-  <div class="picker-empty" style="max-width: 760px;">
-    The design's 3-step generator wizard is on the way — replaces the classic form
-    with live topic weighting, a live preview pane, and a blueprint summary.
-    Click "Open classic form" above to generate an exam now using the existing flow.
-  </div>
+  <%= form_with url: exams_path, method: :post, local: true,
+                class: 'wizard-form',
+                data: {
+                  action: 'change->exam-form#updatePreview input->exam-form#updatePreview',
+                  'wizard-target': 'form'
+                } do |f| %>
+
+    <div class="wizard-grid">
+      <div class="wizard-main">
+        <nav class="wizard-steps" aria-label="Wizard progress">
+          <% %w[Settings Types Topics].each_with_index do |label, i| %>
+            <button type="button"
+                    class="wizard-step <%= 'is-active' if i == 0 %>"
+                    data-wizard-target="tab"
+                    data-wizard-step="<%= i + 1 %>"
+                    data-action="click->wizard#goTo">
+              <span class="wizard-step__num"><%= i + 1 %></span>
+              <span class="wizard-step__label"><%= label %></span>
+            </button>
+            <% unless i == 2 %><span class="wizard-step__sep"></span><% end %>
+          <% end %>
+        </nav>
+
+        <section class="wizard-panel is-active"
+                 data-wizard-target="panel" data-wizard-step="1">
+          <h2 class="wizard-panel__title">Paper settings</h2>
+          <p class="wizard-panel__hint">Title and total length.</p>
+
+          <div class="wizard-field">
+            <label for="wizard_title">Exam title</label>
+            <%= f.text_field :title, id: 'wizard_title',
+                             placeholder: 'e.g. Midterm · Physics 2',
+                             value: params[:title], class: 'wizard-input' %>
+          </div>
+
+          <div class="wizard-field-row">
+            <div class="wizard-field">
+              <label for="wizard_count">Total questions</label>
+              <%= f.number_field :question_count, id: 'wizard_count',
+                                 min: 1, value: (params[:question_count] || 10),
+                                 required: true, class: 'wizard-input',
+                                 data: { 'exam-form-target': 'count' } %>
+            </div>
+
+            <div class="wizard-field">
+              <label for="wizard_duration">Duration (minutes)</label>
+              <%= f.number_field :duration_minutes, id: 'wizard_duration',
+                                 min: 1, value: params[:duration_minutes],
+                                 placeholder: '60', class: 'wizard-input' %>
+            </div>
+          </div>
+
+          <label class="wizard-toggle">
+            <%= check_box_tag :allow_repeats, '1',
+                              ActiveModel::Type::Boolean.new.cast(params[:allow_repeats]),
+                              id: 'wizard_allow_repeats' %>
+            <span>Allow the same question to appear more than once</span>
+          </label>
+
+          <footer class="wizard-nav">
+            <span></span>
+            <button type="button" class="btn sm" data-action="wizard#next">Next →</button>
+          </footer>
+        </section>
+
+        <section class="wizard-panel" data-wizard-target="panel" data-wizard-step="2">
+          <h2 class="wizard-panel__title">Question types</h2>
+          <p class="wizard-panel__hint">Restrict to ticked types; untick all to stay mixed.</p>
+
+          <label class="wizard-toggle">
+            <input type="checkbox" data-action="exam-form#toggleAllTypes"
+                   data-exam-form-target="typeToggle" checked>
+            <span>All types</span>
+          </label>
+
+          <div class="wizard-type-grid">
+            <% selected_types = Array(params[:question_types]).presence || @question_types %>
+            <% QuestionTypes.all.each do |d| %>
+              <label class="wizard-type-card">
+                <%= check_box_tag 'question_types[]', d.key,
+                                  selected_types.include?(d.key),
+                                  id: "qt_#{d.key}",
+                                  data: { 'exam-form-target': 'typeCheckbox' } %>
+                <span class="wizard-type-card__glyph"><%= d.icon %></span>
+                <span class="wizard-type-card__label"><%= d.label %></span>
+              </label>
+            <% end %>
+          </div>
+
+          <footer class="wizard-nav">
+            <button type="button" class="btn ghost sm" data-action="wizard#prev">← Back</button>
+            <button type="button" class="btn sm" data-action="wizard#next">Next →</button>
+          </footer>
+        </section>
+
+        <section class="wizard-panel" data-wizard-target="panel" data-wizard-step="3">
+          <h2 class="wizard-panel__title">Topics &amp; weights</h2>
+          <p class="wizard-panel__hint">Tick the topics to pull from. Higher weight = more questions drawn.</p>
+
+          <label class="wizard-toggle">
+            <input type="checkbox" data-action="exam-form#toggleAllTopics"
+                   data-exam-form-target="topicToggle">
+            <span>All topics</span>
+          </label>
+
+          <div class="wizard-topic-list">
+            <% @topics.each do |topic| %>
+              <div class="wizard-topic-row">
+                <label class="wizard-topic-row__check">
+                  <% checked = Array(params[:topic_ids]).map(&:to_s).include?(topic.id.to_s) %>
+                  <%= check_box_tag 'topic_ids[]', topic.id, checked,
+                                    id: "topic_#{topic.id}",
+                                    data: { 'exam-form-target': 'topicCheckbox' } %>
+                  <span class="wizard-topic-row__name"><%= topic.name %></span>
+                  <span class="wizard-topic-row__count">
+                    <%= pluralize(@question_counts[topic.id] || 0, 'question') %>
+                  </span>
+                </label>
+                <div class="wizard-topic-row__weight">
+                  <label for="tw_<%= topic.id %>">Weight</label>
+                  <input type="number" id="tw_<%= topic.id %>"
+                         name="topic_weights[<%= topic.id %>]"
+                         min="0" step="1"
+                         value="<%= params.dig(:topic_weights, topic.id.to_s) %>"
+                         placeholder="—"
+                         data-exam-form-target="weightInput"
+                         data-topic-id="<%= topic.id %>">
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <footer class="wizard-nav">
+            <button type="button" class="btn ghost sm" data-action="wizard#prev">← Back</button>
+            <button type="submit" class="btn primary">Generate paper</button>
+          </footer>
+        </section>
+      </div>
+
+      <aside class="wizard-blueprint">
+        <header class="wizard-blueprint__header">
+          <div class="eyebrow">Blueprint</div>
+          <div class="wizard-blueprint__title">
+            <span data-exam-form-target="availability">—</span> available
+          </div>
+        </header>
+
+        <div class="wizard-blueprint__section">
+          <div class="eyebrow">By question type</div>
+          <div class="wizard-chips" data-exam-form-target="typeList">
+            <span class="chip chip--ghost">Waiting…</span>
+          </div>
+        </div>
+
+        <div class="wizard-blueprint__section">
+          <div class="eyebrow">Suggested allocation</div>
+          <div class="wizard-alloc" data-exam-form-target="topicTable">
+            <div class="wizard-alloc__empty">Pick topics in step 3</div>
+          </div>
+        </div>
+
+        <div class="wizard-blueprint__footer">
+          <p class="wizard-blueprint__hint">Submitting opens the new exam in the Canvas.</p>
+        </div>
+      </aside>
+    </div>
+  <% end %>
 </section>

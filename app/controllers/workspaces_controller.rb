@@ -59,6 +59,13 @@ class WorkspacesController < ApplicationController
       @topics = Topic.includes(:topic_modules, :questions, :learning_objectives).order(:name)
       @question_counts = Question.group(:topic_id).count
     end
+
+    if @tab == 'generate'
+      @topics = Topic.includes(:topic_modules, :questions).order(:name)
+      @question_types = Question::QUESTION_TYPES
+      @question_counts = Question.group(:topic_id).count
+      @templates = ExamTemplate.order(:name)
+    end
   end
 
   # Placeholder — Phase 4 uses it for the Setup form. Keeps the route alive

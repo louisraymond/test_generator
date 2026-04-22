@@ -3,7 +3,8 @@
   the sidebar + main grid live here (shared with application.html.erb
   via `shared/_sidebar`). `@tab` selects the tab partial.
 %>
-<div class="app" data-controller="<%= 'autosave' if @exam %>"
+<div class="app"
+     data-controller="palette <%= 'autosave' if @exam %>"
      data-autosave-exam-id-value="<%= @exam&.id %>"
      data-autosave-debounce-value="3000">
 
