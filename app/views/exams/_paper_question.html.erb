@@ -21,9 +21,13 @@
   def _paper_mcq_options(raw)
     Array(raw).map do |opt|
       if opt.is_a?(Hash)
-        { text: (opt['text'] || opt[:text]).to_s, correct: ActiveModel::Type::Boolean.new.cast(opt['correct'] || opt[:correct]) }
+        {
+          text: (opt['text'] || opt[:text]).to_s,
+          correct: ActiveModel::Type::Boolean.new.cast(opt['correct'] || opt[:correct]),
+          eliminated: ActiveModel::Type::Boolean.new.cast(opt['eliminated'] || opt[:eliminated])
+        }
       else
-        { text: opt.to_s, correct: false }
+        { text: opt.to_s, correct: false, eliminated: false }
       end
     end
   end
@@ -45,13 +49,13 @@
       <div class="q__stem markdown-content"><%= render_markdown(question.content.to_s) %></div>
       <ol class="opts">
         <% _paper_mcq_options(question.options).each_with_index do |opt, i| %>
-          <li class="opt-li <%= 'is-correct' if opt[:correct] %>"
+          <li class="opt-li <%= 'is-correct' if opt[:correct] %> <%= 'is-eliminated' if opt[:eliminated] %>"
               <% if editable %>
                 data-mcq-paper-target="option"
                 data-option-index="<%= i %>"
                 data-action="click->mcq-paper#markCorrect"
               <% end %>>
-            <span <%= 'data-edit' if editable %> class="markdown-content"><%= render_markdown_inline(opt[:text]) %></span>
+            <span <% if editable %>data-edit data-field="options.<%= i %>.text"<% end %> class="markdown-content"><%= render_markdown_inline(opt[:text]) %></span>
           </li>
         <% end %>
       </ol>

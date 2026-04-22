@@ -1,5 +1,5 @@
 class QuestionsController < ApplicationController
-  before_action :set_question, only: %i[edit update toggle_correct toggle_blank]
+  before_action :set_question, only: %i[edit update toggle_correct toggle_blank toggle_eliminated options_patch]
   before_action :load_filters, only: :index
   before_action :load_form_data, only: %i[new create edit update]
 
@@ -73,6 +73,39 @@ class QuestionsController < ApplicationController
     # that nils-out explicit `false` values. The shape we wrote is already
     # valid on re-read (one true, rest false).
     @question.update_columns(options: options, updated_at: Time.current)
+    head :ok
+  end
+
+  # Wave 3 — MCQ shift-click toggles the `eliminated` flag so the printed
+  # paper (and the rail preview) can visually strike options the author has
+  # discarded as distractors — kept for history but won't be credited.
+  def toggle_eliminated
+    unless @question.question_type == 'multiple_choice'
+      head :unprocessable_entity and return
+    end
+
+    idx = params[:index].to_i
+    options = @question.options.map(&:deep_dup)
+    return head(:unprocessable_entity) if idx.negative? || idx >= options.length
+
+    current = ActiveModel::Type::Boolean.new.cast(options[idx]['eliminated'])
+    options[idx]['eliminated'] = !current
+    @question.update_columns(options: options, updated_at: Time.current)
+    head :ok
+  end
+
+  # Wave 3 — generic per-type options merge. Stimulus controllers that
+  # mutate a single key (e.g. cloze adds a per-blank `accepts` array)
+  # PATCH here instead of defining a new action per mutation.
+  def options_patch
+    patch = params[:options].permit!.to_h if params[:options].respond_to?(:permit!)
+    patch ||= params[:options].to_unsafe_h if params[:options].respond_to?(:to_unsafe_h)
+    patch ||= params[:options]
+    return head(:unprocessable_entity) unless patch.is_a?(Hash)
+
+    current = @question.options.is_a?(Hash) ? @question.options : {}
+    merged = current.merge(patch.stringify_keys)
+    @question.update_columns(options: merged, updated_at: Time.current)
     head :ok
   end
 

@@ -22,8 +22,10 @@ Rails.application.routes.draw do
 
   resources :questions, only: %i[index new create edit update] do
     member do
-      post :toggle_correct # MCQ paper-editor click
-      post :toggle_blank   # Cloze paper-editor click
+      post :toggle_correct    # MCQ paper-editor click
+      post :toggle_eliminated # MCQ Shift-click to strike an eliminator
+      post :toggle_blank      # Cloze paper-editor click
+      patch :options_patch    # Wave 3 — merge a per-type options fragment
     end
   end
   resources :topics, only: %i[index show new create edit update]
