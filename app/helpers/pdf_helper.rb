@@ -112,11 +112,17 @@ module PdfHelper
   end
 
   # Eyebrow text shown above the cover title: "SUBJECT · PAPER N · TIER".
+  # When subject/paper/tier are unset (legacy exams from before the
+  # redesign), falls back to showing just the exam date so the cover
+  # doesn't read as a generic "Examination paper" every time.
   def paper_eyebrow(exam)
     parts = []
     parts << exam.subject.to_s.upcase if exam.subject.present?
     parts << "Paper #{exam.paper_number}" if exam.paper_number.present?
     parts << exam.tier.to_s.capitalize if exam.tier.present?
-    parts.compact.join(' · ')
+    return parts.join(' · ') if parts.any?
+
+    date = exam.exam_date || exam.created_at.to_date
+    "Exam · #{date.strftime('%B %Y').upcase}"
   end
 end

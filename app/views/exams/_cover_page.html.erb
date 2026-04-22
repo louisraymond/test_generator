@@ -4,8 +4,21 @@
   via Exam#subject/#paper_number/#tier/#centre_name (falls back to the
   exam_template when no per-exam override is set).
 %>
-<% candidate_fields = (exam.exam_template&.candidate_fields.presence || ['Full name', 'Centre number', 'Candidate number']) %>
-<% paper_structure  = exam.exam_template&.exam_sections.to_a %>
+<%
+  # Defaults used when the exam has no template (old exams created before
+  # the redesign). These make every cover page look "finished" without
+  # needing to backfill data per exam.
+  default_rubric = <<~RUBRIC.strip
+    Answer all questions in the spaces provided on this paper.
+    Show sufficient working — correct answers without working may not score full marks.
+    Calculators are permitted unless the question states otherwise.
+    Marks for each question are shown in the right-hand margin.
+  RUBRIC
+
+  candidate_fields = (exam.exam_template&.candidate_fields.presence || ['Full name', 'Centre number', 'Candidate number'])
+  paper_structure  = exam.exam_template&.exam_sections.to_a
+  rubric_text      = exam.exam_template&.rubric.presence || default_rubric
+%>
 
 <div class="paper">
   <div class="runhead">
@@ -40,12 +53,10 @@
     </div>
   </div>
 
-  <% if exam.exam_template&.rubric.present? %>
-    <div class="rubric">
-      <h4>Instructions to candidates</h4>
-      <%= simple_format(exam.exam_template.rubric, {}, wrapper_tag: 'ul') %>
-    </div>
-  <% end %>
+  <div class="rubric">
+    <h4>Instructions to candidates</h4>
+    <%= simple_format(rubric_text, {}, wrapper_tag: 'ul') %>
+  </div>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 6px;">
     <% if paper_structure.any? %>

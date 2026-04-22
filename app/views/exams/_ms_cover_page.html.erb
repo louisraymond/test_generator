@@ -39,13 +39,19 @@
     </div>
   </div>
 
-  <% principles = exam.exam_template&.principles_of_marking %>
-  <% if principles.present? %>
-    <div class="rubric" style="background: linear-gradient(to right, var(--credit-soft) 0%, var(--credit-soft) 4px, transparent 4px);">
-      <h4 style="color: var(--credit);">Principles of marking</h4>
-      <%= simple_format(principles, {}, wrapper_tag: 'ul') %>
-    </div>
-  <% end %>
+  <%
+    default_principles = <<~POM.strip
+      Accept any equivalent phrasing where meaning is unambiguously preserved.
+      Credit shown working even where the final answer is incorrect — method marks are unconditional.
+      Ignore subsequent work (ISW) once a complete correct answer has been given.
+      Do not deduct for minor notational issues unless they alter the mathematical meaning.
+    POM
+    principles = exam.exam_template&.principles_of_marking.presence || default_principles
+  %>
+  <div class="rubric" style="background: linear-gradient(to right, var(--credit-soft) 0%, var(--credit-soft) 4px, transparent 4px);">
+    <h4 style="color: var(--credit);">Principles of marking</h4>
+    <%= simple_format(principles, {}, wrapper_tag: 'ul') %>
+  </div>
 
   <div style="font-family: 'Source Sans 3', sans-serif; font-size: 9pt;">
     <div class="smcap" style="margin-bottom: 8px;">Credit codes used in this scheme</div>
