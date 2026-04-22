@@ -83,7 +83,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'navigates to Exam Generator page' do
-      visit topics_path
+      visit topics_path(ui: "classic")
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -93,8 +93,8 @@ RSpec.describe 'Navigation', type: :system do
         click_link 'Exam Generator'
       end
 
-      # Should navigate to the new-exam path
-      expect(page).to have_current_path(new_exam_path)
+      # Should navigate to the new-exam path (classic nav preserves ?ui=classic)
+      expect(page).to have_current_path(/\/exams\/new/)
       expect(page).to have_css('h1', text: 'Generate Exam')
 
       # Menu should be closed
@@ -112,8 +112,8 @@ RSpec.describe 'Navigation', type: :system do
         click_link 'Topics'
       end
 
-      # Should navigate to topics path
-      expect(page).to have_current_path(topics_path)
+      # Should navigate to topics path (classic nav preserves ?ui=classic)
+      expect(page).to have_current_path(/\/topics/)
       expect(page).to have_css('h1', text: 'Topics')
 
       # Menu should be closed
@@ -131,8 +131,8 @@ RSpec.describe 'Navigation', type: :system do
         click_link 'Question Bank'
       end
 
-      # Should navigate to questions path
-      expect(page).to have_current_path(questions_path)
+      # Should navigate to questions path (classic nav preserves ?ui=classic)
+      expect(page).to have_current_path(/\/questions/)
       expect(page).to have_css('h1', text: 'Question Library')
 
       # Menu should be closed
@@ -146,7 +146,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'highlights the current page in navigation' do
-      visit topics_path
+      visit topics_path(ui: "classic")
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -158,7 +158,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'highlights Exam Generator on the new-exam path' do
-      visit new_exam_path
+      visit new_exam_path(ui: "classic")
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -170,7 +170,7 @@ RSpec.describe 'Navigation', type: :system do
     end
 
     it 'highlights Question Bank on questions path' do
-      visit questions_path
+      visit questions_path(ui: "classic")
 
       # Open menu
       find('button', text: 'Toggle navigation').click
@@ -184,7 +184,7 @@ RSpec.describe 'Navigation', type: :system do
 
   describe 'Logo Link' do
     it 'navigates to home page when clicking logo' do
-      visit topics_path
+      visit topics_path(ui: "classic")
 
       # Click logo
       within('.app-header') do
@@ -229,7 +229,7 @@ RSpec.describe 'Navigation', type: :system do
       end
 
       # Should successfully navigate
-      expect(page).to have_current_path(topics_path)
+      expect(page).to have_current_path(/\/topics/)
     end
   end
 

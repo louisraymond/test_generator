@@ -1,0 +1,79 @@
+/* Wave 5 — legacy page shim.
+ *
+ * The Topics / Questions / Exams classic views were built for the
+ * hamburger chrome (blue gradient header, pastel gradient body). When
+ * those same views render inside the new workspace sidebar shell, the
+ * gradients fight with the paper palette. This sheet neutralises the
+ * worst offenders so they read as coherent "page body" inside .main.
+ *
+ * Anything `?ui=classic` goes to `body.legacy-shell` and these overrides
+ * don't apply — the old chrome stays intact.
+ */
+
+.workspace-shell .main {
+  padding: 40px 56px 96px;
+  max-width: 1280px;
+}
+
+/* Strip pastel gradients + forced min-height from legacy wrappers so
+ * they don't paint over the paper palette. */
+.workspace-shell .topic-list,
+.workspace-shell .topic-detail,
+.workspace-shell .topic-detail.premium-page-wrapper {
+  background: transparent !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+.workspace-shell .form-wrapper {
+  padding: 0;
+}
+
+.workspace-shell .premium-page-header {
+  background: transparent !important;
+  padding: 0 0 24px !important;
+  margin: 0 0 24px !important;
+  color: var(--ink, #2a2622) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--rule, #d8d0c0);
+}
+.workspace-shell .premium-page-header__content { max-width: none; }
+.workspace-shell .premium-title {
+  font-family: var(--serif, serif);
+  font-weight: 500;
+  color: var(--ink, #2a2622) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+}
+.workspace-shell .premium-subtitle {
+  color: var(--ink-muted, #8b8479) !important;
+}
+
+/* Neutralise the Topics-index pastel header panel too. */
+.workspace-shell .topic-list__header {
+  border-bottom: 1px solid var(--rule, #d8d0c0);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+}
+
+/* Keep primary+ghost buttons on the paper palette */
+.workspace-shell .btn.btn--primary {
+  background: var(--accent, #b4532a);
+  color: var(--paper, #f7f4ee);
+  border-radius: 5px;
+}
+
+/* Shrink the giant module-cards so they fit the 1280px main pane. */
+.workspace-shell .modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.workspace-shell .module-card {
+  background: var(--paper, #f7f4ee);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: none;
+}
