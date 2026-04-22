@@ -26,7 +26,11 @@
   transition: background-color var(--dur) var(--ease);
 }
 .paper .opt-li:hover { background: rgba(180, 83, 42, 0.05); }
-.paper .opt-li.is-correct::before {
+/* The correct-answer tick is an author affordance — it marks "this is
+ * the one students should pick". It only makes sense in the Canvas
+ * editor context (q--editable). On the read-only paper preview and the
+ * PDF output, we don't want to give the student the answer. */
+.paper .q--editable .opt-li.is-correct::before {
   content: "✓";
   position: absolute;
   left: -28px;
