@@ -81,8 +81,17 @@ select.rail-input {
   padding: 16px;
   border-top: 1px solid #2d2a23;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
+.rail-link {
+  color: #a89c82;
+  font-size: 12px;
+  text-decoration: none;
+  font-family: var(--mono);
+}
+.rail-link:hover { color: var(--accent); }
 .rail-btn {
   background: var(--accent);
   color: var(--paper);

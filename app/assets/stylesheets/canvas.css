@@ -65,7 +65,35 @@
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.01em;
+  margin-bottom: 8px;
 }
+.qlist__actions {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+.qlist__action {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.qlist__action:hover { border-color: var(--accent); background: var(--paper-2); }
+
+.qlist-row { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+.qlist-item__edit {
+  padding: 6px 12px;
+  color: var(--ink-3);
+  text-decoration: none;
+  font-size: 14px;
+  border-left: 1px solid var(--rule);
+}
+.qlist-item__edit:hover { color: var(--accent); }
 
 .qlist {
   list-style: none;

@@ -125,6 +125,20 @@ module PdfHelper
     tokens
   end
 
+  # Render a code snippet in the paper's printed code style — monospace
+  # on warm beige, gutter line numbers, no syntax highlighting (paper is
+  # meant to be calm and print-friendly, not an IDE). Matches the
+  # `pre.code` + `.ln` markup spec'd in the design explorations.
+  def render_paper_code(code, language: 'text')
+    return '' if code.to_s.empty?
+    lines = code.to_s.split("\n")
+    html = lines.each_with_index.map { |line, i|
+      number = tag.span((i + 1).to_s, class: 'ln')
+      "#{number} #{ERB::Util.html_escape(line)}"
+    }.join("\n")
+    tag.pre(raw(html), class: "code code--#{language}")
+  end
+
   # Eyebrow text shown above the cover title: "SUBJECT · PAPER N · TIER".
   # When subject/paper/tier are unset (legacy exams from before the
   # redesign), falls back to showing just the exam date so the cover

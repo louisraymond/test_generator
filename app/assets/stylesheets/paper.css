@@ -322,6 +322,46 @@
   font-size: 10pt;
 }
 
+/* Printed code block — calm monospace on warm beige, no IDE syntax
+ * highlighting (paper is for reading, not editing). Spec from the
+ * design exploration (.paper pre.code). */
+.paper pre.code {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-size: 10.5pt;
+  background: #f2eada;
+  border: .4pt solid #d8cfba;
+  padding: 12px 14px;
+  line-height: 1.5;
+  margin: 12px 0;
+  white-space: pre;
+  overflow-x: auto;
+  color: #1a140a;
+  border-radius: 2px;
+  tab-size: 4;
+  page-break-inside: avoid;
+}
+.paper pre.code .ln {
+  color: #a89c82;
+  display: inline-block;
+  width: 22px;
+  text-align: right;
+  margin-right: 8px;
+  user-select: none;
+}
+.paper pre.code .hi {
+  background: rgba(180, 83, 42, .15);
+  display: block;
+  margin: 0 -14px;
+  padding: 0 14px;
+}
+.paper .code-blank {
+  display: inline-block;
+  min-width: 48px;
+  border-bottom: 1pt solid var(--ink);
+  text-align: center;
+  color: transparent;
+}
+
 /* figure */
 .figure {
   margin: 10px 0 6px;

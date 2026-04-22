@@ -58,6 +58,8 @@
     </section>
 
     <footer class="rail-footer">
+      <%= link_to 'Open full editor ↗', edit_question_path(question),
+                  target: '_blank', class: 'rail-link' %>
       <%= f.submit 'Save', class: 'rail-btn' %>
     </footer>
   <% end %>

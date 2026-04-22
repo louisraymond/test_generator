@@ -103,9 +103,7 @@
       <% code = opts['code'].to_s %>
       <% lang = opts['language'].presence || 'text' %>
       <% if code.present? %>
-        <div class="q__code markdown-content">
-          <%= render_markdown("```#{lang}\n#{code}\n```") %>
-        </div>
+        <%= render_paper_code(code, language: lang) %>
       <% end %>
       <% if opts['answer_format'] == 'multiple_choice' && opts['choices'].is_a?(Array) %>
         <ol class="opts">

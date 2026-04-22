@@ -5,19 +5,27 @@
       <header class="qlist__header">
         <div class="eyebrow">Questions</div>
         <div class="qlist__title"><%= @exam.title %></div>
+        <div class="qlist__actions">
+          <%= link_to '+ New question', new_question_path, class: 'qlist__action' %>
+          <%= link_to 'Bank →', questions_path, class: 'qlist__action' %>
+        </div>
       </header>
       <ol class="qlist" role="list">
         <% @exam.exam_questions.each_with_index do |eq, i| %>
           <% q = eq.question %>
-          <%= link_to rail_exam_question_path(eq),
-                      class: 'qlist-item',
-                      data: { eq_id: eq.id, action: 'click->canvas#selectQuestion', 'turbo-frame': 'rail-body' } do %>
-            <span class="drag-handle" aria-hidden="true">⋮⋮</span>
-            <span class="qlist-item__num"><%= i + 1 %></span>
-            <span class="qlist-item__type"><%= q.question_type %></span>
-            <span class="qlist-item__stem"><%= truncate(strip_tags(q.content.to_s), length: 48) %></span>
-            <span class="qlist-item__marks"><%= q.points %>m</span>
-          <% end %>
+          <li class="qlist-row">
+            <%= link_to rail_exam_question_path(eq),
+                        class: 'qlist-item',
+                        data: { eq_id: eq.id, action: 'click->canvas#selectQuestion', 'turbo-frame': 'rail-body' } do %>
+              <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+              <span class="qlist-item__num"><%= i + 1 %></span>
+              <span class="qlist-item__type"><%= q.question_type %></span>
+              <span class="qlist-item__stem"><%= truncate(strip_tags(q.content.to_s), length: 40) %></span>
+              <span class="qlist-item__marks"><%= q.points %>m</span>
+            <% end %>
+            <%= link_to '✎', edit_question_path(q), target: '_blank',
+                        class: 'qlist-item__edit', title: 'Open full editor' %>
+          </li>
         <% end %>
       </ol>
     </aside>
