@@ -1,5 +1,6 @@
 <%#
   Topics card grid — ported from the design's #screen-topics.
+  Each card: .num (order prefix) + h4 (title) + .desc + .stats (3 tiles).
 %>
 <% topics = @topics || [] %>
 <% counts = @question_counts || {} %>
@@ -11,32 +12,35 @@
     <div>
       <h1><em>Topics</em> &amp; modules</h1>
       <p class="sub">
-        <%= pluralize(topics.size, 'topic') %> covering <%= TopicModule.count %> modules and
+        <%= pluralize(topics.size, 'topic') %> covering <%= pluralize(TopicModule.count, 'module') %> and
         <%= pluralize(Question.count, 'question') %>.
       </p>
     </div>
     <div class="page-head__actions">
+      <%= link_to 'Import syllabus', '#', class: 'btn ghost sm' %>
       <%= link_to '+ New topic', new_topic_path, class: 'btn sm' %>
     </div>
   </div>
 
   <% if topics.any? %>
     <div class="topics-grid">
-      <% topics.each do |t| %>
+      <% topics.each_with_index do |t, i| %>
+        <%
+          # Description: prefer epigraph, then first module-aim string, then a
+          # fallback built from the first few module names.
+          desc = t.epigraph_quote.presence
+          desc ||= (t.module_aims.is_a?(Array) && t.module_aims.first.is_a?(String) ? t.module_aims.first : nil)
+          desc ||= t.topic_modules.first(3).map(&:name).join(' · ').presence
+          desc ||= "#{pluralize(t.topic_modules.size, 'module')} in this topic."
+        %>
         <%= link_to topic_path(t), class: 'topic-card' do %>
-          <div class="topic-card__title"><%= t.name %></div>
-          <div class="topic-card__meta">
-            <span><%= pluralize(counts[t.id] || 0, 'question') %></span>
-            <span><%= pluralize(t.topic_modules.size, 'module') %></span>
-            <span><%= pluralize(t.learning_objectives.size, 'LO') %></span>
-          </div>
-          <div class="topic-card__modules">
-            <% t.topic_modules.first(5).each do |m| %>
-              <span class="topic-card__mod"><%= m.name %></span>
-            <% end %>
-            <% if t.topic_modules.size > 5 %>
-              <span class="topic-card__mod">+<%= t.topic_modules.size - 5 %> more</span>
-            <% end %>
+          <div class="num"><%= format('%02d', i + 1) %> · Topic</div>
+          <h4><%= t.name %></h4>
+          <div class="desc"><%= truncate(desc.to_s, length: 160) %></div>
+          <div class="stats">
+            <div class="s"><b><%= t.topic_modules.size %></b>modules</div>
+            <div class="s"><b><%= counts[t.id] || 0 %></b>questions</div>
+            <div class="s"><b><%= t.learning_objectives.size %></b>LOs</div>
           </div>
         <% end %>
       <% end %>
