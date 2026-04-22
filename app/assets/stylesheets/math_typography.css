@@ -26,6 +26,27 @@
   text-rendering: geometricPrecision;
 }
 
+/* Paper surface: math should pop out against the serif body so students
+ * can scan equations. Slightly darker ink + weight 500 + a whisper of
+ * horizontal padding gives KaTeX spans a "pulled-forward" feel without
+ * looking like a different typeface. */
+.paper .katex,
+.paper .markdown-content .katex {
+  color: #0f0e0a;
+  font-weight: 500;
+  padding: 0 0.08em;
+}
+.paper .katex-display {
+  font-weight: 500;
+}
+/* Boxed variables + operators inside inline math look cleaner with
+ * a tighter rendering. */
+.paper .katex .mord,
+.paper .katex .mbin,
+.paper .katex .mrel {
+  color: #0f0e0a;
+}
+
 /* Display math */
 .katex-display {
   margin: 1.1em 0 1.25em;

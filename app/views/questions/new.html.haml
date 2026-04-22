@@ -1,30 +1,36 @@
-.form-page
-  - if @learning_objective
-    .form-page__back
-      = link_to topic_path(@learning_objective.topic), class: 'link-back' do
-        ← Back to Learning Outcomes
-  
-  .form-page__header
-    %h1 Create Assessment Question
-    %p
-      - if @learning_objective
-        Generate a question linked to a specific learning outcome
-      - else
-        Create a bank item, align it with the right learning outcomes, and keep exam coverage balanced.
+.screen-q-editor
+  .breadcrumb
+    %span.s Library
+    \/
+    = link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb'
+    \/ New question
+
+  .page-head
+    %div
+      %h1
+        %em New
+        \question
+      %p.sub
+        - if @learning_objective
+          Linked to
+          %strong= @learning_objective.description.to_s.truncate(80)
+          · #{@learning_objective.topic.name}
+        - else
+          Add a bank item, align it with a learning outcome, and keep exam coverage balanced.
+    .page-head__actions
+      = link_to 'Cancel', workspace_path(tab: 'questions'), class: 'btn ghost sm'
 
   - if @learning_objective
-    .question-context
-      %h3.question-context__title Question Context
-      .question-context__content
-        .question-context__field
-          %label.question-context__label Topic
-          .question-context__value= @learning_objective.topic.name
-        .question-context__field
-          %label.question-context__label Category
-          .question-context__value= @learning_objective.category
-        .question-context__field
-          %label.question-context__label Learning Outcome
-          .question-context__value= @learning_objective.description
+    .q-editor-context
+      .q-editor-context__field
+        .q-editor-context__label Topic
+        .q-editor-context__value= @learning_objective.topic.name
+      .q-editor-context__field
+        .q-editor-context__label Category
+        .q-editor-context__value= @learning_objective.category
+      .q-editor-context__field
+        .q-editor-context__label Learning outcome
+        .q-editor-context__value= @learning_objective.description
 
   = form_with(model: @question) do |form|
     = render 'form', form: form, question: @question

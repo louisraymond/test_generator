@@ -1,6 +1,18 @@
-.form-page
-  .form-page__header
-    %h1 Edit question
-    %p Adjust the prompt, update the answer, or re-align the learning outcomes.
+.screen-q-editor
+  .breadcrumb
+    %span.s Library
+    \/
+    = link_to 'Question bank', workspace_path(tab: 'questions'), class: 'breadcrumb__crumb'
+    \/ Edit
+
+  .page-head
+    %div
+      %h1
+        %em Edit
+        \question
+      %p.sub Adjust the prompt, update the answer, or re-align the learning outcomes.
+    .page-head__actions
+      = link_to 'Back to question bank', workspace_path(tab: 'questions'), class: 'btn ghost sm'
+
   = form_with(model: @question) do |form|
     = render 'form', form: form, question: @question

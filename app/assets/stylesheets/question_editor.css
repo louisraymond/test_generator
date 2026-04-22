@@ -1,0 +1,186 @@
+/* Wave 5 — question editor chrome (for /questions/new + /questions/:id/edit).
+ * Wraps the existing question-form partials so the page reads like a
+ * coherent workspace screen (breadcrumb → page-head → card form) rather
+ * than the legacy premium-page-header treatment.
+ *
+ * The internal form markup (question-form, question-form__grid, type
+ * panels) stays intact — we're restyling its outer scaffold + the grid
+ * at the top so it matches Topics / Question bank / History.
+ */
+
+.screen-q-editor {
+  padding-bottom: 40px;
+}
+
+/* Breadcrumb links inside the editor should be subtle accent. */
+.screen-q-editor .breadcrumb__crumb {
+  color: var(--ink-3, #8b8479);
+  text-decoration: none;
+}
+.screen-q-editor .breadcrumb__crumb:hover { color: var(--accent, #b4532a); }
+
+/* Context block shown when question is being created under an LO. */
+.q-editor-context {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 0 0 28px;
+  background: rgba(180, 83, 42, 0.05);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-left: 3px solid var(--accent, #b4532a);
+  border-radius: 5px;
+}
+.q-editor-context__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.q-editor-context__label {
+  font-family: var(--mono, monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-3, #8b8479);
+}
+.q-editor-context__value {
+  font-size: 14px;
+  color: var(--ink, #1a1915);
+}
+
+/* Outer .question-form (from the existing partial) inside the sidebar
+ * shell: drop any leftover centered-card look, lean into a two-column
+ * grid matching the workspace palette. */
+.screen-q-editor .question-form {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  max-width: none;
+}
+.screen-q-editor .question-form__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+@media (max-width: 1080px) {
+  .screen-q-editor .question-form__grid { grid-template-columns: 1fr; }
+}
+
+/* Each section (main / side / type panels) sits inside a paper-coloured
+ * card so the page has a clear visual rhythm. */
+.screen-q-editor .question-form__main,
+.screen-q-editor .question-form__side,
+.screen-q-editor .type-panel-content,
+.screen-q-editor .type-panels {
+  background: var(--paper, #f7f4ee);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 6px;
+  padding: 20px 22px;
+}
+
+.screen-q-editor .question-form__section h2,
+.screen-q-editor .question-form__section-title,
+.screen-q-editor .question-form__label,
+.screen-q-editor .type-panel-content legend {
+  font-family: var(--mono, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3, #8b8479);
+  margin-bottom: 6px;
+}
+
+.screen-q-editor .question-form__input,
+.screen-q-editor .question-form__textarea,
+.screen-q-editor .question-form__select,
+.screen-q-editor input[type="text"],
+.screen-q-editor input[type="number"],
+.screen-q-editor textarea,
+.screen-q-editor select {
+  border: none;
+  border-bottom: 1px solid var(--rule, #d8d0c0);
+  padding: 8px 2px;
+  background: transparent;
+  color: var(--ink, #1a1915);
+  font-size: 15px;
+  font-family: var(--sans, sans-serif);
+  border-radius: 0;
+  width: 100%;
+  box-shadow: none;
+}
+.screen-q-editor textarea {
+  min-height: 120px;
+  font-family: var(--serif, serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.screen-q-editor input:focus,
+.screen-q-editor textarea:focus,
+.screen-q-editor select:focus {
+  outline: none;
+  border-bottom: 2px solid var(--accent, #b4532a);
+  padding-bottom: 7px;
+}
+
+/* Type-panel chrome */
+.screen-q-editor .type-panels {
+  margin-bottom: 24px;
+}
+.screen-q-editor .type-panel-content p.hint {
+  font-size: 12px;
+  color: var(--ink-3, #8b8479);
+  margin: 0 0 12px;
+}
+
+/* Hide legacy pastel errors block — use a cleaner accent row. */
+.screen-q-editor .question-form__errors {
+  background: rgba(177, 70, 70, 0.06);
+  border: 1px solid rgba(177, 70, 70, 0.35);
+  border-left: 3px solid var(--red, #b14646);
+  border-radius: 5px;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+}
+.screen-q-editor .question-form__errors h2 {
+  color: var(--red, #b14646);
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 6px;
+}
+.screen-q-editor .question-form__errors ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13px;
+  color: var(--ink-2, #4b4238);
+}
+
+/* Action row */
+.screen-q-editor .question-form__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule, #d8d0c0);
+}
+.screen-q-editor .question-form__actions .btn-primary,
+.screen-q-editor .question-form__actions .btn-secondary,
+.screen-q-editor .question-form__actions input[type=submit] {
+  padding: 8px 18px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--rule, #d8d0c0);
+  background: var(--paper, #f7f4ee);
+  color: var(--ink, #1a1915);
+  cursor: pointer;
+  text-decoration: none;
+}
+.screen-q-editor .question-form__actions input[type=submit],
+.screen-q-editor .question-form__actions .btn-primary {
+  background: var(--accent, #b4532a);
+  border-color: var(--accent, #b4532a);
+  color: var(--paper, #f7f4ee);
+}
+.screen-q-editor .question-form__actions .btn-secondary:hover { border-color: var(--ink-3, #8b8479); }

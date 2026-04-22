@@ -6,7 +6,9 @@
           <div class="eyebrow">Student paper</div>
           <div class="review__pane-title"><%= @exam.title %></div>
         </header>
-        <iframe src="<%= paper_exam_path(@exam) %>" title="Student paper preview" loading="lazy"></iframe>
+        <div class="review__pane-viewport">
+          <iframe src="<%= paper_exam_path(@exam) %>" title="Student paper preview" loading="lazy"></iframe>
+        </div>
       </div>
 
       <div class="review__pane review__marker">
@@ -14,7 +16,9 @@
           <div class="eyebrow">Mark scheme</div>
           <div class="review__pane-title">Marker's copy</div>
         </header>
-        <iframe src="<%= marking_scheme_exam_path(@exam, variant: 'marker') %>" title="Mark scheme preview" loading="lazy"></iframe>
+        <div class="review__pane-viewport">
+          <iframe src="<%= marking_scheme_exam_path(@exam, variant: 'marker') %>" title="Mark scheme preview" loading="lazy"></iframe>
+        </div>
       </div>
     </main>
 
