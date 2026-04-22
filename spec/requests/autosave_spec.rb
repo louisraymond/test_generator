@@ -36,5 +36,41 @@ RSpec.describe 'Exam autosave', type: :request do
       expect(response).to have_http_status(:ok)
       expect(q.reload.content).to eq('New content')
     end
+
+    it 'merges (not replaces) question options jsonb' do
+      topic = create(:topic)
+      source = create(:source)
+      q = create(:question,
+                 topic: topic, source: source, question_type: 'matching',
+                 options: { 'left' => %w[a b], 'right' => %w[1 2] })
+
+      patch "/api/exams/#{exam.id}/autosave",
+            params: {
+              exam: { lock_version: exam.lock_version },
+              question: { id: q.id, options: { seed: 42 } }
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+
+      expect(response).to have_http_status(:ok)
+      expect(q.reload.options).to include('left' => %w[a b], 'right' => %w[1 2], 'seed' => 42)
+    end
+
+    it 'returns 409 when a stale per-question lock_version is supplied' do
+      topic = create(:topic)
+      source = create(:source)
+      q = create(:question, topic: topic, source: source, content: 'Old')
+      q.update_columns(lock_version: 7)
+
+      patch "/api/exams/#{exam.id}/autosave",
+            params: {
+              exam: { lock_version: exam.lock_version },
+              question: { id: q.id, lock_version: 2, content: 'New' }
+            }.to_json,
+            headers: { 'Content-Type' => 'application/json' }
+
+      expect(response).to have_http_status(:conflict)
+      expect(JSON.parse(response.body)).to include('field' => 'question')
+      expect(q.reload.content).to eq('Old')
+    end
   end
 end

@@ -1,0 +1,20 @@
+<%#
+  Shared partial — wrap any text node with a contenteditable span that the
+  paper_editor_controller picks up automatically.
+
+  Locals:
+    field: 'content' | 'options.0.text' | ... (dot-path for autosave)
+    text:  raw markdown source to display + edit
+    inline: true to emit a <span>, false to emit a <div> block.
+%>
+<% tag = (local_assigns.fetch(:inline, true) ? :span : :div) %>
+<%= content_tag(tag,
+                text.to_s,
+                class: 'paper-editable',
+                data: {
+                  edit: true,
+                  field: field,
+                  original_text: text.to_s
+                },
+                contenteditable: 'true',
+                spellcheck: 'false') %>

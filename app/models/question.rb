@@ -32,6 +32,21 @@ class Question < ApplicationRecord
   has_many :question_learning_objectives, dependent: :destroy
   has_many :learning_objectives, through: :question_learning_objectives
   has_many :marking_steps, -> { ordered }, dependent: :destroy
+  has_many :question_parts, -> { where(parent_part_id: nil).order(:position) },
+           dependent: :destroy, inverse_of: :question
+
+  # Phase 7 / Wave 3 — typed access to `options` via a per-type value object.
+  # See `app/models/question_options/*` and `QuestionTypes::REGISTRY`.
+  def typed_options
+    descriptor = QuestionTypes.for(question_type)
+    return nil unless descriptor
+    descriptor.options_class.from(options)
+  end
+
+  # Wave 3 helper — does the Stimulus paper-editor flag include this type?
+  def paper_editor_enabled?
+    QuestionTypes.enabled?(question_type)
+  end
 
   # True when the question has one or more structured credit events.
   # The mark-scheme renderer uses this to decide between the new card

@@ -1,0 +1,14 @@
+<%#
+  ⋯ menu — every direct-manipulation editor must expose an accessible
+  fallback (coord-table, list form, etc.) via this menu. Pass a block:
+
+    <%= render 'shared/accessibility_menu' do %>
+      <%= render 'coord_table', question: question %>
+    <% end %>
+%>
+<details class="accessibility-menu">
+  <summary class="accessibility-menu__btn" aria-label="More input options">⋯</summary>
+  <div class="accessibility-menu__panel" role="menu">
+    <%= yield if block_given? %>
+  </div>
+</details>

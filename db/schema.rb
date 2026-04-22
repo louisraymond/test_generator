@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_22_160200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -107,6 +107,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "creditable_type"
+    t.bigint "creditable_id"
+    t.index ["creditable_type", "creditable_id"], name: "index_marking_steps_on_creditable"
     t.index ["question_id", "position"], name: "index_marking_steps_on_question_id_and_position", unique: true
     t.index ["question_id"], name: "index_marking_steps_on_question_id"
   end
@@ -119,6 +122,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
     t.index ["learning_objective_id"], name: "index_question_learning_objectives_on_learning_objective_id"
     t.index ["question_id", "learning_objective_id"], name: "index_qlo_on_question_and_learning_objective", unique: true
     t.index ["question_id"], name: "index_question_learning_objectives_on_question_id"
+  end
+
+  create_table "question_parts", force: :cascade do |t|
+    t.bigint "question_id", null: false
+    t.bigint "parent_part_id"
+    t.integer "position", null: false
+    t.string "part_type", null: false
+    t.string "label"
+    t.text "stem"
+    t.text "model_answer"
+    t.integer "marks", default: 1, null: false
+    t.string "answer_label"
+    t.string "unit"
+    t.jsonb "options", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["parent_part_id"], name: "index_question_parts_on_parent_part_id"
+    t.index ["question_id", "parent_part_id", "position"], name: "idx_parts_per_parent_order"
+    t.index ["question_id"], name: "index_question_parts_on_question_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -138,6 +160,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
     t.bigint "topic_module_id"
     t.string "bloom_level"
     t.text "marker_notes"
+    t.integer "lock_version", default: 0, null: false
     t.index ["bloom_level"], name: "index_questions_on_bloom_level"
     t.index ["question_type"], name: "index_questions_on_question_type"
     t.index ["source_id"], name: "index_questions_on_source_id"
@@ -214,6 +237,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_22_100200) do
   add_foreign_key "marking_steps", "questions"
   add_foreign_key "question_learning_objectives", "learning_objectives"
   add_foreign_key "question_learning_objectives", "questions"
+  add_foreign_key "question_parts", "question_parts", column: "parent_part_id"
+  add_foreign_key "question_parts", "questions"
   add_foreign_key "questions", "sources"
   add_foreign_key "questions", "topic_modules"
   add_foreign_key "questions", "topics"

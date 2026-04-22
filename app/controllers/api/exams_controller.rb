@@ -75,9 +75,31 @@ module Api
 
         if (q_attrs = body[:question]).present? && q_attrs[:id].present?
           question = Question.find(q_attrs[:id])
-          q_keys = %w[content answer points answer_label unit bloom_level marker_notes]
+
+          # Per-question optimistic lock (Wave 3)
+          supplied_q_version = q_attrs[:lock_version]
+          if supplied_q_version.present? && supplied_q_version.to_i < question.lock_version
+            render json: {
+              error: 'stale question lock_version',
+              field: 'question',
+              current: question.lock_version
+            }, status: :conflict and return
+          end
+
+          q_keys = %w[content answer points answer_label unit bloom_level marker_notes
+                      answer_size question_type]
           permitted = q_attrs.slice(*q_keys).compact
-          question.update!(permitted) if permitted.any?
+
+          # Merge (not replace) into the options jsonb so a paper-editor that
+          # only writes `{ seed: 42 }` doesn't clobber the rest of the hash.
+          if (opts_patch = q_attrs[:options]).present?
+            current = question.options.is_a?(Hash) ? question.options.dup : {}
+            merged = current.is_a?(Hash) ? current.merge(opts_patch.stringify_keys) : opts_patch
+            permitted[:options] = merged
+          end
+
+          question.assign_attributes(permitted)
+          question.save!
         end
       end
 

@@ -6,6 +6,10 @@ class MarkingStep < ApplicationRecord
   KINDS = %w[m a b dm].freeze
 
   belongs_to :question
+  # Phase 7 / Wave 3 — mark steps may attach to either a Question directly
+  # (today's shape) or to a QuestionPart (composite sub-parts). Back-fill in
+  # migration sets creditable=Question for existing rows.
+  belongs_to :creditable, polymorphic: true, optional: true
 
   validates :kind, inclusion: { in: KINDS }
   validates :n, numericality: { only_integer: true, greater_than: 0 }
