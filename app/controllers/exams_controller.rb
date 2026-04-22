@@ -57,13 +57,24 @@ class ExamsController < ApplicationController
 
   def show
     @exam = Exam.includes(exam_questions: :question).find(params[:id])
-    
+
     # Extract font size and spacing parameters for PDF generation
     @font_size = params[:font_size]&.to_i || 14
     @question_spacing = params[:question_spacing]&.to_i || 18
 
     respond_to do |format|
-      format.html
+      format.html do
+        # Redesign: HTML show now uses the same paper template as
+        # /exams/:id/paper with a thin paper-palette toolbar on top,
+        # so the HTML view matches the PDF output. Legacy show.html.erb
+        # (blue gradient header + display sidebar) stays at
+        # ?ui=classic for anyone who needs it.
+        if params[:ui] == 'classic'
+          render :show
+        else
+          render template: 'exams/paper', layout: 'paper_show'
+        end
+      end
       format.pdf do
         # Phase 1: PDF render uses the paper-style redesigned template
         # (`exams/paper`) rather than the web-chrome show template.

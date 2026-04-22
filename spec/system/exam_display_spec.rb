@@ -34,7 +34,7 @@ RSpec.describe 'Exam Display', type: :system do
 
   describe 'Page Structure and Dimensions' do
     before do
-      visit exam_path(exam)
+      visit exam_path(exam, ui: "classic")
     end
 
     it 'displays the exam with correct A4 page dimensions' do
@@ -123,7 +123,7 @@ RSpec.describe 'Exam Display', type: :system do
 
   describe 'Display Controls' do
     before do
-      visit exam_path(exam)
+      visit exam_path(exam, ui: "classic")
     end
 
     it 'shows the floating display controls sidebar' do
@@ -169,7 +169,7 @@ RSpec.describe 'Exam Display', type: :system do
       sleep 0.5
 
       # Reload page
-      visit exam_path(exam)
+      visit exam_path(exam, ui: "classic")
 
       sleep 0.5
 
@@ -185,7 +185,7 @@ RSpec.describe 'Exam Display', type: :system do
 
   describe 'Action Header' do
     before do
-      visit exam_path(exam)
+      visit exam_path(exam, ui: "classic")
     end
 
     it 'displays the action header with exam title' do
@@ -206,7 +206,7 @@ RSpec.describe 'Exam Display', type: :system do
 
   describe 'Print Styling' do
     it 'hides UI elements when printing' do
-      visit exam_path(exam)
+      visit exam_path(exam, ui: "classic")
       
       # Check print media query would hide controls
       # Note: We can't actually test @media print in Selenium, but we can verify CSS is loaded
@@ -224,7 +224,7 @@ RSpec.describe 'Exam Display', type: :system do
       font_sizes = [9, 12, 16]
       
       font_sizes.each do |font_size|
-        visit exam_path(exam, font_size: font_size, question_spacing: 18)
+        visit exam_path(exam, ui: "classic", font_size: font_size, question_spacing: 18)
         
         # Verify PDF link includes the correct parameters
         pdf_link = find_link('PDF')
@@ -241,16 +241,16 @@ RSpec.describe 'Exam Display', type: :system do
         expect(page).to have_no_content('500')
         
         # Go back to HTML view to continue testing
-        visit exam_path(exam, font_size: font_size, question_spacing: 18)
+        visit exam_path(exam, ui: "classic", font_size: font_size, question_spacing: 18)
       end
     end
 
     it 'verifies font size affects page count in HTML preview' do
       # Test that smaller font sizes result in fewer pages
-      visit exam_path(exam, font_size: 18, question_spacing: 18)
+      visit exam_path(exam, ui: "classic", font_size: 18, question_spacing: 18)
       large_font_pages = page.all('.page').count
       
-      visit exam_path(exam, font_size: 9, question_spacing: 18)
+      visit exam_path(exam, ui: "classic", font_size: 9, question_spacing: 18)
       small_font_pages = page.all('.page').count
       
       # Smaller font should result in fewer pages
@@ -262,7 +262,7 @@ RSpec.describe 'Exam Display', type: :system do
     end
 
     it 'verifies PDF link parameters match URL parameters' do
-      visit exam_path(exam, font_size: 12, question_spacing: 20)
+      visit exam_path(exam, ui: "classic", font_size: 12, question_spacing: 20)
       
       # Wait for the page to load and Stimulus controller to update the link
       sleep(0.5)
@@ -274,7 +274,7 @@ RSpec.describe 'Exam Display', type: :system do
     end
 
     it 'verifies PDF can be generated successfully' do
-      visit exam_path(exam, font_size: 14, question_spacing: 18)
+      visit exam_path(exam, ui: "classic", font_size: 14, question_spacing: 18)
       
       # Get PDF link and test generation
       pdf_link = find_link('PDF')

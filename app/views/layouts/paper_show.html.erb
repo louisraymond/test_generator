@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= @exam.title %> · ExamGen</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <style>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/fonts.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/tokens.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/paper.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/paper_editor.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/exam.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
+      <%= raw File.read(Rails.root.join('app/assets/stylesheets/math_typography.css')) %>
+
+      /* Thin paper-palette toolbar — only shown on screen, hidden in print. */
+      body { background: var(--paper-2, #efeae0); margin: 0; font-family: var(--sans); color: var(--ink); }
+      .paper-toolbar {
+        position: sticky; top: 0; z-index: 50;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 24px;
+        background: var(--paper, #f7f4ee);
+        border-bottom: 1px solid var(--rule, #d8d0c0);
+        gap: 16px;
+      }
+      .paper-toolbar__title {
+        font-family: var(--serif, Georgia);
+        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+      }
+      .paper-toolbar__title small {
+        font-family: var(--mono, monospace);
+        font-size: 10px;
+        color: var(--ink-3);
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 2px;
+      }
+      .paper-toolbar__actions { display: flex; gap: 8px; align-items: center; }
+      .paper-toolbar__btn {
+        padding: 6px 12px;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        background: transparent;
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .paper-toolbar__btn:hover { border-color: var(--accent); }
+      .paper-toolbar__btn--primary {
+        background: var(--accent);
+        color: var(--paper);
+        border-color: var(--accent);
+      }
+      .paper-toolbar__btn--primary:hover { background: var(--accent-ink); }
+      @media print { .paper-toolbar { display: none; } }
+    </style>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError: false, strict: false,
+          ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <header class="paper-toolbar">
+      <div>
+        <small><%= [@exam.subject, "Paper #{@exam.paper_number}", @exam.tier&.capitalize].compact.join(' · ').presence || 'Exam' %></small>
+        <div class="paper-toolbar__title"><%= @exam.title %></div>
+      </div>
+      <nav class="paper-toolbar__actions">
+        <%= link_to 'Edit in Canvas', workspace_path(tab: 'canvas', exam: @exam.id), class: 'paper-toolbar__btn' %>
+        <%= link_to 'Mark scheme', marking_scheme_exam_path(@exam), class: 'paper-toolbar__btn' %>
+        <%= link_to 'Classic view', exam_path(@exam, ui: 'classic'), class: 'paper-toolbar__btn' %>
+        <%= link_to 'Download PDF', exam_path(@exam, format: :pdf), class: 'paper-toolbar__btn paper-toolbar__btn--primary' %>
+      </nav>
+    </header>
+
+    <%= yield %>
+  </body>
+</html>
