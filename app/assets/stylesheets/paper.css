@@ -213,22 +213,24 @@
 .q__stem { margin: 0 0 8px; text-wrap: pretty; }
 .q__stem em { color: var(--ink-soft); }
 
-/* sub-parts: (a)(b)(c) */
-.subparts { margin: 4px 0 0 0; }
-.sub {
+/* sub-parts: (a)(b)(c) — scoped to .paper so the dashboard's
+   `.page-head .sub` and other generic sub labels don't inherit the
+   sub-part grid. */
+.paper .subparts { margin: 4px 0 0 0; }
+.paper .sub {
   display: grid;
   grid-template-columns: 22px 1fr 56px;
   column-gap: 8px;
   margin-top: 10px;
 }
-.sub__label {
+.paper .sub__label {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 600;
   font-style: italic;
   text-align: right;
   padding-top: 1px;
 }
-.sub__marks {
+.paper .sub__marks {
   font-family: 'Source Sans 3', sans-serif;
   font-size: 8pt;
   text-align: right;
@@ -238,7 +240,7 @@
 }
 
 /* roman sub-sub parts */
-.sub--roman .sub__label { font-size: 10.5pt; }
+.paper .sub--roman .sub__label { font-size: 10.5pt; }
 
 /* answer regions — parametric on question marks */
 .lines {

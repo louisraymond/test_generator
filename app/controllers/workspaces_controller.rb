@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-# Single-controller shell for the redesign's four-tab workspace:
-#   /workspace?tab=setup|kb|canvas|review
+# Single-controller shell for the redesign's five-tab workspace:
+#   /workspace?tab=dashboard|setup|kb|canvas|review
 #
-# Intentionally thin: each tab's content lives in a partial under
-# app/views/workspaces/. Phase 3 ships stub partials — Phases 4-9 replace
-# them with the real screens.
+# Dashboard is the default landing (Phase 12); Setup, Knowledge base,
+# Canvas, and Review followed in earlier phases. Each tab's content
+# lives in a partial under app/views/workspaces/.
 class WorkspacesController < ApplicationController
   layout 'workspace'
 
-  TABS = %w[setup kb canvas review].freeze
-  DEFAULT_TAB = 'setup'
+  TABS = %w[dashboard setup kb canvas review].freeze
+  DEFAULT_TAB = 'dashboard'
 
   def show
     @tab = params[:tab].presence_in(TABS) || DEFAULT_TAB

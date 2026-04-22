@@ -5,5 +5,9 @@ db/schema.rb linguist-generated
 
 # Mark any vendored files as having been vendored.
 vendor/* linguist-vendored
+
+# Visual-regression baselines for the UI suite. Marking as binary keeps
+# PR diffs quiet when a baseline changes; reviewers open the file directly.
+spec/screenshots/**/*.png binary
 config/credentials/*.yml.enc diff=rails_credentials
 config/credentials.yml.enc diff=rails_credentials

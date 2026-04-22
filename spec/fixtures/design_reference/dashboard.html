@@ -1,0 +1,94 @@
+      <div class="screen active" id="screen-dashboard">
+        <div class="breadcrumb"><span class="s">Workspace</span> / Dashboard</div>
+        <div class="page-head">
+          <div>
+            <h1>Good morning, <em>Mustafa</em>.</h1>
+            <p class="sub">You've generated 47 exams this semester. No pending reviews.</p>
+          </div>
+          <div style="display:flex;gap:10px">
+            <a class="btn ghost" data-navto="templates">From template</a>
+            <a class="btn" data-navto="generator">Generate exam <span class="arr">→</span></a>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat"><div class="l">Exams generated</div><div class="n">47<span class="d">· this semester</span></div><div class="trend">+12 vs last term</div></div>
+          <div class="stat"><div class="l">Question bank</div><div class="n">1,284<span class="d">· questions</span></div><div class="trend">+38 this week</div></div>
+          <div class="stat"><div class="l">Topics</div><div class="n">14<span class="d">· 72 modules</span></div><div class="trend d">no change</div></div>
+          <div class="stat"><div class="l">Templates</div><div class="n">9<span class="d">· reusable</span></div><div class="trend d">2 used this week</div></div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="head">
+              <div><h3>Recent activity</h3><p class="h-sub">Across exams, questions, and topics.</p></div>
+              <a class="btn ghost sm">View all</a>
+            </div>
+            <div class="activity-item">
+              <div class="time">09:42</div>
+              <div>
+                <div class="title">Midterm Final — Phys 2 generated</div>
+                <div class="meta">12 questions · 90 min · Quantum, Thermodynamics · PDF exported</div>
+              </div>
+              <div class="type">Exam</div>
+            </div>
+            <div class="activity-item">
+              <div class="time">yesterday</div>
+              <div>
+                <div class="title">3 questions added to Optics / Diffraction</div>
+                <div class="meta">Calculation, Written · from Young &amp; Freedman Ch. 35</div>
+              </div>
+              <div class="type">Questions</div>
+            </div>
+            <div class="activity-item">
+              <div class="time">yesterday</div>
+              <div>
+                <div class="title">Template "Weekly Quiz — 30 min" edited</div>
+                <div class="meta">Section B: point cap raised 6 → 8</div>
+              </div>
+              <div class="type">Template</div>
+            </div>
+            <div class="activity-item">
+              <div class="time">Apr 15</div>
+              <div>
+                <div class="title">New module: Statistical Mechanics</div>
+                <div class="meta">Under Topic: Thermodynamics · 4 LOs</div>
+              </div>
+              <div class="type">Topic</div>
+            </div>
+            <div class="activity-item">
+              <div class="time">Apr 14</div>
+              <div>
+                <div class="title">Practice Set 4 generated from template</div>
+                <div class="meta">10 questions · no time limit · Optics</div>
+              </div>
+              <div class="type">Exam</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Quick actions</h3>
+            <p class="h-sub">Your five most common jobs.</p>
+            <div class="quick-card" onclick="showScreen('generator')">
+              <div class="qicon">+</div>
+              <div><div class="qtitle">Generate a new exam</div><div class="qsub">Pick topics, weights, and question types.</div></div>
+            </div>
+            <div class="quick-card" onclick="showScreen('templates')">
+              <div class="qicon">T</div>
+              <div><div class="qtitle">Use a saved template</div><div class="qsub">9 templates ready. "Weekly quiz" used 8×.</div></div>
+            </div>
+            <div class="quick-card">
+              <div class="qicon">Q</div>
+              <div><div class="qtitle">Add question from source</div><div class="qsub">Import from Young &amp; Freedman or Kittel.</div></div>
+            </div>
+            <div class="quick-card" onclick="showScreen('topics')">
+              <div class="qicon">ʘ</div>
+              <div><div class="qtitle">Edit learning outcomes</div><div class="qsub">Keep LOs in sync with syllabus.</div></div>
+            </div>
+            <div class="quick-card" onclick="showScreen('history')">
+              <div class="qicon">↘</div>
+              <div><div class="qtitle">Re-export past exam</div><div class="qsub">Tweak font size, regenerate PDF.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>

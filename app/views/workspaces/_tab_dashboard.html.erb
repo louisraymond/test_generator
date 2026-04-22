@@ -1,0 +1,95 @@
+<%#
+  Dashboard — Phase 12. Structure ports the design handoff's
+  `#screen-dashboard` verbatim (ExamGenerator Redesign.html lines 1262-1355),
+  served with live DB numbers via WorkspacesHelper.
+
+  Locals / instance vars:
+    none — all data comes from helper methods so the same partial is
+    rendered the same way in both dev and test.
+%>
+<% stats = dashboard_stats %>
+<% activity = dashboard_activity_feed %>
+<% quick_actions = dashboard_quick_actions %>
+
+<section class="dashboard">
+  <div class="breadcrumb"><span class="s">Workspace</span> / Dashboard</div>
+
+  <div class="page-head">
+    <div>
+      <h1>
+        <%= greeting_for %>, <em><%= dashboard_user_name %></em>.
+      </h1>
+      <p class="sub">
+        <% exam_count = stats.dig(0, :value) %>
+        <% if exam_count.to_i.positive? %>
+          You've generated <%= pluralize(exam_count, 'exam') %> on the system. No pending reviews.
+        <% else %>
+          No exams yet — generate your first paper below.
+        <% end %>
+      </p>
+    </div>
+    <div class="page-head__actions">
+      <%= link_to 'From template', exam_templates_path, class: 'btn ghost' %>
+      <%= link_to new_exam_path, class: 'btn' do %>
+        Generate exam <span class="arr">→</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <% stats.each do |s| %>
+      <div class="stat">
+        <div class="l"><%= s[:label] %></div>
+        <div class="n">
+          <%= number_with_delimiter(s[:value]) %>
+          <span class="d"><%= s[:detail] %></span>
+        </div>
+        <div class="trend <%= 'd' if s[:trend_muted] %>"><%= s[:trend] %></div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="head">
+        <div>
+          <h3>Recent activity</h3>
+          <p class="h-sub">Across exams, templates, and topics.</p>
+        </div>
+        <%= link_to 'View all', exams_path(ui: 'classic'), class: 'btn ghost sm' %>
+      </div>
+
+      <% if activity.any? %>
+        <% activity.each do |item| %>
+          <div class="activity-item">
+            <div class="time"><%= activity_time_label(item[:time]) %></div>
+            <div>
+              <div class="title"><%= item[:title] %></div>
+              <div class="meta"><%= item[:meta] %></div>
+            </div>
+            <div class="type"><%= item[:type] %></div>
+          </div>
+        <% end %>
+      <% else %>
+        <p class="h-sub">
+          No activity yet. Start by generating an exam or adding a question.
+        </p>
+      <% end %>
+    </div>
+
+    <div class="panel">
+      <h3>Quick actions</h3>
+      <p class="h-sub">Your five most common jobs.</p>
+
+      <% quick_actions.each do |a| %>
+        <%= link_to a[:href], class: 'quick-card' do %>
+          <div class="qicon"><%= a[:icon] %></div>
+          <div>
+            <div class="qtitle"><%= a[:title] %></div>
+            <div class="qsub"><%= a[:subtitle] %></div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</section>

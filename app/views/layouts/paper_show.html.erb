@@ -15,9 +15,12 @@
       <%= raw File.read(Rails.root.join('app/assets/stylesheets/markdown.css')) %>
       <%= raw File.read(Rails.root.join('app/assets/stylesheets/math_typography.css')) %>
 
-      /* Thin paper-palette toolbar — only shown on screen, hidden in print. */
+      /* Exam toolbar — ported from the design's #screen-exam .exam-toolbar.
+       * Left: title, "Ready to print" status pill, mono meta (questions · time · seed).
+       * Right: three action buttons (Marking scheme · Regenerate · Download PDF).
+       * Only shown on screen; hidden in print. */
       body { background: var(--paper-2, #efeae0); margin: 0; font-family: var(--sans); color: var(--ink); }
-      .paper-toolbar {
+      .exam-toolbar {
         position: sticky; top: 0; z-index: 50;
         display: flex; align-items: center; justify-content: space-between;
         padding: 12px 24px;
@@ -25,23 +28,44 @@
         border-bottom: 1px solid var(--rule, #d8d0c0);
         gap: 16px;
       }
-      .paper-toolbar__title {
-        font-family: var(--serif, Georgia);
+      .exam-toolbar .l {
+        display: flex; align-items: center; gap: 14px; min-width: 0;
+      }
+      .exam-toolbar .l .title {
+        font-family: var(--serif);
         font-weight: 500;
-        font-size: 16px;
+        font-size: 18px;
         letter-spacing: -0.01em;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
-      .paper-toolbar__title small {
-        font-family: var(--mono, monospace);
-        font-size: 10px;
+      .exam-toolbar .badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 3px 10px;
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        font-size: 11px;
         color: var(--ink-3);
-        letter-spacing: .12em;
-        text-transform: uppercase;
-        display: block;
-        margin-bottom: 2px;
+        background: var(--paper-2);
       }
-      .paper-toolbar__actions { display: flex; gap: 8px; align-items: center; }
-      .paper-toolbar__btn {
+      .exam-toolbar .badge .dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        display: inline-block;
+      }
+      .exam-toolbar .mono {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-3);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+      .exam-toolbar .mono b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .exam-toolbar .r { display: flex; gap: 8px; align-items: center; }
+      .exam-toolbar .btn {
         padding: 6px 12px;
         border: 1px solid var(--rule);
         border-radius: 4px;
@@ -51,15 +75,18 @@
         font-size: 13px;
         text-decoration: none;
         cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
       }
-      .paper-toolbar__btn:hover { border-color: var(--accent); }
-      .paper-toolbar__btn--primary {
+      .exam-toolbar .btn:hover { border-color: var(--accent); }
+      .exam-toolbar .btn.primary,
+      .exam-toolbar .btn.btn--primary {
         background: var(--accent);
         color: var(--paper);
         border-color: var(--accent);
       }
-      .paper-toolbar__btn--primary:hover { background: var(--accent-ink); }
-      @media print { .paper-toolbar { display: none; } }
+      .exam-toolbar .btn.primary:hover,
+      .exam-toolbar .btn.btn--primary:hover { background: var(--accent-ink); }
+      @media print { .exam-toolbar { display: none; } }
     </style>
 
     <!-- KaTeX -->
@@ -82,16 +109,20 @@
     </script>
   </head>
   <body>
-    <header class="paper-toolbar">
-      <div>
-        <small><%= [@exam.subject, "Paper #{@exam.paper_number}", @exam.tier&.capitalize].compact.join(' · ').presence || 'Exam' %></small>
-        <div class="paper-toolbar__title"><%= @exam.title %></div>
+    <header class="exam-toolbar">
+      <div class="l">
+        <span class="title"><%= @exam.title %></span>
+        <span class="badge"><span class="dot"></span>Ready to print</span>
+        <span class="mono">
+          <%= pluralize(@exam.exam_questions.size, 'question') %>
+          <% if @exam.duration_minutes.present? %> · <%= @exam.duration_minutes %> min<% end %>
+          <% if @exam.seed.present? %> · seed <b><%= @exam.seed.to_s(16).rjust(4, '0') %></b><% end %>
+        </span>
       </div>
-      <nav class="paper-toolbar__actions">
-        <%= link_to 'Edit in Canvas', workspace_path(tab: 'canvas', exam: @exam.id), class: 'paper-toolbar__btn' %>
-        <%= link_to 'Mark scheme', marking_scheme_exam_path(@exam), class: 'paper-toolbar__btn' %>
-        <%= link_to 'Classic view', exam_path(@exam, ui: 'classic'), class: 'paper-toolbar__btn' %>
-        <%= link_to 'Download PDF', exam_path(@exam, format: :pdf), class: 'paper-toolbar__btn paper-toolbar__btn--primary' %>
+      <nav class="r">
+        <%= link_to 'Marking scheme', marking_scheme_exam_path(@exam), class: 'btn' %>
+        <%= link_to 'Regenerate', new_exam_path, class: 'btn' %>
+        <%= link_to 'Download PDF', exam_path(@exam, format: :pdf), class: 'btn primary' %>
       </nav>
     </header>
 

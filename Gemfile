@@ -64,6 +64,11 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Visual-regression for UI screens. PNG baselines under spec/screenshots
+  # are committed; specs diff against them within tolerance. Enables red-green
+  # TDD on rendered HTML/CSS without asserting on every class by hand.
+  gem "capybara-screenshot-diff", "~> 1.9"
 end
 
 gem "rspec-rails", "~> 7.1", group: :test
