@@ -1,7 +1,9 @@
 /* Marking Scheme (shared between screen + PDF) */
-@page {
-  margin: 20mm;
-}
+
+/* Wave 5 fix: @page margin is owned by paper.css (margin: 0). The
+ * marking scheme paper uses its own .paper .paper--ms block which
+ * provides padding via paper.css. Declaring a second margin here
+ * would force phantom overflow pages. */
 
 .marking-scheme-body {
   font-family: Arial, sans-serif;

@@ -52,9 +52,9 @@ body {
 
 /* Print setup */
 
-@page {
-    margin: 25mm 20mm;
-}
+/* Wave 5 fix: @page margins are owned by paper.css (margin: 0) — each
+ * .paper block provides its own inset via padding. Redeclaring @page
+ * margin here would stack and force a phantom overflow page. */
 
 @media print {
     * {
