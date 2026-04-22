@@ -38,8 +38,12 @@
   --credit-soft: #e9efe4;
   --gap: #f3efe4;           /* cloze / redacted span */
 
-  width: 794px;              /* A4 @ 96dpi */
-  min-height: 1123px;        /* at least one full A4 page; grows to fit content */
+  /* Use mm units (not px) to avoid sub-pixel rounding drift when
+   * Chromium converts CSS pixels to physical mm for print. Each
+   * .paper block now maps 1:1 onto one A4 sheet without the +0.3px
+   * overflow that was producing the 1-line ghost footer pages. */
+  width: 210mm;
+  min-height: 297mm;
   background: var(--paper);
   color: var(--ink);
   font-family: 'Cormorant Garamond', Georgia, serif;

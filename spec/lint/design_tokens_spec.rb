@@ -43,9 +43,9 @@ RSpec.describe 'Design tokens & font manifest' do
       expect(css).to match(/@page\s*\{[^}]*margin:\s*0/m)
     end
 
-    it 'sizes the .paper box to A4 @ 96dpi' do
-      expect(css).to include('width: 794px')
-      expect(css).to include('height: 1123px')
+    it 'sizes the .paper box to A4 in mm (avoids Chromium sub-pixel drift)' do
+      expect(css).to include('width: 210mm')
+      expect(css).to include('height: 297mm')
     end
 
     it 'does not @import Google Fonts (fonts are self-hosted)' do
