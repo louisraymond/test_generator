@@ -7,39 +7,53 @@ module PdfHelper
   # Maps a question to a CSS class for its answer region.
   # Accepts either:
   #   - an integer (marks) — old signature, kept for back-compat
-  #   - a Question instance — preferred; reads answer_size + points
+  #   - a Question instance — preferred; reads question_type + answer_size + points
   #
-  # answer_size (short/medium/long) overrides the marks-based default, so
-  # authors can say "this 2-mark question is a derivation — give it a box"
-  # without inflating the mark value.
+  # Prose question types (written, markdown) get *ruled lines* for
+  # handwriting. Math types (calculation, everything else) get a blank
+  # workbox suited to showing working.
   #
-  # Marks-based fallback (revised after feedback that 4 marks was too small):
-  #   1 mark   → one ruled line
-  #   2 marks  → two ruled lines
-  #   3 marks  → medium working box (88px)
-  #   4 marks  → large working box (140px)
-  #   5+ marks → extra-large working box (190px), usually paired with .finalans
+  # answer_size (short/medium/long) overrides the marks-based default.
   def marks_to_workspace(question_or_marks)
-    size, marks = if question_or_marks.respond_to?(:points)
-                    [question_or_marks.try(:answer_size), question_or_marks.points.to_i]
-                  else
-                    [nil, question_or_marks.to_i]
-                  end
+    if question_or_marks.respond_to?(:points)
+      question = question_or_marks
+      size = question.try(:answer_size).to_s
+      marks = question.points.to_i
+      type = question.try(:question_type).to_s
+    else
+      question = nil
+      size = ''
+      marks = question_or_marks.to_i
+      type = ''
+    end
 
-    case size.to_s
-    when 'long'   then return 'workbox workbox--xl'
-    when 'medium' then return 'workbox workbox--lg'
+    prose = %w[written markdown composite].include?(type)
+
+    # answer_size override
+    case size
+    when 'long'   then return prose ? 'lines lines--22' : 'workbox workbox--xl'
+    when 'medium' then return prose ? 'lines lines--12' : 'workbox workbox--lg'
     when 'short'  then return 'lines lines--1'
     end
 
-    # Marks → workspace (revised for maths: every question gets a real
-    # working box, and anything 4+ marks is half-page minimum).
-    case marks
-    when 0    then 'lines lines--2'
-    when 1    then 'workbox workbox--sm'   # 120px — ~5 lines
-    when 2    then 'workbox workbox--md'   # 200px
-    when 3    then 'workbox workbox--lg'   # 350px
-    else           'workbox workbox--xl'   # 550px half-page default for 4+ marks
+    if prose
+      # Prose answers — ruled lines, no enclosing box.
+      case marks
+      when 0, 1 then 'lines lines--4'
+      when 2    then 'lines lines--6'
+      when 3    then 'lines lines--10'
+      when 4    then 'lines lines--16'
+      else           'lines lines--22'    # 550-ish px ≈ half-page ruled
+      end
+    else
+      # Math / calculation — blank working box.
+      case marks
+      when 0    then 'lines lines--2'
+      when 1    then 'workbox workbox--sm'
+      when 2    then 'workbox workbox--md'
+      when 3    then 'workbox workbox--lg'
+      else           'workbox workbox--xl'
+      end
     end
   end
 

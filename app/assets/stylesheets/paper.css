@@ -244,24 +244,31 @@
 .lines {
   background-image: repeating-linear-gradient(to bottom,
     transparent 0, transparent 23px,
-    var(--rule) 23px, var(--rule) 23.5px);
+    var(--rule) 23px, var(--rule) 24px);
   background-size: 100% 24px;
   min-height: 48px;
+  /* Reserve a little space before the first rule so text doesn't
+   * collide with the top line when lines follow a stem directly. */
+  margin-top: 6px;
 }
-.lines--1 { min-height: 24px; }
-.lines--2 { min-height: 48px; }
-.lines--3 { min-height: 72px; }
-.lines--4 { min-height: 96px; }
-.lines--5 { min-height: 120px; }
-.lines--6 { min-height: 144px; }
-.lines--8 { min-height: 192px; }
+.lines--1  { min-height:  24px; }
+.lines--2  { min-height:  48px; }
+.lines--3  { min-height:  72px; }
+.lines--4  { min-height:  96px; }
+.lines--5  { min-height: 120px; }
+.lines--6  { min-height: 144px; }
+.lines--8  { min-height: 192px; }
+.lines--10 { min-height: 240px; }
+.lines--12 { min-height: 288px; }
+.lines--16 { min-height: 384px; }
+.lines--22 { min-height: 528px; }
 
 .workbox {
   border: .5pt solid var(--rule);
   border-radius: 2px;
   min-height: 200px;          /* generous default — math questions need room */
   margin-top: 4px;
-  background: repeating-linear-gradient(to bottom, transparent 0, transparent 23px, #eee7d5 23px, #eee7d5 23.5px);
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 23px, var(--rule-soft, #d8d0c0) 23px, var(--rule-soft, #d8d0c0) 24px);
   background-size: 100% 24px;
 }
 .workbox--blank { background: none; }

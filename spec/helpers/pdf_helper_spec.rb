@@ -30,22 +30,48 @@ RSpec.describe PdfHelper, type: :helper do
     end
 
     describe 'answer_size override (Question-shaped argument)' do
-      Q = Struct.new(:points, :answer_size)
+      Q = Struct.new(:points, :answer_size, :question_type)
 
       it "uses 'long' to force an XL workbox regardless of marks" do
-        expect(helper.marks_to_workspace(Q.new(1, 'long'))).to eq('workbox workbox--xl')
+        expect(helper.marks_to_workspace(Q.new(1, 'long', 'calculation'))).to eq('workbox workbox--xl')
       end
 
       it "uses 'medium' to force a large workbox" do
-        expect(helper.marks_to_workspace(Q.new(1, 'medium'))).to eq('workbox workbox--lg')
+        expect(helper.marks_to_workspace(Q.new(1, 'medium', 'calculation'))).to eq('workbox workbox--lg')
       end
 
       it "uses 'short' to force one line regardless of marks" do
-        expect(helper.marks_to_workspace(Q.new(10, 'short'))).to eq('lines lines--1')
+        expect(helper.marks_to_workspace(Q.new(10, 'short', 'calculation'))).to eq('lines lines--1')
       end
 
       it 'falls back to marks when answer_size is nil' do
-        expect(helper.marks_to_workspace(Q.new(4, nil))).to eq('workbox workbox--xl')
+        expect(helper.marks_to_workspace(Q.new(4, nil, 'calculation'))).to eq('workbox workbox--xl')
+      end
+    end
+
+    describe 'prose question types render ruled lines, not a workbox' do
+      Qtype = Struct.new(:points, :answer_size, :question_type)
+
+      it 'written → ruled lines sized by marks' do
+        expect(helper.marks_to_workspace(Qtype.new(1, nil, 'written'))).to eq('lines lines--4')
+        expect(helper.marks_to_workspace(Qtype.new(3, nil, 'written'))).to eq('lines lines--10')
+        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'written'))).to eq('lines lines--22')
+      end
+
+      it 'markdown → same as written' do
+        expect(helper.marks_to_workspace(Qtype.new(4, nil, 'markdown'))).to eq('lines lines--16')
+      end
+
+      it 'composite → ruled lines (sub-parts each render their own region)' do
+        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'composite'))).to eq('lines lines--22')
+      end
+
+      it 'calculation stays on workbox' do
+        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'calculation'))).to eq('workbox workbox--xl')
+      end
+
+      it "answer_size 'long' on a written question yields tall ruled lines" do
+        expect(helper.marks_to_workspace(Qtype.new(1, 'long', 'written'))).to eq('lines lines--22')
       end
     end
   end
