@@ -97,9 +97,14 @@
             <%= tok[:text].html_safe %>
           <% when :autoblank %>
             <% blank_counter += 1 %>
+            <%# Strip `$` delimiters from the visible inner text so KaTeX
+                auto-render (which scans the whole body for $...$) doesn't
+                pick up the blanked answer and render it on top of the
+                is-blanked transparent background. The real answer is kept
+                on data-answer for the marker's copy. %>
             <span class="w is-blanked" data-blank-n="<%= blank_counter %>"
                   data-answer="<%= tok[:answer] %>"
-                  aria-label="blank"><%= tok[:answer] %></span>
+                  aria-label="blank"><%= tok[:answer].to_s.delete('$') %></span>
           <% when :space %>
             <%= tok[:text] %>
           <% when :word %>
