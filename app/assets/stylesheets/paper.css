@@ -64,9 +64,18 @@
   background: #fefdf9;
 }
 
-/* In print, each .paper starts a new page. On-screen we stack them with a
- * small gap so authors can scroll through the preview. */
+/* In print, each .paper starts a new page. The print media query drops
+ * the on-screen gap so the margin-top doesn't spill onto its own ghost
+ * page in Chromium. */
 .paper + .paper { margin-top: 24px; page-break-before: always; }
+@media print {
+  .paper + .paper { margin-top: 0; }
+  /* Forced break before each subsequent .paper; `break-before` is the
+   * modern spelling, kept alongside legacy page-break-before for
+   * maximal Chromium compatibility. */
+  .paper { break-before: page; }
+  .paper:first-of-type { break-before: auto; }
+}
 
 /* running heads */
 .paper .runhead {
