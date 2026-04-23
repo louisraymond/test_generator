@@ -3,6 +3,14 @@
   the sidebar + main grid live here (shared with application.html.erb
   via `shared/_sidebar`). `@tab` selects the tab partial.
 %>
+<%
+  # Canvas + Review are self-contained editing surfaces (3-column
+  # canvas / side-by-side review panes). They need the full right
+  # column of the workspace grid without the .main pane's 1280px
+  # max-width + 56px padding.
+  bleed_tabs = %w[canvas review]
+  main_classes = ['main', ('main--bleed' if bleed_tabs.include?(@tab))].compact.join(' ')
+%>
 <div class="app"
      data-controller="palette <%= 'autosave' if @exam %>"
      data-autosave-exam-id-value="<%= @exam&.id %>"
@@ -10,7 +18,7 @@
 
   <%= render 'shared/sidebar', active_tab: @tab %>
 
-  <main class="main">
+  <main class="<%= main_classes %>">
     <%= render "workspaces/tab_#{@tab}", tab: @tab %>
   </main>
 </div>

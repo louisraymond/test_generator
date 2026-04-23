@@ -1,25 +1,59 @@
 <% if @exam %>
-  <section class="review">
-    <main class="review__panes">
-      <div class="review__pane review__student">
-        <header class="review__pane-header">
-          <div class="eyebrow">Student paper</div>
-          <div class="review__pane-title"><%= @exam.title %></div>
-        </header>
-        <div class="review__pane-viewport">
-          <iframe src="<%= paper_exam_path(@exam) %>" title="Student paper preview" loading="lazy"></iframe>
+  <section class="review"
+           data-controller="review-panes"
+           data-review-panes-active-value="student"
+           data-active-pane="student">
+
+    <header class="review__header">
+      <div>
+        <div class="review__breadcrumb">
+          <span class="s">Edit</span> / Review &amp; export
         </div>
+        <div class="review__title"><%= @exam.title %></div>
       </div>
 
-      <div class="review__pane review__marker">
+      <div class="review__toggle" role="tablist" aria-label="Paper toggle">
+        <button type="button"
+                class="review__toggle-btn is-active"
+                data-review-panes-target="tab"
+                data-pane="student"
+                data-action="click->review-panes#switch">
+          Student
+        </button>
+        <button type="button"
+                class="review__toggle-btn"
+                data-review-panes-target="tab"
+                data-pane="marker"
+                data-action="click->review-panes#switch">
+          Marker
+        </button>
+      </div>
+    </header>
+
+    <main class="review__panes">
+      <section class="review__pane review__student" aria-label="Student paper">
+        <header class="review__pane-header">
+          <div class="eyebrow">Student paper</div>
+          <div class="review__pane-title">What the candidate sees</div>
+        </header>
+        <div class="paper-sheet">
+          <iframe src="<%= paper_exam_path(@exam) %>"
+                  title="Student paper preview"
+                  loading="lazy"></iframe>
+        </div>
+      </section>
+
+      <section class="review__pane review__marker" aria-label="Marker copy">
         <header class="review__pane-header">
           <div class="eyebrow">Mark scheme</div>
           <div class="review__pane-title">Marker's copy</div>
         </header>
-        <div class="review__pane-viewport">
-          <iframe src="<%= marking_scheme_exam_path(@exam, variant: 'marker') %>" title="Mark scheme preview" loading="lazy"></iframe>
+        <div class="paper-sheet">
+          <iframe src="<%= marking_scheme_exam_path(@exam, variant: 'marker') %>"
+                  title="Mark scheme preview"
+                  loading="lazy"></iframe>
         </div>
-      </div>
+      </section>
     </main>
 
     <aside class="review-export" aria-label="Export rail">

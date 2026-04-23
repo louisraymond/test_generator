@@ -1,166 +1,245 @@
-/* Review & export tab (Phase 9 + Wave 5): side-by-side preview + export
- * rail.
+/* Review & export tab (Wave 6).
  *
- * Each iframe loads the full paper_show page (A4 sheets stacked). To fit
- * both student + marker copies next to each other inside the workspace
- * `.main` column, we scale each iframe down with `transform: scale()`
- * and compensate with a proportionally wider iframe width so the whole
- * A4 sheet fits. Outer scrolling is per-pane so a user can step through
- * every sheet without horizontal overflow on the page.
+ * Layout contract:
+ *   - Two panes (student + marker) side-by-side when the workspace
+ *     .main is wide enough for each paper to read (~560px/pane).
+ *   - Below that breakpoint a Student / Marker toggle appears and only
+ *     the active pane is visible.
+ *   - Each paper is sized responsively: width = pane width, height
+ *     locked to A4 aspect ratio via `aspect-ratio: 210 / 297`. The
+ *     iframe scales itself with CSS `zoom` so the underlying
+ *     paper_show page (fixed at 210mm) fits the container exactly.
+ *   - Every paper is a discrete card with shadow + gap, Google-Docs
+ *     style. A multi-sheet paper scrolls within its pane.
+ *
+ * Full-bleed treatment: the tab is marked `main--bleed` by
+ * WorkspacesController#show so the outer .main pane has no padding
+ * or max-width constraint — the three-column grid here owns the full
+ * right-hand column of the sidebar shell.
  */
 
 .review {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 0;
-  align-items: flex-start;
-  min-height: calc(100vh - 60px);
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "header   rail"
+    "panes    rail";
+  min-height: calc(100vh - 1px);
+  background: var(--paper-2, #efeae0);
+}
+
+.review__header {
+  grid-area: header;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 18px 24px;
+  background: var(--paper, #f7f4ee);
+  border-bottom: 1px solid var(--rule, #d8d0c0);
+}
+.review__breadcrumb {
+  font-family: var(--mono, monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-3, #8b8479);
+}
+.review__breadcrumb .s { color: var(--ink, #1a1915); font-weight: 600; }
+.review__title {
+  font-family: var(--serif, serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.review__toggle {
+  margin-left: auto;
+  display: none;                 /* hidden at wide viewports */
+  gap: 4px;
+  padding: 2px;
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 6px;
+  background: var(--paper-2, #efeae0);
+}
+.review__toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--ink-3, #8b8479);
+}
+.review__toggle-btn:hover { color: var(--ink, #1a1915); }
+.review__toggle-btn.is-active {
+  background: var(--paper, #f7f4ee);
+  color: var(--ink, #1a1915);
+  box-shadow: 0 1px 2px rgba(26, 25, 21, 0.08);
 }
 
 .review__panes {
+  grid-area: panes;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 24px;
   padding: 24px;
-  background: var(--paper-2);
+  align-items: flex-start;
+  overflow-y: auto;
+  background: var(--paper-2, #efeae0);
 }
 
 .review__pane {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-inner);
-  background: var(--paper);
-  overflow: hidden;
-  height: calc(100vh - 60px);
+  gap: 12px;
+  min-width: 0;                  /* let grid column shrink cleanly */
 }
 .review__pane-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 2px;
 }
 .review__pane-header .eyebrow {
-  font-family: var(--mono);
+  font-family: var(--mono, monospace);
   font-size: 10px;
-  color: var(--ink-3);
-  letter-spacing: var(--tr-pill);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  color: var(--ink-3, #8b8479);
 }
 .review__pane-title {
-  font-family: var(--serif);
-  font-size: 16px;
+  font-family: var(--serif, serif);
+  font-size: 15px;
   font-weight: 500;
 }
-.review__pane iframe {
-  flex: 1;
-  width: 100%;
-  border: none;
-  background: var(--paper);
-  min-height: 100%;
-}
 
-/* The iframe loads the paper_show layout (210mm × N sheets stacked).
- * On a ~500px-wide pane, A4 (794 CSS px) doesn't fit — we scale the
- * iframe's VIRTUAL width up and then scale the whole element down via
- * CSS transform so every sheet is visible at the same aspect ratio.
- * `transform-origin: top left` keeps the paper pinned to the upper
- * corner of the pane; the container scrolls vertically to reveal
- * additional sheets. */
-.review__pane-viewport {
-  flex: 1;
-  overflow: auto;
-  background: var(--paper-2, #efeae0);
+/* The paper card — width is set by the grid column; height follows A4
+ * aspect ratio. The iframe inside is 210mm wide by design (paper.css),
+ * so CSS zoom = paneWidth / 210mm keeps the A4 sheet aspect perfect.
+ * Scaling via `zoom` (not `transform: scale`) means the browser
+ * actually resizes the iframe, so its scrollbar + content flow update
+ * correctly — no dead whitespace like `transform` creates. */
+.paper-sheet {
   position: relative;
+  width: 100%;
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  background: #fdfcf8;
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 4px;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 12px 36px rgba(40, 35, 25, 0.10);
 }
-.review__pane-viewport iframe {
-  display: block;
-  width: 900px;           /* roomy enough for the A4 sheet + gutter */
-  height: 2600px;         /* ≈ 2 A4 sheets at 96dpi + margin */
+.paper-sheet iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: none;
   background: transparent;
-  transform: scale(0.55);
-  transform-origin: top left;
-}
-@media (min-width: 1600px) {
-  .review__pane-viewport iframe { transform: scale(0.7); }
 }
 
-/* Export rail */
+/* Export rail on the right */
 .review-export {
-  border-left: 1px solid var(--rule);
+  grid-area: rail;
+  border-left: 1px solid var(--rule, #d8d0c0);
   padding: 24px;
+  background: var(--paper, #f7f4ee);
   overflow-y: auto;
-  background: var(--paper);
 }
 .review-export__header { margin-bottom: 24px; }
 .review-export__header .eyebrow {
-  font-family: var(--mono);
+  font-family: var(--mono, monospace);
   font-size: 10px;
-  color: var(--accent);
-  letter-spacing: var(--tr-pill);
+  color: var(--accent, #b4532a);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 .review-export__title {
-  font-family: var(--serif);
+  font-family: var(--serif, serif);
   font-size: 20px;
   font-weight: 500;
 }
-
 .review-export__group {
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule, #d8d0c0);
 }
 .review-export__group:last-child { border-bottom: none; }
-
 .review-export__label {
-  font-family: var(--mono);
+  font-family: var(--mono, monospace);
   font-size: 10px;
-  letter-spacing: var(--tr-pill);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: var(--ink-3, #8b8479);
   margin-bottom: 12px;
 }
-
 .review-export__btn {
   display: block;
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-inner);
-  background: var(--card);
-  color: var(--ink);
+  border: 1px solid var(--rule, #d8d0c0);
+  border-radius: 5px;
+  background: var(--paper, #f7f4ee);
+  color: var(--ink, #1a1915);
   font-size: 13px;
   text-decoration: none;
   margin-bottom: 8px;
-  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+  transition: border-color .15s ease;
 }
-.review-export__btn:hover { border-color: var(--accent); background: var(--paper-2); }
+.review-export__btn:hover { border-color: var(--ink-3, #8b8479); }
 .review-export__btn--accent {
-  background: var(--accent);
-  color: var(--paper);
-  border-color: var(--accent);
+  background: var(--accent, #b4532a);
+  color: var(--paper, #f7f4ee);
+  border-color: var(--accent, #b4532a);
 }
-.review-export__btn--accent:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
-
-.review-export__seed { display: flex; flex-direction: column; gap: 6px; }
 .review-export__seed-input {
-  background: transparent;
+  width: 100%;
   border: none;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule, #d8d0c0);
+  background: transparent;
   padding: 6px 2px;
-  font: inherit;
+  font-family: var(--sans, sans-serif);
   font-size: 14px;
-  outline: none;
-}
-.review-export__seed-input:focus {
-  border-bottom-width: 2px;
-  border-bottom-color: var(--accent);
-  padding-bottom: 5px;
 }
 .review-export__hint {
+  display: block;
   font-size: 12px;
+  color: var(--ink-3, #8b8479);
+  margin-top: 6px;
   font-style: italic;
-  color: var(--ink-3);
+}
+
+/* -------- Narrow viewport: toggle + single active pane -------- */
+@media (max-width: 1199px) {
+  .review {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "panes"
+      "rail";
+  }
+  .review__toggle { display: inline-flex; }
+  .review__panes {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  /* Hide the non-active pane. The controller sets data-active-pane on
+   * `.review`; CSS keys off that attribute so the toggle works without
+   * inline styles. */
+  .review[data-active-pane="student"] .review__marker,
+  .review[data-active-pane="marker"]  .review__student {
+    display: none;
+  }
+  .review-export {
+    border-left: none;
+    border-top: 1px solid var(--rule, #d8d0c0);
+  }
 }

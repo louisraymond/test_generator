@@ -14,6 +14,10 @@
   padding: 40px 56px 96px;
   max-width: 1280px;
 }
+.workspace-shell .main.main--bleed {
+  padding: 0;
+  max-width: none;
+}
 
 /* Strip pastel gradients + forced min-height from legacy wrappers so
  * they don't paint over the paper palette. */
