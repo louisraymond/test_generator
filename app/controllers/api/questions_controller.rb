@@ -1,5 +1,17 @@
 module Api
   class QuestionsController < BaseController
+    def destroy
+      question = Question.find_by(id: params[:id])
+      unless question
+        render json: { error: "Question #{params[:id]} not found" }, status: :not_found
+        return
+      end
+
+      Rails.logger.info "[API] destroy_question: id=#{question.id} topic_id=#{question.topic_id}"
+      question.destroy!
+      head :no_content
+    end
+
     def bulk
       topic = Topic.find(params[:topic_id])
       raw_questions = Array(params[:questions])

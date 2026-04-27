@@ -58,7 +58,7 @@ Rails.application.routes.draw do
       resources :topic_modules, only: %i[create]
     end
 
-    resources :questions, only: [] do
+    resources :questions, only: %i[destroy] do
       collection do
         post :bulk
       end
