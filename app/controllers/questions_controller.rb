@@ -70,10 +70,16 @@ class QuestionsController < ApplicationController
 
   def update
     if @question.update(question_params)
-      redirect_to questions_path, notice: 'Question updated successfully.'
+      respond_to do |format|
+        format.html { redirect_to questions_path, notice: 'Question updated successfully.' }
+        format.json { head :ok }
+      end
     else
       @question.options_text = params.dig(:question, :options_text)
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { errors: @question.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -117,6 +123,23 @@ class QuestionsController < ApplicationController
     options[idx]['eliminated'] = !current
     @question.update_columns(options: options, updated_at: Time.current)
     head :ok
+  end
+
+  def destroy
+    question = Question.find_by(id: params[:id])
+    if question.nil?
+      respond_to do |format|
+        format.html { redirect_to questions_path, alert: "Question not found." }
+        format.json { render json: { error: "Question #{params[:id]} not found" }, status: :not_found }
+      end
+      return
+    end
+
+    question.destroy!
+    respond_to do |format|
+      format.html { redirect_to questions_path, notice: "Question deleted." }
+      format.json { head :no_content }
+    end
   end
 
   # Wave 3 — generic per-type options patcher. Stimulus controllers PATCH
