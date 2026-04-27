@@ -213,7 +213,20 @@ class QuestionsController < ApplicationController
         parts[idx] = updated
         current['parts'] = parts
       when 'add_part'
-        next # implemented in commit 3.6
+        return head(:unprocessable_entity) unless @question.question_type == 'composite'
+
+        parts = Array(current['parts']).map(&:deep_dup)
+        after = value['after'].to_i
+        insert_at = (after + 1).clamp(0, parts.length)
+
+        new_part = {
+          'stem'        => '',
+          'type'        => 'written',
+          'marks'       => 1,
+          'answer_size' => 'medium',
+        }
+        parts.insert(insert_at, new_part)
+        current['parts'] = parts
       else
         current[key] = value
       end
