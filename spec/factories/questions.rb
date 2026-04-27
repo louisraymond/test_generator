@@ -36,5 +36,20 @@ FactoryBot.define do
     trait :with_module do
       association :topic_module
     end
+
+    trait :composite do
+      question_type { 'composite' }
+      content { 'Parent stem.' }
+      answer  { 'Parent answer.' }
+      points  { 6 }
+      options do
+        {
+          'parts' => [
+            { 'stem' => 'Part A.', 'type' => 'written',     'marks' => 2, 'answer_size' => 'medium' },
+            { 'stem' => 'Part B.', 'type' => 'calculation', 'marks' => 3, 'answer_label' => 'x', 'unit' => 'm' },
+          ],
+        }
+      end
+    end
   end
 end
