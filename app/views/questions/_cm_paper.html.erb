@@ -1,0 +1,29 @@
+<div class="q q--editable q--cm" data-question-id="<%= question.id %>">
+  <div class="q__num"><%= counter %></div>
+  <div class="q__body">
+
+    <% if question.question_type == 'composite' %>
+      <%= render 'questions/cm_composite', question: question %>
+    <% else %>
+      <%# Parent stem editor for non-composite questions. %>
+      <div class="q__stem"
+           data-controller="cm-editor"
+           data-cm-editor-source-value="<%= question.content.to_s %>"
+           data-cm-editor-save-url-value="<%= question_path(question) %>"
+           data-cm-editor-save-field-value="question[content]"
+           data-cm-editor-question-id-value="<%= question.id %>">
+      </div>
+
+      <div class="q__answer-label">Model answer</div>
+      <div class="q__answer"
+           data-controller="cm-editor"
+           data-cm-editor-source-value="<%= question.answer.to_s %>"
+           data-cm-editor-save-url-value="<%= question_path(question) %>"
+           data-cm-editor-save-field-value="question[answer]"
+           data-cm-editor-question-id-value="<%= question.id %>">
+      </div>
+    <% end %>
+
+  </div>
+  <div class="q__marks"><i>[<b><%= question.points %></b> <%= 'mark'.pluralize(question.points.to_i) %>]</i></div>
+</div>

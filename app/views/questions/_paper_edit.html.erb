@@ -32,11 +32,7 @@
     <main class="q-editor-single__paper">
       <div class="paper">
         <div class="paper__inner">
-          <%= render 'exams/paper_question',
-                     question: @question,
-                     counter: 1,
-                     exam_question: nil,
-                     editable: true %>
+          <%= render 'questions/cm_paper', question: @question, counter: 1 %>
         </div>
       </div>
     </main>
