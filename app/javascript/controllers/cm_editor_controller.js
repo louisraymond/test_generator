@@ -16,12 +16,14 @@ export default class extends Controller {
       { EditorState },
       { EditorView, keymap, lineNumbers },
       { defaultKeymap, history, historyKeymap },
-      { markdown }
+      { markdown },
+      { markdownPreview }
     ] = await Promise.all([
       import("@codemirror/state"),
       import("@codemirror/view"),
       import("@codemirror/commands"),
       import("@codemirror/lang-markdown"),
+      import("lib/cm_markdown_preview"),
     ])
 
     this._save = this._debounce(this._flushSave.bind(this), this.debounceMsValue)
@@ -33,6 +35,7 @@ export default class extends Controller {
           history(),
           keymap.of([...defaultKeymap, ...historyKeymap]),
           markdown(),
+          markdownPreview,
           EditorView.updateListener.of(u => {
             if (u.docChanged) this._save()
           }),

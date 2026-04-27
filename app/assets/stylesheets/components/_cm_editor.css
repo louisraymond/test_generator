@@ -1,0 +1,23 @@
+/* Decoration classes emitted by `app/javascript/lib/cm_markdown_preview.js`.
+ *
+ * The plugin walks the markdown syntax tree on docChanged / selectionSet /
+ * viewportChanged and tags inner ranges with the *-bold / *-italic / *-heading-N
+ * / *-code-inline classes below. When the cursor is OFF the line containing
+ * the token, the leading + trailing markers (`**`, `*`, `## `, backticks)
+ * additionally get `cm-md-syntax-hidden` so the raw markdown is not visible.
+ *
+ * Loaded by Sprockets via `require_tree .` in `application.css`.
+ */
+.cm-md-syntax-hidden { display: none; }
+.cm-md-bold          { font-weight: 700; }
+.cm-md-italic        { font-style: italic; }
+.cm-md-heading-1     { font-size: 1.6em; font-weight: 700; }
+.cm-md-heading-2     { font-size: 1.3em; font-weight: 700; }
+.cm-md-heading-3     { font-size: 1.1em; font-weight: 700; }
+.cm-md-code-inline   {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0 0.2em;
+}
+.cm-md-katex         { display: inline-block; }
+.cm-md-katex--block  { display: block; text-align: center; }
