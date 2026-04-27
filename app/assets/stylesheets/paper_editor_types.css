@@ -178,6 +178,15 @@
   margin-top: 4pt;
 }
 
+/* Editor ticket #10 — left accent bar on the selected composite part.
+ * Solid colour only (no gradient) so the PDF rasteriser doesn't drop
+ * the bar; matches the rail's accent token. */
+.paper .composite__part.is-selected {
+  border-left: 4px solid var(--accent, #b4532a);
+  padding-left: 8pt;
+  margin-left: -12pt;
+}
+
 /* Code-analysis — line-level highlight toggle */
 .paper pre.code.code--editable .code__line { cursor: pointer; padding: 0 2pt; }
 .paper pre.code.code--editable .code__line:hover {

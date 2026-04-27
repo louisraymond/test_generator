@@ -22,7 +22,8 @@
       <li class="composite__part"
           data-part-index="<%= i %>"
           data-part-type="<%= part_type %>"
-          data-test-id="part-<%= ('a'.ord + i).chr %>">
+          data-test-id="part-<%= ('a'.ord + i).chr %>"
+          data-action="click->composite-editor#select">
         <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
         <div class="composite__part-stem"
              data-controller="cm-editor"
