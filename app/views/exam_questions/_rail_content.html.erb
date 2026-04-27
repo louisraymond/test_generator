@@ -3,6 +3,12 @@
   summaries that don't fit naturally on the printed paper: shuffle seeds,
   distractor counts, pin lists, answer-format switches, etc.
   Locals: question, exam_question, descriptor
+
+  Editor ticket #10 — for composite questions, also renders a per-part
+  inspector (hidden until a part is clicked on the paper). The inspector
+  is a separate `<div data-controller="rail-part-inspector">` block that
+  listens for `composite:part-selected` events emitted by the
+  composite-editor controller.
 %>
 <% opts = question.typed_options %>
 <div class="rail-typeblock" data-controller="rail-type">
@@ -77,8 +83,107 @@
     <p class="rail-hint">
       <%= pluralize(parts, 'sub-part') %>. Option-Return on a part to append.
     </p>
+    <p class="rail-hint">Click a part on the paper to inspect it below.</p>
 
   <% else %>
     <p class="rail-hint">Free-form written answer. Stem edits below flow into the paper live.</p>
   <% end %>
 </div>
+
+<%# Editor ticket #10 — per-part inspector. Hidden until the user clicks
+    a part on the paper. Activated by `composite:part-selected` events
+    from the composite-editor controller. %>
+<% if question.question_type == 'composite' %>
+  <div class="rail-part-inspector"
+       data-controller="rail-part-inspector"
+       data-rail-part-inspector-question-id-value="<%= question.id %>">
+    <div class="rail-typeblock rail-part-inspector__panel"
+         data-rail-part-inspector-target="panel"
+         hidden>
+      <p class="rail-hint rail-part-inspector__header"
+         data-rail-part-inspector-target="header">part · type</p>
+
+      <div class="rail-field">
+        <label class="rail-field__label">Type</label>
+        <div class="rail-pills" data-rail-part-inspector-target="pills">
+          <% %w[written multiple_choice calculation markdown matching ordering ranking code_analysis].each do |t| %>
+            <% descriptor = QuestionTypes.for(t) %>
+            <button type="button"
+                    class="rail-pill"
+                    data-rail-part-inspector-target="typePill"
+                    data-part-type-pill="<%= t %>"
+                    data-action="click->rail-part-inspector#pickType">
+              <%= descriptor&.label || t.humanize %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="rail-warning-banner"
+           data-rail-part-inspector-target="warningBanner"
+           hidden>
+        <p class="rail-warning-banner__text">
+          switching type will reset type-specific options. stem &amp; metadata kept.
+        </p>
+        <div class="rail-warning-banner__actions">
+          <button type="button"
+                  class="rail-btn"
+                  data-action="click->rail-part-inspector#confirmTypeSwitch">
+            Confirm
+          </button>
+          <button type="button"
+                  class="rail-btn rail-btn--ghost"
+                  data-action="click->rail-part-inspector#cancelTypeSwitch">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="part_marks">Marks</label>
+        <input type="number"
+               id="part_marks"
+               name="part_marks"
+               min="0"
+               class="rail-input"
+               data-rail-part-inspector-target="marks"
+               data-action="change->rail-part-inspector#marksChanged">
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="part_answer_size">Answer size</label>
+        <select id="part_answer_size"
+                name="part_answer_size"
+                class="rail-input"
+                data-rail-part-inspector-target="answerSize"
+                data-action="change->rail-part-inspector#answerSizeChanged">
+          <option value="short">Short</option>
+          <option value="medium">Medium</option>
+          <option value="long">Long</option>
+        </select>
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="part_answer_label">Answer label</label>
+        <input type="text"
+               id="part_answer_label"
+               name="part_answer_label"
+               class="rail-input"
+               placeholder="e.g. x ="
+               data-rail-part-inspector-target="answerLabel"
+               data-action="change->rail-part-inspector#answerLabelChanged">
+      </div>
+
+      <div class="rail-field">
+        <label class="rail-field__label" for="part_unit">Unit</label>
+        <input type="text"
+               id="part_unit"
+               name="part_unit"
+               class="rail-input"
+               placeholder="e.g. m"
+               data-rail-part-inspector-target="unit"
+               data-action="change->rail-part-inspector#unitChanged">
+      </div>
+    </div>
+  </div>
+<% end %>

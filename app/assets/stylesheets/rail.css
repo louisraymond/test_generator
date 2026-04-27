@@ -163,6 +163,55 @@ select.rail-input {
 .rail-mark-list__row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; color: #d4cfc1; }
 .rail-mark-list__text { color: #a89c82; }
 
+/* Editor ticket #10 — rail per-part inspector. */
+.rail-part-inspector__header {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f7f4ee !important;
+  margin-bottom: 12px !important;
+}
+.rail-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rail-pill {
+  background: transparent;
+  color: #d4cfc1;
+  border: 1px solid #3a342c;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.rail-pill:hover { background: rgba(255, 255, 255, 0.05); color: #f7f4ee; }
+.rail-pill.is-active {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+.rail-warning-banner {
+  background: rgba(212, 159, 0, 0.18);
+  border: 1px solid rgba(212, 159, 0, 0.55);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin: 12px 0;
+  color: #f3e6b0;
+}
+.rail-warning-banner__text {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.rail-warning-banner__actions {
+  display: flex;
+  gap: 8px;
+}
+
 .canvas__rail.is-collapsed { width: 32px !important; overflow: hidden; }
 .canvas__rail.is-collapsed .rail-tabs,
 .canvas__rail.is-collapsed .rail-panel,
