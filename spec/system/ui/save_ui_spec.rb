@@ -72,7 +72,7 @@ RSpec.describe 'Save UI — explicit Save + dirty indicator', type: :system do
     # `keydown.meta+s@window` binding fires regardless of focus state.
     page.execute_script(<<~JS)
       const ev = new KeyboardEvent('keydown', {
-        key: 's', code: 'KeyS', metaKey: true, ctrlKey: true,
+        key: 's', code: 'KeyS', metaKey: true,
         bubbles: true, cancelable: true,
       });
       window.dispatchEvent(ev);

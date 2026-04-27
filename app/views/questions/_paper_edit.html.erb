@@ -22,7 +22,18 @@
         · <%= @question.topic&.name || 'no topic' %>
       </p>
     </div>
-    <div class="page-head__actions">
+    <div class="page-head__actions"
+         data-controller="save-chrome"
+         data-action="click->save-chrome#save keydown.meta+s@window->save-chrome#save keydown.ctrl+s@window->save-chrome#save cm:dirty@window->save-chrome#onDirty cm:saved@window->save-chrome#onSaved">
+      <button type="button"
+              class="page-head__save-btn"
+              data-save-chrome-target="button"
+              data-action="click->save-chrome#save"
+              data-test-id="save-button"
+              data-dirty="false">
+        Save
+      </button>
+      <span data-save-chrome-target="state" class="page-head__save-state">✓ saved a moment ago</span>
       <%= link_to 'Done', workspace_path(tab: 'questions'), class: 'btn sm' %>
       <%= link_to 'Classic editor', edit_question_path(@question, ui: 'classic'), class: 'btn ghost sm' %>
     </div>

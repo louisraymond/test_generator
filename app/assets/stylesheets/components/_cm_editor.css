@@ -21,3 +21,20 @@
 }
 .cm-md-katex         { display: inline-block; }
 .cm-md-katex--block  { display: block; text-align: center; }
+
+/* Save button + dirty indicator (Editor ticket #40, design contract item 4). */
+.page-head__save-btn {
+  font: 500 14px/1.4 'Inter', system-ui, sans-serif;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--ink, #15110c);
+  color: var(--paper, #f7f4ee);
+  border: none;
+  cursor: pointer;
+}
+.page-head__save-btn[data-dirty="true"] { background: var(--accent, #b4532a); }
+.page-head__save-state {
+  font: 400 12px/1 'JetBrains Mono', monospace;
+  color: var(--ink-3, #6b6358);
+  margin-left: 12px;
+}
