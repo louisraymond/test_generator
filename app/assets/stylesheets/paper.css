@@ -578,4 +578,20 @@
     width: auto;
     height: auto;
   }
+
+  /* Print-only override: avoids Skia rasterising the on-screen gradient.
+   * See spec/requests/exam_pdf_image_count_spec.rb.
+   * The on-screen `.lines` and `.workbox` use `repeating-linear-gradient`
+   * to draw ruled writing space. Skia/PDF rasterises the tile and stamps
+   * it once per region (~4 per page on a real exam). The spike to a simple
+   * two-stop gradient still rasterised; falling all the way to `none` is
+   * what brings the count under the regression-spec threshold. If you ever
+   * need the printed paper to show ruled lines again, emit them via stacked
+   * <hr class="rule-line"> tags in the partial — borders are stroke ops in
+   * Skia, never raster. */
+  .lines,
+  .workbox {
+    background-image: none;
+    background: none;
+  }
 }

@@ -1639,3 +1639,26 @@ code.md-inline,
     border-radius: 6px;
     font-size: 0.875rem;
 }
+
+/* Print-only override: avoids Skia rasterising the on-screen gradient.
+ * See spec/requests/exam_pdf_image_count_spec.rb.
+ *
+ * On-screen `.answer-lines` uses `repeating-linear-gradient` to draw
+ * ruled writing lines. Skia/PDF rasterises that gradient as a tile-stamped
+ * raster image — one stamp per answer region, ~4 per page on a real exam.
+ * 126 raster stamps in a 31-page paper made GoodNotes/Notability/PDF Expert
+ * laggy on iPad because they re-decode each image on every viewport redraw.
+ *
+ * Dropping the gradient in print eliminates the rasterisation. If you ever
+ * need visible ruled lines back in the printed PDF, emit them via stacked
+ * `<hr class="rule-line">` tags in the answer partial — borders are stroke
+ * ops in Skia, never raster.
+ *
+ * Block placed at end-of-file so it wins on source-order cascade against
+ * the on-screen rule at line ~573. */
+@media print {
+    .answer-lines {
+        background-image: none;
+    }
+}
+
