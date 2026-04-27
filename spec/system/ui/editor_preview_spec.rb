@@ -67,4 +67,34 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
       expect(size.to_f).to be >= 1.3
     end
   end
+
+  context 'inline code decoration' do
+    let!(:code_question) do
+      create(:question, topic: topic, content: "Use `puts hello` to print.")
+    end
+
+    it 'shows raw backticks when cursor is on the inline-code line' do
+      visit edit_question_path(code_question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 7)   # inside `puts hello`
+      raw = page.find("#{selector} .cm-line", match: :first).text
+      expect(raw).to include('`puts hello`')
+    end
+
+    it 'hides backticks and applies cm-md-code-inline with mono font when cursor is off the line' do
+      visit edit_question_path(code_question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 7)
+      page.execute_script("document.activeElement.blur();")
+      cm_set_cursor(selector, line: 1, col: 1)
+
+      expect(page).to have_css("#{selector} .cm-md-code-inline", text: 'puts hello')
+      family = page.evaluate_script(<<~JS)
+        getComputedStyle(document.querySelector('#{selector} .cm-md-code-inline')).fontFamily
+      JS
+      expect(family.to_s.downcase).to match(/mono|courier|consolas|menlo|cascadia/)
+    end
+  end
 end
