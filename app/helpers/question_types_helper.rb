@@ -1,5 +1,51 @@
 # Small view-level helpers for the Question editor chrome (Wave 5).
 module QuestionTypesHelper
+  # Adapter that wraps a composite-part hash so the existing standalone
+  # per-type partials (`_calculation.html.erb`, `_multiple_choice.html.erb`,
+  # `_markdown.html.erb`, etc.) can render a sub-part without us having to
+  # re-implement their layout.
+  #
+  # Editor #9 / design contract item 3: "Composite parts MUST embed the
+  # standalone per-type renderers, not re-implement them."
+  CompositePartAdapter = Struct.new(:part, :parent_id, :index) do
+    def id
+      "#{parent_id}-p#{index}"
+    end
+
+    def content
+      part['stem'].to_s
+    end
+
+    def answer_label
+      part['answer_label']
+    end
+
+    def unit
+      part['unit']
+    end
+
+    def options
+      part['options']
+    end
+
+    def answer_size
+      part['answer_size']
+    end
+
+    def question_type
+      part['type']
+    end
+
+    def points
+      part['marks']
+    end
+  end
+
+  # Public: build a Question-shaped adapter for one composite part.
+  def composite_part_question(question, part, index)
+    CompositePartAdapter.new(part, question.id, index)
+  end
+
   # One-line blurb shown under each type card on the picker screen.
   # Kept here (not on the Descriptor) because it's purely presentational.
   def q_picker_blurb(key)

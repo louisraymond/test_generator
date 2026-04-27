@@ -8,11 +8,17 @@
        data-cm-editor-question-id-value="<%= question.id %>">
   </div>
 
-  <%# Parts will mount here in commit 4.4. %>
+  <%# Parts list. Each part renders its own type-specific answer surface
+      below the CM6 stem editor — design contract item 3 (Editor #9). %>
   <ol class="composite" data-composite-root>
     <% Array(question.options['parts']).each_with_index do |part, i| %>
+      <%
+        part_type = part['type'].to_s
+        part_q    = composite_part_question(question, part, i)
+      %>
       <li class="composite__part"
           data-part-index="<%= i %>"
+          data-part-type="<%= part_type %>"
           data-test-id="part-<%= ('a'.ord + i).chr %>">
         <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
         <div class="composite__part-stem"
@@ -23,6 +29,31 @@
              data-cm-editor-question-id-value="<%= question.id %>">
         </div>
         <span class="composite__marks">[<%= part['marks'] %>]</span>
+
+        <div class="composite__part-answer">
+          <% case part_type %>
+          <% when 'multiple_choice' %>
+            <%= render 'questions/multiple_choice', question: part_q %>
+          <% when 'calculation' %>
+            <%= render 'questions/calculation', question: part_q %>
+          <% when 'matching' %>
+            <%= render 'questions/matching', question: part_q %>
+          <% when 'ordering' %>
+            <%= render 'questions/ordering', question: part_q %>
+          <% when 'ranking' %>
+            <%= render 'questions/ranking', question: part_q %>
+          <% when 'code_analysis' %>
+            <%= render 'questions/code_analysis', question: part_q %>
+          <% when 'markdown' %>
+            <%= render 'questions/markdown', question: part_q %>
+          <% else %>
+            <%# 'written' (and unknown types) fall back to ruled answer
+                lines sized by answer_size — same DOM as a standalone
+                written question's else-branch in `_question.html.erb`. %>
+            <% size_class = part['answer_size'].presence || 'short' %>
+            <div class="answer-lines answer-lines-<%= size_class %>"></div>
+          <% end %>
+        </div>
       </li>
     <% end %>
   </ol>
