@@ -10,7 +10,10 @@
 
   <%# Parts list. Each part renders its own type-specific answer surface
       below the CM6 stem editor — design contract item 3 (Editor #9). %>
-  <ol class="composite" data-composite-root>
+  <ol class="composite"
+      data-composite-root
+      data-controller="composite-editor"
+      data-composite-editor-question-id-value="<%= question.id %>">
     <% Array(question.options['parts']).each_with_index do |part, i| %>
       <%
         part_type = part['type'].to_s
@@ -54,6 +57,10 @@
             <div class="answer-lines answer-lines-<%= size_class %>"></div>
           <% end %>
         </div>
+
+        <button type="button"
+                class="composite__add-after"
+                data-action="click->composite-editor#addAfter">Add part below</button>
       </li>
     <% end %>
   </ol>
