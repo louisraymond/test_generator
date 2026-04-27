@@ -22,6 +22,10 @@
       <li class="composite__part"
           data-part-index="<%= i %>"
           data-part-type="<%= part_type %>"
+          data-part-marks="<%= part['marks'] %>"
+          data-part-answer-size="<%= part['answer_size'] %>"
+          data-part-answer-label="<%= part['answer_label'] %>"
+          data-part-unit="<%= part['unit'] %>"
           data-test-id="part-<%= ('a'.ord + i).chr %>"
           data-action="click->composite-editor#select">
         <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
