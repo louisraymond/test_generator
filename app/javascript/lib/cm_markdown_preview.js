@@ -7,7 +7,12 @@ const HIDDEN_SYNTAX = Decoration.mark({ class: "cm-md-syntax-hidden" })
 const STYLED = {
   StrongEmphasis: Decoration.mark({ class: "cm-md-bold" }),
   Emphasis:       Decoration.mark({ class: "cm-md-italic" }),
+  ATXHeading1:    Decoration.mark({ class: "cm-md-heading-1" }),
+  ATXHeading2:    Decoration.mark({ class: "cm-md-heading-2" }),
+  ATXHeading3:    Decoration.mark({ class: "cm-md-heading-3" }),
 }
+
+const HEADING_NODES = new Set(["ATXHeading1", "ATXHeading2", "ATXHeading3"])
 
 function buildDecorations(view) {
   const builder = new RangeSetBuilder()
@@ -22,11 +27,22 @@ function buildDecorations(view) {
         const onCursorLine = view.state.doc.lineAt(node.from).number === cursorLine
         builder.add(node.from, node.to, span)
         if (!onCursorLine) {
-          // Hide the leading + trailing markdown markers (** or *).
-          // For StrongEmphasis the marker length is 2, for Emphasis it's 1.
-          const markerLen = node.name === "StrongEmphasis" ? 2 : 1
-          builder.add(node.from, node.from + markerLen, HIDDEN_SYNTAX)
-          builder.add(node.to - markerLen, node.to, HIDDEN_SYNTAX)
+          if (HEADING_NODES.has(node.name)) {
+            // Hide the leading `# ` / `## ` / `### ` (HeaderMark + the space
+            // that follows it). The Lezer grammar exposes the marker as the
+            // first child node; the trailing space is one character past it.
+            const headerMark = node.node.firstChild
+            if (headerMark && headerMark.name === "HeaderMark") {
+              const hideTo = Math.min(headerMark.to + 1, node.to)
+              builder.add(headerMark.from, hideTo, HIDDEN_SYNTAX)
+            }
+          } else {
+            // Hide the leading + trailing inline markers (** or *).
+            // For StrongEmphasis the marker length is 2, for Emphasis it's 1.
+            const markerLen = node.name === "StrongEmphasis" ? 2 : 1
+            builder.add(node.from, node.from + markerLen, HIDDEN_SYNTAX)
+            builder.add(node.to - markerLen, node.to, HIDDEN_SYNTAX)
+          }
         }
       }
     })
