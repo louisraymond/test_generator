@@ -32,4 +32,39 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
     JS
     expect(weight.to_i).to be >= 600
   end
+
+  context 'heading decoration' do
+    let!(:heading_question) do
+      create(:question, topic: topic, content: "## Heading line\n\nbody paragraph")
+    end
+
+    it 'shows raw `## ` when cursor is on the heading line' do
+      visit edit_question_path(heading_question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 1)
+      raw = page.find("#{selector} .cm-line", match: :first).text
+      expect(raw).to include('## Heading line')
+    end
+
+    it 'hides `## ` and applies cm-md-heading-2 with larger font when cursor is off the heading line' do
+      visit edit_question_path(heading_question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 1)
+      cm_set_cursor(selector, line: 3, col: 1)   # move to body line
+
+      expect(page).to have_css("#{selector} .cm-md-heading-2", text: 'Heading line')
+      size = page.evaluate_script(<<~JS)
+        (() => {
+          const el = document.querySelector('#{selector} .cm-md-heading-2');
+          const parent = el.closest('.cm-line') || el.parentElement;
+          const elPx     = parseFloat(getComputedStyle(el).fontSize);
+          const parentPx = parseFloat(getComputedStyle(parent).fontSize);
+          return parentPx > 0 ? elPx / parentPx : 0;
+        })()
+      JS
+      expect(size.to_f).to be >= 1.3
+    end
+  end
 end
