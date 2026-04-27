@@ -66,4 +66,32 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     # the saved content still has the blank line separating the blocks.
     expect(composite.reload.content).to include("\n\n")
   end
+
+  it 'inserts a new part via the add-part button and the new editor mounts' do
+    visit edit_question_path(composite)
+    expect(page).to have_css('[data-part-index]', count: 2, wait: 5)
+
+    # Add a new part after part (a).
+    within('[data-part-index="0"]') { click_button('Add part below', wait: 5) }
+
+    # New part appears at index 1; original part B shifts to index 2.
+    expect(page).to have_css('[data-part-index]', count: 3, wait: 5)
+    new_sel = '[data-part-index="1"] [data-controller~="cm-editor"]'
+    expect(page).to have_css(new_sel, wait: 5)
+
+    cm_set_value(new_sel, 'Newly inserted part.')
+    # Forward-compat with Editor #40 — once the explicit Save button lands the
+    # debounced autosave goes away, so click Save when present.
+    if page.has_css?('[data-test-id="save-button"]', wait: 1)
+      find('[data-test-id="save-button"]').click
+    end
+    wait_for_cm_save(new_sel)
+
+    parts = composite.reload.options['parts']
+    expect(parts.length).to eq(3)
+    expect(parts[1]['stem']).to eq('Newly inserted part.')
+    expect(parts[1]['type']).to eq('written')
+    expect(parts[1]['marks']).to eq(1)
+    expect(parts[2]['stem']).to eq('Part B.')   # original part B shifted
+  end
 end
