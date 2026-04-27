@@ -97,4 +97,27 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
       expect(family.to_s.downcase).to match(/mono|courier|consolas|menlo|cascadia/)
     end
   end
+
+  context 'inline math' do
+    let!(:question) { create(:question, topic: topic, content: 'Inline $H_A = 5.6$ here.') }
+
+    it 'shows raw $H_A$ when cursor on the line' do
+      visit edit_question_path(question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 8)
+      raw = page.find("#{selector} .cm-line").text
+      expect(raw).to include('$H_A = 5.6$')
+    end
+
+    it 'renders KaTeX when cursor leaves the line' do
+      visit edit_question_path(question)
+      expect(page).to have_css(selector, wait: 5)
+
+      cm_set_cursor(selector, line: 1, col: 8)
+      page.execute_script("document.activeElement.blur();")
+
+      expect(page).to have_css("#{selector} .katex", wait: 3)
+    end
+  end
 end
