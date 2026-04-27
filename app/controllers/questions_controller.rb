@@ -195,8 +195,25 @@ class QuestionsController < ApplicationController
         else
           current['highlighted_lines'] << value.to_i
         end
+      when 'update_part'
+        return head(:unprocessable_entity) unless @question.question_type == 'composite'
+
+        parts = Array(current['parts'])
+        idx   = value['index'].to_i
+        return head(:unprocessable_entity) if idx.negative? || idx >= parts.length
+
+        # TODO: when QuestionPart AR rows become the source of truth (per migration
+        # 20260422160100), replace this jsonb write with @question.parts[idx].update!(...)
+        # and re-run spec/system/ui/question_editor_spec.rb. The CM6 editor reads
+        # question.options['parts'] only — it has no AR-awareness.
+        updated = parts[idx].dup
+        %w[stem type marks answer_label answer_size unit].each do |attr|
+          updated[attr] = value[attr] if value.key?(attr)
+        end
+        parts[idx] = updated
+        current['parts'] = parts
       when 'add_part'
-        next # PR #8 handles via AR
+        next # implemented in commit 3.6
       else
         current[key] = value
       end
