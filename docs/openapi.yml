@@ -269,6 +269,65 @@ paths:
       responses:
         '204': { description: Deleted }
 
+  /api/questions/{id}:
+    delete:
+      summary: Delete a question
+      description: |
+        Removes a question and any rows that depend on it via standard ActiveRecord
+        cascades (notably `exam_questions` and `question_learning_objectives`).
+        The owning topic, module, and learning objectives are preserved.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+        '404':
+          description: Question not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /questions/{id}/options_patch:
+    patch:
+      summary: Apply a per-type options command to a question
+      description: |
+        Mutates `question.options` jsonb via a small set of commands. Composite-only
+        commands include:
+          * `update_part: { index, stem, type, marks, answer_label, unit, answer_size }`
+            — patches the part at `index` with whitelisted attrs. Returns 422 on an
+            out-of-range index or when the question is not composite.
+          * `add_part: { after }` — inserts a new part after the given index with
+            defaults `{ stem: "", type: "written", marks: 1, answer_size: "medium" }`
+            and shifts later parts. Returns 422 when the question is not composite.
+
+        JSON callers receive `{ status: "ok" }`; HTML callers receive the
+        re-rendered composite root partial so the editor can swap it in place.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                options:
+                  type: object
+                  description: One command keyed by name (e.g. `update_part`, `add_part`).
+      responses:
+        '200':
+          description: Patch applied; JSON callers get :ok, HTML callers get the re-rendered composite root partial.
+        '422':
+          description: Invalid index, missing stem, or non-composite question for a composite-only command.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /api/questions/bulk:
     post:
       summary: Bulk-create questions for a topic
