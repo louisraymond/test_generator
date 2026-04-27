@@ -594,4 +594,21 @@
     background-image: none;
     background: none;
   }
+
+  /* Print-only override: avoids Skia rasterising the on-screen gradient.
+   * See spec/requests/exam_pdf_image_count_spec.rb.
+   * Item 2 of the GoodNotes-lag fix. The rubric block draws a 4px accent
+   * stripe via `linear-gradient(to right, accent 0% 4px, transparent 4px)`.
+   * Skia rasterises the gradient even though it's a single colour stop —
+   * gradient-to-stroke fallback in Chromium's PDF emitter only kicks in
+   * for a narrow set of simple patterns. Replacing the gradient with a
+   * `border-left` of the same width emits a single stroke op. The
+   * `padding-left` is reduced by the border width (16px - 4px) so the
+   * rubric's inner text doesn't shift right by 4px. Visually
+   * indistinguishable in print. */
+  .rubric {
+    background: none;
+    border-left: 4px solid var(--accent-soft);
+    padding-left: calc(16px - 4px);
+  }
 }
