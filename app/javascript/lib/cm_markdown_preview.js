@@ -10,6 +10,7 @@ const STYLED = {
   ATXHeading1:    Decoration.mark({ class: "cm-md-heading-1" }),
   ATXHeading2:    Decoration.mark({ class: "cm-md-heading-2" }),
   ATXHeading3:    Decoration.mark({ class: "cm-md-heading-3" }),
+  InlineCode:     Decoration.mark({ class: "cm-md-code-inline" }),
 }
 
 const HEADING_NODES = new Set(["ATXHeading1", "ATXHeading2", "ATXHeading3"])
@@ -37,8 +38,12 @@ function buildDecorations(view) {
               builder.add(headerMark.from, hideTo, HIDDEN_SYNTAX)
             }
           } else {
-            // Hide the leading + trailing inline markers (** or *).
-            // For StrongEmphasis the marker length is 2, for Emphasis it's 1.
+            // Hide the leading + trailing inline markers.
+            //   StrongEmphasis  → 2-char `**`
+            //   Emphasis        → 1-char `*`
+            //   InlineCode      → 1-char backtick (single-backtick spans only;
+            //                     multi-backtick fences would need a smarter
+            //                     length, but the v1 grammar handles `code` here)
             const markerLen = node.name === "StrongEmphasis" ? 2 : 1
             builder.add(node.from, node.from + markerLen, HIDDEN_SYNTAX)
             builder.add(node.to - markerLen, node.to, HIDDEN_SYNTAX)
