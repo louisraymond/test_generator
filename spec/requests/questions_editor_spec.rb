@@ -23,4 +23,36 @@ RSpec.describe 'Question editor save endpoints', type: :request do
       expect(question.reload.answer).to eq('new answer')
     end
   end
+
+  describe 'PATCH /questions/:id/options_patch with update_part' do
+    let!(:composite) { create(:question, :composite, topic: topic) }
+
+    it 'updates a sub-part stem and leaves siblings untouched' do
+      patch options_patch_question_path(composite),
+            params: { options: { update_part: { index: 1, stem: 'Revised B.' } } }.to_json,
+            headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+
+      expect(response).to have_http_status(:ok)
+      parts = composite.reload.options['parts']
+      expect(parts[0]['stem']).to eq('Part A.')
+      expect(parts[1]['stem']).to eq('Revised B.')
+      expect(parts[1]['type']).to eq('calculation')   # other fields untouched
+      expect(parts[1]['marks']).to eq(3)
+    end
+
+    it 'returns 422 when the index is out of range' do
+      patch options_patch_question_path(composite),
+            params: { options: { update_part: { index: 99, stem: 'x' } } }.to_json,
+            headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it 'returns 422 on a non-composite question' do
+      written = create(:question, topic: topic)
+      patch options_patch_question_path(written),
+            params: { options: { update_part: { index: 0, stem: 'x' } } }.to_json,
+            headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end
