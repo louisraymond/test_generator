@@ -233,7 +233,11 @@ class QuestionsController < ApplicationController
     end
 
     @question.update_columns(options: current, updated_at: Time.current)
-    head :ok
+
+    respond_to do |format|
+      format.json { head :ok }
+      format.html { render partial: 'questions/cm_composite', locals: { question: @question.reload } }
+    end
   end
 
   # Phase 7 — Cloze paper-is-editor: click a word to blank it. Stores a
