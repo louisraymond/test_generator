@@ -1,5 +1,33 @@
-<%# Real implementation in commits 4.2 / 4.4 / 4.8.
-    Stub so the spike spec doesn't need composite plumbing. %>
-<div class="q__cm-composite-placeholder">
-  Composite editor pending — see commits 4.2+.
+<%# app/views/questions/_cm_composite.html.erb %>
+<div data-test-id="q-<%= question.id %>">
+  <div class="q__stem"
+       data-controller="cm-editor"
+       data-cm-editor-source-value="<%= question.content.to_s %>"
+       data-cm-editor-save-url-value="<%= question_path(question) %>"
+       data-cm-editor-save-field-value="question[content]"
+       data-cm-editor-question-id-value="<%= question.id %>">
+  </div>
+
+  <%# Parts will mount here in commit 4.4. %>
+  <ol class="composite" data-composite-root>
+    <% Array(question.options['parts']).each_with_index do |part, i| %>
+      <li class="composite__part"
+          data-part-index="<%= i %>"
+          data-test-id="part-<%= ('a'.ord + i).chr %>">
+        <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
+        <%# Stem editor mounts in commit 4.4 %>
+        <div class="composite__part-placeholder"><%= part['stem'] %></div>
+        <span class="composite__marks">[<%= part['marks'] %>]</span>
+      </li>
+    <% end %>
+  </ol>
+
+  <div class="q__answer-label">Model answer</div>
+  <div class="q__answer"
+       data-controller="cm-editor"
+       data-cm-editor-source-value="<%= question.answer.to_s %>"
+       data-cm-editor-save-url-value="<%= question_path(question) %>"
+       data-cm-editor-save-field-value="question[answer]"
+       data-cm-editor-question-id-value="<%= question.id %>">
+  </div>
 </div>
