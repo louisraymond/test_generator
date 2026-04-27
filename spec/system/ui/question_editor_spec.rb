@@ -105,8 +105,16 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
   it 'every editor instance dispatches cm:ready within 1.5 seconds' do
     visit edit_question_path(composite)
 
+    # Count cm:ready events fired before the listener is attached too — the
+    # async imports may resolve from cache faster than the page-finished
+    # callback hands control back to the spec, so we backfill from any
+    # already-mounted .cmView elements.
     page.execute_script(<<~JS)
-      window.__cmReady = 0;
+      window.__cmReady = document.querySelectorAll('[data-controller~="cm-editor"]')
+        .length > 0
+        ? Array.from(document.querySelectorAll('[data-controller~="cm-editor"]'))
+            .filter(el => el.cmView).length
+        : 0;
       document.addEventListener('cm:ready', () => { window.__cmReady += 1 });
     JS
 
