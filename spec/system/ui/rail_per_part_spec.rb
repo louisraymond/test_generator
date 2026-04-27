@@ -54,8 +54,10 @@ RSpec.describe 'Rail per-part inspector — Flow A·03/04', type: :system do
 
     expect(page).to have_css('[data-rail-part-inspector-target="panel"]', wait: 3)
     within('[data-rail-part-inspector-target="panel"]') do
-      expect(page).to have_text('part (a)')
-      expect(page).to have_text('written', normalize_ws: true)
+      # Header is text-transformed to uppercase via CSS — match
+      # case-insensitively so the spec is style-resilient.
+      expect(page).to have_text(/part \(a\)/i)
+      expect(page).to have_text(/written/i)
       expect(page).to have_css('[data-rail-part-inspector-target="typePill"]')
       # We expose pills for the design-supported subset of types.
       %w[written multiple_choice calculation markdown].each do |t|
