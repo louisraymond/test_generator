@@ -55,7 +55,9 @@ module CodemirrorHelpers
   end
 
   # Wait until the controller stamps data-cm-saved-at after the most recent edit.
-  def wait_for_cm_save(selector, timeout: 3)
+  # The 8s window matches the KaTeX cold-cache wait bumped in #42 — the explicit-Save
+  # round-trip can exceed 3s on a cold connection (CDN warmup + server pacing).
+  def wait_for_cm_save(selector, timeout: 8)
     started_at = page.evaluate_script(
       "document.querySelector(#{selector.to_json}).dataset.cmSavedAt || '0'"
     ).to_i
