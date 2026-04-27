@@ -117,7 +117,10 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
       cm_set_cursor(selector, line: 1, col: 8)
       page.execute_script("document.activeElement.blur();")
 
-      expect(page).to have_css("#{selector} .katex", wait: 3)
+      # KaTeX is loaded from a CDN; allow a generous window for cold-cache
+      # loads in CI / first-run scenarios so the `.katex` lookup doesn't
+      # race a slow network.
+      expect(page).to have_css("#{selector} .katex", wait: 8)
     end
 
     context 'display math' do
@@ -127,7 +130,8 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
         visit edit_question_path(question)
         expect(page).to have_css(selector, wait: 5)
         cm_set_cursor(selector, line: 1, col: 1)
-        expect(page).to have_css("#{selector} .cm-md-katex--block", wait: 3)
+        # Same CDN-cold-cache concern as the inline-math spec above.
+        expect(page).to have_css("#{selector} .cm-md-katex--block", wait: 8)
       end
     end
   end
