@@ -96,4 +96,27 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     expect(parts[1]['marks']).to eq(1)
     expect(parts[2]['stem']).to eq('Part B.')   # original part B shifted
   end
+
+  # Editor #43 — performance budget. Every CM6 instance on the composite edit
+  # page must dispatch `cm:ready` within 1.5s of mount. The composite fixture
+  # has 4 instances (parent stem + parent answer + 2 part stems); on a cold
+  # cache the lazy CDN fetch dominates first-paint, so the budget guards
+  # against a regression in the connect()-time import pattern.
+  it 'every editor instance dispatches cm:ready within 1.5 seconds' do
+    visit edit_question_path(composite)
+
+    page.execute_script(<<~JS)
+      window.__cmReady = 0;
+      document.addEventListener('cm:ready', () => { window.__cmReady += 1 });
+    JS
+
+    Timeout.timeout(2.0) do
+      loop do
+        ready = page.evaluate_script("window.__cmReady || 0")
+        # parent stem + parent answer + 2 part stems = 4 instances
+        break if ready >= 4
+        sleep 0.05
+      end
+    end
+  end
 end
