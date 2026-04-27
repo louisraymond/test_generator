@@ -48,6 +48,11 @@ const STYLED = {
 
 const HEADING_NODES = new Set(["ATXHeading1", "ATXHeading2", "ATXHeading3"])
 
+// TODO: KaTeX widget reflow may degrade with > 20 math spans per editor;
+// add a perf budget if a question with that many ever ships. Today the
+// rebuild rate is bounded by selection/focus changes (see ViewPlugin below)
+// and visibleRanges only covers what's on screen, so single-screen content
+// is fine — but a long stem with dozens of inline `$...$` spans is unverified.
 function addMathDecorations(view, push, cursorLine) {
   // When the editor is unfocused, treat every line as "off-cursor" so math
   // renders even though `selection.main.head` still reports its last
@@ -152,6 +157,10 @@ export const markdownPreview = ViewPlugin.fromClass(class {
     // on a transaction; in headless tests `view.focus()` lands in a tick
     // after the dispatch has already settled, so we listen on the DOM
     // directly and dispatch a no-op when the focus state actually flips.
+    // TODO (#43 follow-up): @codemirror/view 6.26 added EditorView.focusChangeEffect
+    // which would replace this DOM-level workaround with an effect-based path.
+    // Keeping the DOM listener for now because the existing editor_preview_spec
+    // suite relies on the headless-friendly tick ordering it provides.
     this._poke = () => {
       if (view.hasFocus !== this.lastFocus) {
         this.lastFocus = view.hasFocus
