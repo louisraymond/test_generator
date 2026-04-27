@@ -2,13 +2,22 @@ import { Controller } from "@hotwired/stimulus"
 
 // CM6 + extensions are imported lazily inside connect() so the controller file
 // itself is small and the heavy bundle only loads when an editor mounts.
+//
+// Save semantics (Editor ticket #40, design contract item 4):
+//   - NO autosave on docChanged.
+//   - NO blur flush.
+//   - NO pagehide / beforeunload flush — tab close means data loss, by design.
+//   - The controller exposes `save()`. The page chrome's Save button calls it.
+//   - On every doc change we set `_dirty = true` and dispatch `cm:dirty`
+//     ({ detail: { dirty, fieldId } }) so chrome can render the indicator.
+//   - On a successful POST we set `_dirty = false`, stamp data-cm-saved-at,
+//     and dispatch `cm:saved`.
 export default class extends Controller {
   static values = {
     source:     String,
     saveUrl:    String,
     saveField:  String,        // e.g. "question[content]" or JSON path for options_patch
     questionId: Number,
-    debounceMs: { type: Number, default: 400 },
   }
 
   async connect() {
@@ -26,7 +35,7 @@ export default class extends Controller {
       import("lib/cm_markdown_preview"),
     ])
 
-    this._save = this._debounce(this._flushSave.bind(this), this.debounceMsValue)
+    this._dirty = false
 
     this.view = new EditorView({
       state: EditorState.create({
@@ -36,11 +45,9 @@ export default class extends Controller {
           keymap.of([...defaultKeymap, ...historyKeymap]),
           markdown(),
           markdownPreview,
+          // Track dirty state only — no autosave, no debounced POST.
           EditorView.updateListener.of(u => {
-            if (u.docChanged) this._save()
-          }),
-          EditorView.domEventHandlers({
-            blur: () => this._flushSave(),
+            if (u.docChanged) this._markDirty()
           }),
         ],
       }),
@@ -49,26 +56,34 @@ export default class extends Controller {
 
     this.element.cmView = this.view  // for test introspection
     this.element.dispatchEvent(new CustomEvent("cm:ready", { bubbles: true }))
-
-    // Flush on tab close / navigation. pagehide fires more reliably than
-    // beforeunload and supports keepalive: true fetches.
-    this._onPageHide = () => this._flushSave({ keepalive: true })
-    window.addEventListener("pagehide", this._onPageHide)
   }
 
   disconnect() {
-    window.removeEventListener("pagehide", this._onPageHide)
     if (this.view) {
       this.view.destroy()
       this.view = null
     }
   }
 
-  async _flushSave(opts = {}) {
+  // Public API. The page chrome's Save button calls this on every mounted
+  // cm-editor element. Idempotent: a no-op if !this._dirty.
+  async save() {
     if (!this.view) return
+    if (!this._dirty) return
+    await this._flushSave()
+  }
+
+  _markDirty() {
+    if (this._dirty) return
+    this._dirty = true
+    this.element.dispatchEvent(new CustomEvent("cm:dirty", {
+      bubbles: true,
+      detail: { dirty: true, fieldId: this.saveFieldValue },
+    }))
+  }
+
+  async _flushSave() {
     const value = this.view.state.doc.toString()
-    if (value === this._lastSaved) return
-    this._lastSaved = value
 
     const token = document.querySelector('meta[name="csrf-token"]')?.content
     const body = this._buildBody(value)
@@ -81,12 +96,14 @@ export default class extends Controller {
         "Accept":       "application/json",
       },
       body: JSON.stringify(body),
-      keepalive: !!opts.keepalive,
     })
 
-    // Stamp for tests + autosave UI hooks.
+    this._dirty = false
     this.element.dataset.cmSavedAt = String(Date.now())
-    this.element.dispatchEvent(new CustomEvent("cm:saved", { bubbles: true }))
+    this.element.dispatchEvent(new CustomEvent("cm:saved", {
+      bubbles: true,
+      detail: { fieldId: this.saveFieldValue },
+    }))
   }
 
   // saveField follows one of two shapes:
@@ -102,13 +119,5 @@ export default class extends Controller {
     const m = f.match(/^(\w+)\[(\w+)\]$/)
     if (!m) throw new Error(`cm-editor: unknown saveField shape: ${f}`)
     return { [m[1]]: { [m[2]]: value } }
-  }
-
-  _debounce(fn, ms) {
-    let t = null
-    return (...args) => {
-      clearTimeout(t)
-      t = setTimeout(() => fn.apply(this, args), ms)
-    }
   }
 }
