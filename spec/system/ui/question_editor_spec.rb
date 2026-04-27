@@ -47,4 +47,23 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     expect(parts[0]['stem']).to eq('Edited A.')
     expect(parts[1]['stem']).to eq('Edited B.')
   end
+
+  it 'does not merge a heading with the next paragraph when the source contains both' do
+    composite.update!(content: "## Heading\n\nbody paragraph")
+
+    visit edit_question_path(composite)
+    selector = '[data-cm-editor-save-field-value="question[content]"]'
+    expect(page).to have_css(selector, wait: 5)
+
+    # Simulate the original bug's scenario: write back the same text, persist, reload.
+    cm_set_value(selector, "## Heading\n\nbody paragraph")
+    wait_for_cm_save(selector)
+
+    visit edit_question_path(composite)
+    expect(cm_value(selector)).to eq("## Heading\n\nbody paragraph")
+
+    # The original bug produced "<h2>Heading body paragraph</h2>" — make sure
+    # the saved content still has the blank line separating the blocks.
+    expect(composite.reload.content).to include("\n\n")
+  end
 end
