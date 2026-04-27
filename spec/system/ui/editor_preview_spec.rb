@@ -119,5 +119,16 @@ RSpec.describe 'CM editor — live preview decorations', type: :system do
 
       expect(page).to have_css("#{selector} .katex", wait: 3)
     end
+
+    context 'display math' do
+      let!(:question) { create(:question, topic: topic, content: "Block:\n\n$$\\int_0^1 x^2 dx$$\n") }
+
+      it 'renders display KaTeX in a block when cursor leaves the math line' do
+        visit edit_question_path(question)
+        expect(page).to have_css(selector, wait: 5)
+        cm_set_cursor(selector, line: 1, col: 1)
+        expect(page).to have_css("#{selector} .cm-md-katex--block", wait: 3)
+      end
+    end
   end
 end
