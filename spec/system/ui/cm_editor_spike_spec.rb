@@ -19,7 +19,9 @@ RSpec.describe 'CM editor spike — non-composite stem round-trip', type: :syste
     selector = '[data-cm-editor-save-field-value="question[content]"]'
 
     cm_set_value(selector, "## New heading\n\nNew body.")
-    wait_for_cm_save(selector)
+    expect(page).to have_css('[data-test-id="save-button"][data-dirty="true"]', wait: 3)
+    find('[data-test-id="save-button"]').click
+    expect(page).to have_css('[data-test-id="save-button"][data-dirty="false"]', wait: 5)
 
     visit edit_question_path(question)
     expect(cm_value(selector)).to eq("## New heading\n\nNew body.")

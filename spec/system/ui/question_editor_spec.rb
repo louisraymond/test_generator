@@ -12,6 +12,7 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     expect(page).to have_css(selector, wait: 5)
 
     cm_set_value(selector, 'New parent stem.')
+    find('[data-test-id="save-button"]').click
     wait_for_cm_save(selector)
 
     visit edit_question_path(composite)
@@ -25,6 +26,7 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     expect(page).to have_css(selector, wait: 5)
 
     cm_set_value(selector, 'Revised B.')
+    find('[data-test-id="save-button"]').click
     wait_for_cm_save(selector)
 
     visit edit_question_path(composite)
@@ -39,9 +41,12 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     sel1 = '[data-part-index="1"] [data-controller~="cm-editor"]'
 
     cm_set_value(sel0, 'Edited A.')
-    wait_for_cm_save(sel0)
     cm_set_value(sel1, 'Edited B.')
-    wait_for_cm_save(sel1)
+    # Both editors are dirty now; one click of Save dispatches save() on each.
+    find('[data-test-id="save-button"]').click
+    # Poll until the page chrome reports clean (data-dirty="false") which
+    # only happens after every cm-editor's save() resolves.
+    expect(page).to have_css('[data-test-id="save-button"][data-dirty="false"]', wait: 5)
 
     parts = composite.reload.options['parts']
     expect(parts[0]['stem']).to eq('Edited A.')
@@ -57,6 +62,7 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
 
     # Simulate the original bug's scenario: write back the same text, persist, reload.
     cm_set_value(selector, "## Heading\n\nbody paragraph")
+    find('[data-test-id="save-button"]').click
     wait_for_cm_save(selector)
 
     visit edit_question_path(composite)
@@ -80,11 +86,7 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     expect(page).to have_css(new_sel, wait: 5)
 
     cm_set_value(new_sel, 'Newly inserted part.')
-    # Forward-compat with Editor #40 — once the explicit Save button lands the
-    # debounced autosave goes away, so click Save when present.
-    if page.has_css?('[data-test-id="save-button"]', wait: 1)
-      find('[data-test-id="save-button"]').click
-    end
+    find('[data-test-id="save-button"]').click
     wait_for_cm_save(new_sel)
 
     parts = composite.reload.options['parts']
