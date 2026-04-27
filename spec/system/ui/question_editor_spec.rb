@@ -39,8 +39,8 @@ RSpec.describe 'Composite question editor — workflow', type: :system do
     sel1 = '[data-part-index="1"] [data-controller~="cm-editor"]'
 
     cm_set_value(sel0, 'Edited A.')
-    cm_set_value(sel1, 'Edited B.')
     wait_for_cm_save(sel0)
+    cm_set_value(sel1, 'Edited B.')
     wait_for_cm_save(sel1)
 
     parts = composite.reload.options['parts']

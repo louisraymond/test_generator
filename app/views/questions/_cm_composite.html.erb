@@ -15,8 +15,13 @@
           data-part-index="<%= i %>"
           data-test-id="part-<%= ('a'.ord + i).chr %>">
         <span class="composite__label">(<%= ('a'.ord + i).chr %>)</span>
-        <%# Stem editor mounts in commit 4.4 %>
-        <div class="composite__part-placeholder"><%= part['stem'] %></div>
+        <div class="composite__part-stem"
+             data-controller="cm-editor"
+             data-cm-editor-source-value="<%= part['stem'].to_s %>"
+             data-cm-editor-save-url-value="<%= options_patch_question_path(question) %>"
+             data-cm-editor-save-field-value="options_patch:update_part:<%= i %>:stem"
+             data-cm-editor-question-id-value="<%= question.id %>">
+        </div>
         <span class="composite__marks">[<%= part['marks'] %>]</span>
       </li>
     <% end %>
