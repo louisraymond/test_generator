@@ -7,6 +7,10 @@ class TopicsController < ApplicationController
 
   def show
     @exam_usage = LearningObjective.exam_appearance_counts_for(@topic.learning_objectives)
+    # sub-53 — Topic Detail v2 feature flag.  V2 chrome ships behind the
+    # `?v2=1` query param (per-request opt-in for QA) or `TOPIC_DETAIL_V2=true`
+    # ENV.  Once #54-#57 land we'll graduate this to a full flag library.
+    @topic_detail_v2 = helpers.topic_v2_enabled_for?(request)
   end
 
   def new

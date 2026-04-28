@@ -1,0 +1,62 @@
+<%# locals: topic: %>
+<%# sub-53 — sidebar partial (300px sticky column).  sub-55 will rewire %>
+<%# the view-switcher pill cycling but the DOM hooks live here so leaves %>
+<%# don't have to touch this file. %>
+<aside class="topic-detail-v2__sidebar">
+  <div class="topic-detail__sidebar-eyebrow">Topic <%= topic.id %></div>
+  <h1 class="topic-detail__sidebar-title"><%= topic.name %></h1>
+
+  <% if topic.epigraph_quote.present? %>
+    <blockquote class="topic-detail__sidebar-epigraph">
+      <p><%= topic.epigraph_quote %></p>
+      <% if topic.epigraph_attribution.present? %>
+        <cite>— <%= topic.epigraph_attribution %></cite>
+      <% end %>
+    </blockquote>
+  <% end %>
+
+  <div class="topic-detail__sidebar-modules-header">
+    <span>MODULES · <%= topic.topic_modules.size %></span>
+    <% if topic.topic_modules.any? %>
+      <button type="button" class="topic-detail__sidebar-new"
+              data-action="click->topic-detail#startAddModule">+ NEW</button>
+    <% end %>
+  </div>
+
+  <nav aria-label="Topic outline">
+    <% if topic.topic_modules.any? %>
+      <ul class="topic-detail__sidebar-list">
+        <% topic.topic_modules.each_with_index do |mod, i| %>
+          <li>
+            <a href="#mod-<%= mod.id %>"
+               class="topic-detail__sidebar-entry"
+               data-topic-sidebar-target="entry"
+               data-module-id="<%= mod.id %>"
+               data-action="click->topic-sidebar#activate">
+              <span class="topic-detail__sidebar-index"><%= module_index_label(i + 1) %></span>
+              <span class="topic-detail__sidebar-body">
+                <span class="topic-detail__sidebar-name"><%= mod.name %></span>
+                <span class="topic-detail__sidebar-ministats"><%= module_ministats(mod) %></span>
+              </span>
+            </a>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <button type="button" class="topic-detail__sidebar-empty-cta"
+              data-action="click->topic-detail#startAddModule">+ NEW MODULE</button>
+    <% end %>
+  </nav>
+
+  <div class="topic-detail__sidebar-switcher" data-topic-sidebar-target="switcher">
+    <span class="topic-detail__sidebar-caption">VIEW · v TO CYCLE</span>
+    <div class="topic-detail__sidebar-pills">
+      <button type="button" class="topic-detail__sidebar-pill is-active"
+              data-topic-sidebar-target="viewPill" data-view="modules">Modules</button>
+      <button type="button" class="topic-detail__sidebar-pill"
+              data-topic-sidebar-target="viewPill" data-view="by_category">By category</button>
+      <button type="button" class="topic-detail__sidebar-pill"
+              data-topic-sidebar-target="viewPill" data-view="outcomes_only">Outcomes only</button>
+    </div>
+  </div>
+</aside>
