@@ -79,4 +79,22 @@
   /* Motion */
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
   --dur: 150ms;
+
+  /* === sub-54: heat colours === */
+  /* AA-contrast text/background pairs for heat-map cells.
+   * heat-0-fg uses --ink-2 (not --ink-4 or --ink-3) — measured ink-3
+   * lands at 4.46 : 1 on paper-3, just below WCAG AA 4.5 for 11px text.
+   * heat-2-fg uses --ink (not --paper)  — see plan §4 Persona A.
+   */
+  --heat-0-bg: var(--paper-3);
+  --heat-0-fg: var(--ink-2);
+  --heat-1-bg: #e8c4a8;
+  --heat-1-fg: var(--ink-2);
+  --heat-2-bg: #d4905f;
+  --heat-2-fg: var(--ink);
+  --heat-3-bg: #b4532a; /* same as --accent */
+  --heat-3-fg: var(--paper);
+  --heat-4-bg: #7a3317; /* same as --accent-ink */
+  --heat-4-fg: var(--paper);
+  /* === /sub-54 === */
 }
