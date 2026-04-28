@@ -1,1 +1,29 @@
-<!-- placeholder for #56 -->
+<section class="topic-detail__view topic-detail__view--categories"
+         data-topic-view-target="pane"
+         data-view="categories"
+         hidden>
+  <% topic_outcomes_grouped_by_category(topic).each do |category_name, los_with_module_idx| %>
+    <article class="topic-detail__category-section" data-cat-name="<%= category_name %>">
+      <h3>
+        <%= category_name %>
+        <span class="topic-detail__cat-count"><%= pluralize(los_with_module_idx.size, 'outcome') %></span>
+      </h3>
+      <ul class="topic-detail__category-section__list">
+        <% los_with_module_idx.each do |row| %>
+          <li class="topic-detail__lo-row"
+              data-lo-id="<%= row[:lo].id %>"
+              data-lo-text="<%= row[:lo].description %>">
+            <span class="topic-detail__m-tag mono">M<%= row[:module_idx].to_s.rjust(2, '0') %></span>
+            <span class="topic-detail__nq-chip" data-nq="<%= row[:lo].questions.size %>">
+              <%= row[:lo].questions.size %>
+            </span>
+            <span class="topic-detail__lo-text"><%= row[:lo].description %></span>
+            <%= link_to '+ question',
+                        new_question_path(learning_objective_id: row[:lo].id),
+                        class: 'topic-detail__add-question' %>
+          </li>
+        <% end %>
+      </ul>
+    </article>
+  <% end %>
+</section>
