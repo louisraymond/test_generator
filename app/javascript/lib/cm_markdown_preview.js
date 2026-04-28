@@ -1,6 +1,6 @@
-import { ViewPlugin, Decoration, WidgetType } from "@codemirror/view"
-import { syntaxTree }                          from "@codemirror/language"
-import { RangeSetBuilder }                     from "@codemirror/state"
+import { ViewPlugin, Decoration, WidgetType, EditorView } from "@codemirror/view"
+import { syntaxTree }                                     from "@codemirror/language"
+import { RangeSetBuilder }                                from "@codemirror/state"
 
 const HIDDEN_SYNTAX = Decoration.mark({ class: "cm-md-syntax-hidden" })
 
@@ -144,36 +144,24 @@ function buildDecorations(view) {
   return builder.finish()
 }
 
-export const markdownPreview = ViewPlugin.fromClass(class {
+const markdownPreviewPlugin = ViewPlugin.fromClass(class {
   constructor(view) {
     this.decorations = buildDecorations(view)
-    this.lastFocus = view.hasFocus
-    // Force a rebuild on focus change. CM6's ViewUpdate.focusChanged rides
-    // on a transaction; in headless tests `view.focus()` lands in a tick
-    // after the dispatch has already settled, so we listen on the DOM
-    // directly and dispatch a no-op when the focus state actually flips.
-    // TODO (#43 follow-up): @codemirror/view 6.26 added EditorView.focusChangeEffect
-    // which would replace this DOM-level workaround with an effect-based path.
-    // Keeping the DOM listener for now because the existing editor_preview_spec
-    // suite relies on the headless-friendly tick ordering it provides.
-    this._poke = () => {
-      if (view.hasFocus !== this.lastFocus) {
-        this.lastFocus = view.hasFocus
-        view.dispatch({})
-      }
-    }
-    view.dom.addEventListener("focusin",  this._poke)
-    view.dom.addEventListener("focusout", this._poke)
   }
   update(u) {
     if (u.docChanged || u.selectionSet || u.viewportChanged || u.focusChanged) {
       this.decorations = buildDecorations(u.view)
-    } else if (u.view.hasFocus !== this.lastFocus) {
-      // _poke fires synchronously inside the DOM event; the dispatched
-      // empty transaction reaches us with no flags set, but hasFocus has
-      // changed — rebuild on that signal.
-      this.lastFocus = u.view.hasFocus
-      this.decorations = buildDecorations(u.view)
     }
   }
 }, { decorations: v => v.decorations })
+
+// Issue #48: replace the previous DOM `focusin`/`focusout` poke (which
+// dispatched an empty transaction to coax `ViewUpdate.focusChanged` to
+// fire in headless Chrome) with the native CM6 6.7+ primitive.
+// `focusChangeEffect.of` returns an effect that rides on the focus-change
+// transaction CM6 already dispatches internally, so `update.focusChanged`
+// fires reliably and the ViewPlugin's `update()` rebuilds decorations
+// without us having to listen on the DOM.
+const focusRebuildEffect = EditorView.focusChangeEffect.of(() => null)
+
+export const markdownPreview = [markdownPreviewPlugin, focusRebuildEffect]
