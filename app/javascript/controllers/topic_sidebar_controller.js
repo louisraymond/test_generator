@@ -33,7 +33,9 @@ export default class extends Controller {
     if (!target) return
 
     this.setActive(link)
-    target.scrollIntoView({ behavior: "smooth", block: "start" })
+    // Respect reduced-motion preference; otherwise smooth-scroll.
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    target.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" })
     const heading = target.querySelector("h2,h3")
     heading?.focus({ preventScroll: true })
   }
