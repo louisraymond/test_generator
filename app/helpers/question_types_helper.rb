@@ -46,6 +46,41 @@ module QuestionTypesHelper
     CompositePartAdapter.new(part, question.id, index)
   end
 
+  # Editor #50 — return composite parts as hashes (the legacy jsonb shape)
+  # whether they live in QuestionPart AR rows or in `options['parts']` jsonb.
+  # AR wins when present; falls back to jsonb only when AR is empty. This
+  # keeps `_cm_composite.html.erb` shape-stable: every consumer sees the
+  # same hash, regardless of source. Pattern mirrored from
+  # `app/views/exams/_paper_question.html.erb` lines 266-280.
+  def composite_parts(question)
+    ar = question.question_parts.ordered.to_a
+    return _jsonb_composite_parts(question) if ar.empty?
+
+    ar.map { |p| _question_part_to_hash(p) }
+  end
+
+  # Internal — flatten AR row to the jsonb shape consumers already expect.
+  def _question_part_to_hash(part)
+    opts = part.options.is_a?(Hash) ? part.options : {}
+    {
+      'type'         => part.part_type,
+      'stem'         => part.stem.to_s,
+      'marks'        => part.marks,
+      'answer_label' => part.answer_label,
+      'unit'         => part.unit,
+      'answer_size'  => opts['answer_size'],
+      # Strip the answer_size key out of options when it's mirrored at the
+      # top level so the rest of the partial sees the same shape as a jsonb
+      # part (which puts answer_size as a sibling, not nested under options).
+      'options'      => opts.except('answer_size'),
+    }
+  end
+
+  def _jsonb_composite_parts(question)
+    return [] unless question.options.is_a?(Hash)
+    Array(question.options['parts'])
+  end
+
   # One-line blurb shown under each type card on the picker screen.
   # Kept here (not on the Descriptor) because it's purely presentational.
   def q_picker_blurb(key)

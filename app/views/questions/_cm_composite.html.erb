@@ -14,7 +14,10 @@
       data-composite-root
       data-controller="composite-editor"
       data-composite-editor-question-id-value="<%= question.id %>">
-    <% Array(question.options['parts']).each_with_index do |part, i| %>
+    <%# Editor #50 — AR-first read with jsonb fallback. The helper returns a
+        hash whether the source is a QuestionPart AR row or legacy jsonb,
+        keeping the rest of this partial shape-stable. %>
+    <% composite_parts(question).each_with_index do |part, i| %>
       <%
         part_type = part['type'].to_s
         part_q    = composite_part_question(question, part, i)
