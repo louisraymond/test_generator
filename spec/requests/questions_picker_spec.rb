@@ -45,8 +45,11 @@ RSpec.describe 'Questions editor (Wave 5)', type: :request do
       get edit_question_path(q)
       expect(response.body).to include('q-editor-single')
       expect(response.body).to include('rail__eyebrow')
-      # The paper-editor Stimulus controller attaches when editable.
-      expect(response.body).to match(/data-controller="[^"]*paper-editor/)
+      # The cm-editor Stimulus controller attaches when editable. (Replaced
+      # the legacy `paper-editor` controller in the Editor v2 epic; that
+      # controller still drives the Canvas + paper-show surfaces, but the
+      # standalone editor now uses CodeMirror 6.)
+      expect(response.body).to match(/data-controller="[^"]*cm-editor/)
     end
 
     it 'renders the classic form behind ?ui=classic' do
