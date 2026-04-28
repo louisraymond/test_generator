@@ -1,0 +1,12 @@
+<%# === sub-57: one labelled group of shortcut rows. %>
+<div class="kb-overlay__group">
+  <h3 class="kb-overlay__group-title"><%= title %></h3>
+  <dl class="kb-overlay__rows">
+    <% rows.each do |key, description| %>
+      <div class="kb-overlay__row">
+        <dt><kbd class="kb-key"><%= key %></kbd></dt>
+        <dd><%= description %></dd>
+      </div>
+    <% end %>
+  </dl>
+</div>
