@@ -1,0 +1,24 @@
+<%# locals: topic: %>
+<%# sub-53 — toolbar (search + +Outcome + +Module + ?).  sub-56 wires the %>
+<%# search; sub-57 wires the ? button.  Markup ships here so they don't %>
+<%# have to amend show.html.erb later. %>
+<div class="topic-detail__toolbar">
+  <label class="topic-detail__search">
+    <span class="visually-hidden">Search</span>
+    <svg class="topic-detail__search-icon" xmlns="http://www.w3.org/2000/svg"
+         width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="search" placeholder="Search outcomes, categories, modules…"
+           data-topic-detail-target="searchInput" />
+    <kbd class="topic-detail__search-keycap">/</kbd>
+  </label>
+  <button type="button" class="topic-detail__btn topic-detail__btn--ghost"
+          data-action="click->topic-detail#startAddCategory">+ Outcome</button>
+  <button type="button" class="topic-detail__btn topic-detail__btn--filled"
+          data-action="click->topic-detail#startAddModule">+ Module</button>
+  <button type="button" class="topic-detail__btn-help" aria-label="Keyboard shortcuts"
+          data-action="click->topic-detail#openShortcuts">?</button>
+</div>

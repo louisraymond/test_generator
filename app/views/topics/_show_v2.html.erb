@@ -1,0 +1,15 @@
+<%# locals: topic:, exam_usage: %>
+<%# sub-53 — V2 chrome wrapper.  Lays out the 300px sticky sidebar + main %>
+<%# grid behind a feature flag.  Sub-54 owns the heat-map; sub-55 owns the %>
+<%# view switcher; sub-56 owns search; sub-57 owns the keyboard overlay. %>
+<a class="topic-detail__skip-link" href="#topic-detail-main">Skip to main content</a>
+<div class="topic-detail-v2 premium-page-wrapper"
+     data-controller="topic-detail module-focus topic-sidebar"
+     data-topic-detail-topic-id-value="<%= topic.id %>"
+     data-topic-sidebar-topic-id-value="<%= topic.id %>">
+  <%= render 'topic_sidebar', topic: topic %>
+  <main id="topic-detail-main" class="topic-detail-v2__main" tabindex="-1">
+    <%= render 'topic_main', topic: topic, exam_usage: exam_usage %>
+  </main>
+  <footer class="topic-detail__footer-hint">press ? for keyboard shortcuts</footer>
+</div>

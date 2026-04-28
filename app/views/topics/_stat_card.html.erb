@@ -1,0 +1,5 @@
+<%# locals: label:, value:, html_data: { ... } %>
+<div class="topic-detail__stat-card" <% (html_data || {}).each do |k, v| %>data-<%= k.to_s.tr('_', '-') %>="<%= v %>"<% end %>>
+  <div class="topic-detail__stat-card__label"><%= label %></div>
+  <div class="topic-detail__stat-card__value"><%= value %></div>
+</div>

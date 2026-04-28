@@ -1,0 +1,16 @@
+<%# locals: topic:, exam_usage: %>
+<%# sub-53 — main pane.  Renders toolbar, stat strip, heat-map slot, %>
+<%# module cards, and the keyboard overlay slot.  Sub-54-#57 overwrite %>
+<%# the leaf partials (_topic_heatmap, _module_card, _keyboard_overlay) %>
+<%# without touching this orchestrator. %>
+<%= render 'topic_toolbar', topic: topic %>
+<%= render 'stat_strip', topic: topic, exam_usage: exam_usage %>
+<%= render 'topic_heatmap', topic: topic, exam_usage: exam_usage %>
+
+<div class="topic-detail-v2__modules">
+  <% topic.topic_modules.each_with_index do |mod, idx| %>
+    <%= render 'module_card', mod: mod, exam_usage: exam_usage, idx: idx %>
+  <% end %>
+</div>
+
+<%= render 'keyboard_overlay' %>
