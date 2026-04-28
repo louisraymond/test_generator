@@ -31,4 +31,31 @@ RSpec.describe 'Workspace tabs render', type: :request do
     expect(response.body).to match(/data-controller="palette/)
     expect(response.body).to include('⌘K')
   end
+
+  it 'questions tab renders learning-objective chips for linked questions' do
+    topic = Topic.create!(name: 'LO chip workspace topic')
+    mod = topic.topic_modules.create!(name: 'Mod 1', position: 1)
+    lo = topic.learning_objectives.create!(
+      topic_module: mod,
+      description: 'Sentinel objective for workspace LO chip rendering',
+      category: 'Mod 1',
+      position: 1,
+    )
+    question = topic.questions.create!(
+      topic_module: mod,
+      content: 'Sample stem for chip rendering check',
+      answer: 'Model answer',
+      points: 1,
+      question_type: 'written',
+      options: [],
+    )
+    question.learning_objectives << lo
+
+    get "/workspace?tab=questions&topic_id=#{topic.id}"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('outcome-chip'),
+      'expected the workspace questions tab to render LO chips'
+    expect(response.body).to include('Sentinel objective for workspace LO chip rendering')
+  end
 end
