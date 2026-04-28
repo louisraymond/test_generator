@@ -42,6 +42,14 @@ module CodemirrorHelpers
   end
 
   # Place the cursor at line/col (1-indexed) and focus.
+  #
+  # Issue #48: with the native `EditorView.focusChangeEffect` path the
+  # focus-driven decoration rebuild lands on a 10ms `setTimeout` (CM6
+  # debounces focus transactions). The previous DOM-poke workaround was
+  # synchronous, so callers got a synchronous rebuild. To preserve the old
+  # ordering guarantee for tests that read `.cm-line` text immediately
+  # after this helper, wait until both `view.hasFocus` is true AND the
+  # focus-change transaction has been notified internally.
   def cm_set_cursor(selector, line:, col: 1)
     wait_for_cm_ready(selector)
     page.execute_script(<<~JS)
@@ -52,6 +60,20 @@ module CodemirrorHelpers
       view.dispatch({ selection: { anchor: pos } });
       view.focus();
     JS
+    Timeout.timeout(2) do
+      loop do
+        settled = page.evaluate_script(<<~JS)
+          (() => {
+            const el = document.querySelector(#{selector.to_json});
+            const view = el && el.cmView;
+            if (!view) return false;
+            return view.hasFocus === view.inputState.notifiedFocused;
+          })()
+        JS
+        break if settled
+        sleep 0.02
+      end
+    end
   end
 
   # Wait until the controller stamps data-cm-saved-at after the most recent edit.
