@@ -88,4 +88,48 @@ RSpec.describe 'Question editor save endpoints', type: :request do
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
+
+  # Editor #11 / ticket #47 — AR is the source of truth for composite parts.
+  # The two specs below assert that update_part / add_part write to
+  # QuestionPart rows (not the legacy `options['parts']` jsonb). The jsonb
+  # column is left intact for one deprecation cycle so a rollback is safe.
+  describe 'AR-backed composite parts (Editor #11)' do
+    let!(:composite) do
+      q = create(:question, :composite, topic: topic, options: {})
+      q.question_parts.create!(position: 1, part_type: 'written',     marks: 2, stem: 'AR Part A.')
+      q.question_parts.create!(position: 2, part_type: 'calculation', marks: 3, stem: 'AR Part B.')
+      q
+    end
+
+    it 'update_part writes to the QuestionPart AR row and leaves jsonb untouched' do
+      original_jsonb = composite.options.deep_dup
+
+      patch options_patch_question_path(composite),
+            params: { options: { update_part: { index: 0, stem: 'new stem' } } }.to_json,
+            headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+
+      expect(response).to have_http_status(:ok)
+      expect(composite.question_parts.find_by(position: 1).reload.stem).to eq('new stem')
+      # jsonb fallback should be left intact for one deprecation cycle.
+      expect(composite.reload.options).to eq(original_jsonb)
+    end
+
+    it 'add_part creates a new QuestionPart AR row with sensible defaults' do
+      patch options_patch_question_path(composite),
+            params: { options: { add_part: { after: 0 } } }.to_json,
+            headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+
+      expect(response).to have_http_status(:ok)
+      expect(composite.question_parts.count).to eq(3)
+
+      new_part = composite.question_parts.find_by(position: 2)
+      expect(new_part.stem).to eq('')
+      expect(new_part.part_type).to eq('written')
+      expect(new_part.marks).to eq(1)
+
+      # Original second part shifts to position 3.
+      shifted = composite.question_parts.find_by(position: 3)
+      expect(shifted.stem).to eq('AR Part B.')
+    end
+  end
 end
