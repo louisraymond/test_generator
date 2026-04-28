@@ -61,6 +61,7 @@ module Api
                 question.question_learning_objectives.create(learning_objective_id: lo_id)
               end
             end
+            backfill_composite_parts_to_ar(question)
             created += 1
           else
             errors << { index: index, client_id: client_id, message: question.errors.full_messages.join(', ') }
@@ -80,6 +81,37 @@ module Api
     end
 
     private
+
+    # Editor #11 — the OpenAPI request body still ships composite parts as
+    # `options.parts` jsonb so existing API clients don't need to change.
+    # AR is the new source of truth, so map the jsonb shape onto
+    # QuestionPart rows immediately after the parent saves. Idempotent: if
+    # parts were already created (e.g. a future client supplies them
+    # directly), this is a no-op.
+    def backfill_composite_parts_to_ar(question)
+      return unless question.question_type == 'composite'
+      return unless question.options.is_a?(Hash)
+      return if question.question_parts.any?
+
+      Array(question.options['parts']).each_with_index do |part, idx|
+        next unless part.is_a?(Hash)
+
+        attrs = {
+          position:  idx + 1,
+          stem:      part['stem'],
+          marks:     (part['marks'].presence || 1).to_i,
+          part_type: (part['type'].presence || 'written'),
+          options:   (part['options'].is_a?(Hash) ? part['options'] : {})
+        }
+        attrs[:answer_label] = part['answer_label'] if part.key?('answer_label')
+        attrs[:unit]         = part['unit']         if part.key?('unit')
+        if part.key?('answer_size')
+          attrs[:options] = (attrs[:options] || {}).merge('answer_size' => part['answer_size'])
+        end
+
+        question.question_parts.create!(attrs)
+      end
+    end
 
     SCALAR_FIELDS = %w[
       content answer points question_type answer_size bloom_level
