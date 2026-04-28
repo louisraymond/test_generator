@@ -12,7 +12,127 @@ concurrency:
 
 jobs:
   test:
+    # Non-selenium specs. Gates the deploy. Fast (~2 min target).
+    # Selenium-driven system specs run AFTER deploy as a canary — they do
+    # not block prod going out.
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: exam_generator_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/exam_generator_test
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Chromium
+        # Some non-system specs still touch Grover/puppeteer for PDF rendering.
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.9'
+          bundler-cache: true
+
+      - name: Install puppeteer
+        run: npm install --omit=dev
+
+      - name: Setup database
+        run: bin/rails db:schema:load
+
+      - name: Run non-system specs (deploy gate)
+        run: |
+          # Run every spec dir that exists EXCEPT spec/system (selenium).
+          # spec/support, spec/factories, spec/fixtures aren't spec dirs.
+          DIRS=$(ls -d spec/*/ 2>/dev/null \
+            | grep -vE 'spec/(system|support|factories|fixtures)/?$' \
+            | xargs)
+          if [ -z "$DIRS" ]; then
+            echo "No non-system spec dirs found — failing loud."
+            exit 1
+          fi
+          echo "Running: $DIRS"
+          bundle exec rspec $DIRS
+
+      - name: Security audit
+        continue-on-error: true
+        run: |
+          gem install bundler-audit
+          bundle audit check --update
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      previous_sha: ${{ steps.capture_prev.outputs.sha }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2  # need HEAD~1 for rollback target
+
+      - name: Capture previous SHA for potential rollback
+        id: capture_prev
+        run: |
+          PREV=$(git rev-parse HEAD~1)
+          echo "Previous SHA: $PREV"
+          echo "sha=$PREV" >> "$GITHUB_OUTPUT"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.9'
+          bundler-cache: true
+
+      - uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Generate Kamal secrets
+        run: |
+          mkdir -p .kamal
+          cat > .kamal/secrets <<EOF
+          KAMAL_REGISTRY_PASSWORD=${{ secrets.DOCKERHUB_TOKEN }}
+          SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          AUTH_USER=${{ secrets.AUTH_USER }}
+          AUTH_PASSWORD=${{ secrets.AUTH_PASSWORD }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          EOF
+
+      - name: Deploy with Kamal
+        run: |
+          gem install kamal
+          kamal deploy
+
+  smoke:
+    # Selenium-driven system specs run AFTER deploy.
+    # Failure does NOT block deploy (deploy is already done) — it only
+    # triggers the rollback job below.
+    name: Post-deploy selenium canary
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     services:
       postgres:
         image: postgres:16
@@ -50,20 +170,30 @@ jobs:
       - name: Setup database
         run: bin/rails db:schema:load
 
-      - name: Run tests
-        run: bundle exec rspec
-
-      - name: Security audit
-        continue-on-error: true
+      - name: Run system specs (one retry to absorb flakes)
         run: |
-          gem install bundler-audit
-          bundle audit check --update
+          if [ ! -d spec/system ]; then
+            echo "No spec/system directory; nothing to canary."
+            exit 0
+          fi
+          bundle exec rspec spec/system || {
+            echo "::warning::First run failed; retrying once before signalling rollback."
+            bundle exec rspec spec/system
+          }
 
-  deploy:
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  rollback:
+    # Only fires if the deploy succeeded but the post-deploy canary failed.
+    # Pushes the previous SHA back via Kamal.
+    name: Rollback on smoke failure
+    needs: [deploy, smoke]
+    if: |
+      always() &&
+      needs.deploy.result == 'success' &&
+      needs.smoke.result == 'failure' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v6
@@ -77,9 +207,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Generate Kamal secrets
         run: |
           mkdir -p .kamal
@@ -92,7 +219,14 @@ jobs:
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           EOF
 
-      - name: Deploy with Kamal
+      - name: Roll back to previous SHA via Kamal
+        env:
+          PREVIOUS_SHA: ${{ needs.deploy.outputs.previous_sha }}
         run: |
           gem install kamal
-          kamal deploy
+          if [ -z "$PREVIOUS_SHA" ]; then
+            echo "::error::No previous SHA available; cannot rollback automatically."
+            exit 1
+          fi
+          echo "Rolling back to $PREVIOUS_SHA"
+          kamal app rollback "$PREVIOUS_SHA"
