@@ -1565,6 +1565,63 @@
   border-color: var(--ink);
 }
 
+/* Module-card header title: design uses Fraunces 500 26px / -0.015em
+ * letter-spacing. We had 400 22px / normal. */
+.topic-detail-v2 .topic-module__name {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+/* Edit button (module-card header): design uses sans 500 13px ink-2 with
+ * 4px-radius pill at 6×14 padding. We had mono 11px accent with no border. */
+.topic-detail-v2 .topic-module__edit {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  align-self: center;
+}
+.topic-detail-v2 .topic-module__edit:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+  border-color: var(--rule-2);
+}
+
+/* Outcome chip: design is a compact rectangle (radius 3px) with ink-2
+ * text on the heat-coloured background, padded 0×6 and auto-sized.
+ * Our previous chip was a 32×22 white-on-heat pill — wrong shape AND
+ * wrong text colour. */
+.topic-detail-v2 .topic-detail__chip {
+  width: auto;
+  min-width: 24px;
+  height: auto;
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 10px;
+  color: var(--ink-2);
+}
+/* Heat buckets keep the same backgrounds; ink-2 text passes AA on all. */
+.topic-detail-v2 .topic-detail__chip--b3,
+.topic-detail-v2 .topic-detail__chip--b4 {
+  /* On the darkest two buckets, paper text is the only AA-passing choice. */
+  color: var(--paper);
+}
+
+/* Heat-map row label: 14px Fraunces 400 → 15px Fraunces 500 per design. */
+.topic-detail-v2 .topic-heatmap__row-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* "+ question" link: tighter tracking per design (0.1em ≈ 1.1px at 11px). */
+.topic-detail-v2 .topic-module__lo-add {
+  letter-spacing: 0.1em;
+}
+
 /* The v2 wrapper inherits .premium-page-wrapper's 32px padding from
  * application.css. V2 manages its own internal padding via the sidebar
  * and main partials, so reset it. */
