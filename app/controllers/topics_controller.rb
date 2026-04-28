@@ -5,7 +5,9 @@ class TopicsController < ApplicationController
     @topics = Topic.where(parent_topic_id: nil).includes(:questions, :subtopics).order(:name)
   end
 
-  def show; end
+  def show
+    @exam_usage = LearningObjective.exam_appearance_counts_for(@topic.learning_objectives)
+  end
 
   def new
     @topic = Topic.new
