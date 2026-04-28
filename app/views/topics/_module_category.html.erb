@@ -1,0 +1,21 @@
+<%#
+  Locals:
+    mod, category, los, exam_usage
+%>
+<section class="topic-module__category" data-cat-id="<%= category.parameterize %>">
+  <header class="topic-module__cat-header">
+    <span class="topic-module__cat-name"><%= category %></span>
+    <span class="topic-module__cat-filler" aria-hidden="true"></span>
+    <span class="topic-module__cat-count"><%= pluralize(los.size, 'outcome') %></span>
+  </header>
+  <ol class="topic-module__lo-list">
+    <% los.each_with_index do |lo, i| %>
+      <%= render 'topics/lo_row', lo: lo, idx: i, exam_usage: exam_usage %>
+    <% end %>
+  </ol>
+  <button type="button"
+          class="topic-module__add-lo"
+          data-action="click->topic-module#addOutcome">
+    + add outcome
+  </button>
+</section>
