@@ -637,10 +637,11 @@
 
 /* === sub-53: chrome === */
 /* Topic Detail v2 — paper aesthetic, 300px sticky sidebar + main grid.
- * All v2 selectors are namespaced under .topic-detail-v2* or
- * .topic-detail__sidebar*/.topic-detail__toolbar*/.topic-detail__stat*/
- * .topic-detail__skip-link/.topic-detail__footer-hint so they only paint
- * when the wrapper is rendered (i.e., the v2 flag is on).
+ * All v2 selectors are namespaced under .topic-detail-v2 (and child
+ * elements .topic-detail__sidebar, .topic-detail__toolbar,
+ * .topic-detail__stat-strip, .topic-detail__skip-link,
+ * .topic-detail__footer-hint) so they only paint when the wrapper is
+ * rendered (i.e., the v2 flag is on).
  *
  * Subsequent issues (#54-#57) append their own scoped sections; do not
  * modify the rules below in those PRs. */
