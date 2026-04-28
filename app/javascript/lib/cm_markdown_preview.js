@@ -48,11 +48,6 @@ const STYLED = {
 
 const HEADING_NODES = new Set(["ATXHeading1", "ATXHeading2", "ATXHeading3"])
 
-// TODO: KaTeX widget reflow may degrade with > 20 math spans per editor;
-// add a perf budget if a question with that many ever ships. Today the
-// rebuild rate is bounded by selection/focus changes (see ViewPlugin below)
-// and visibleRanges only covers what's on screen, so single-screen content
-// is fine — but a long stem with dozens of inline `$...$` spans is unverified.
 function addMathDecorations(view, push, cursorLine) {
   // When the editor is unfocused, treat every line as "off-cursor" so math
   // renders even though `selection.main.head` still reports its last
