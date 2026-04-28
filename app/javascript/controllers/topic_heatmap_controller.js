@@ -83,9 +83,27 @@ export default class extends Controller {
         }
       })
 
+      // 4th stat card: swap label/value to match the active mode.
+      // The strip pre-renders both pairs as data-{coverage,utilization}-
+      // {label,value}; we just write into the existing label/value DOM nodes
+      // (no re-render). Falls back to a no-op if the markup isn't present.
+      this._syncUsageStatCard(mode)
+
       if (!silent) {
         this.dispatch('mode-changed', { detail: { mode }, bubbles: true })
       }
     })
+  }
+
+  _syncUsageStatCard(mode) {
+    const card = document.querySelector('[data-stat-target="usage"]')
+    if (!card) return
+    const label = card.dataset[`${mode}Label`]
+    const value = card.dataset[`${mode}Value`]
+    if (label === undefined || value === undefined) return
+    const labelEl = card.querySelector('.topic-detail__stat-card__label')
+    const valueEl = card.querySelector('.topic-detail__stat-card__value')
+    if (labelEl) labelEl.textContent = label
+    if (valueEl) valueEl.textContent = value
   }
 }

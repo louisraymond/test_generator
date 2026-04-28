@@ -1530,3 +1530,62 @@
   html { scroll-behavior: auto; }
 }
 /* === /sub-57 === */
+
+/* === topic-v2 design parity (post-#59 hot-fix) ===
+ * Targeted refinements to align the deployed V2 markup with the
+ * approved design (designs/Topic Detail Redesign.html). All rules
+ * scope under .topic-detail-v2 so legacy pages stay untouched. */
+
+/* The v2 wrapper inherits .premium-page-wrapper's 32px padding from
+ * application.css. V2 manages its own internal padding via the sidebar
+ * and main partials, so reset it. */
+.topic-detail-v2.premium-page-wrapper {
+  padding: 0;
+}
+
+/* Sidebar: subtle paper-2 rail per the design (vs. transparent flush). */
+.topic-detail-v2__sidebar {
+  background: var(--paper-2);
+}
+
+/* Topic eyebrow: 10px (was 11px) and slightly looser tracking. */
+.topic-detail-v2 .topic-detail__sidebar-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+/* Topic title:
+ *   - 24px / 500 / -0.36px letter-spacing matches the design exactly.
+ *   - At 24px Fraunces 500 the longer titles ("Continuous Delivery")
+ *     fit on one line in the 244px effective sidebar width.
+ *   - Override exam.css's global `h1 { padding-top: 10mm; text-align:
+ *     center; font-weight: bold }` bleed for the V2 sidebar. */
+.topic-detail-v2 .topic-detail__sidebar-title {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.015em; /* ≈ -0.36px at 24px */
+  line-height: 1.1;
+  padding-top: 0;
+  text-align: left;
+  margin: 8px 0 16px;
+}
+
+/* Stat-strip values: design uses Fraunces 500 (we had 400). */
+.topic-detail-v2 .topic-detail__stat-card__value {
+  font-weight: 500;
+}
+
+/* Heat-map title: weight 500 with subtle negative tracking (was 700). */
+.topic-detail-v2 .topic-heatmap__title {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Heat-map tabs: design uses Inter 12px (we had JetBrains Mono 11px). */
+.topic-detail-v2 .topic-heatmap__tab {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  padding: 6px 14px;
+}
+/* === /topic-v2 design parity === */

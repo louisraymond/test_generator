@@ -31,8 +31,9 @@ module TopicDetailHelper
   # Returns a hash the `_stat_card` partial can splat into HTML attributes.
   # Pass `mode: :usage` for the 4th card so sub-3 (#52) can find it via
   # `data-stat-target="usage"` to swap Questions ↔ Exam-uses without re-rendering.
-  def topic_stat(label:, value:, mode: nil)
+  def topic_stat(label:, value:, mode: nil, extra_data: {})
     html_data = mode == :usage ? { stat_target: 'usage' } : {}
+    html_data = html_data.merge(extra_data) if extra_data.is_a?(Hash) && extra_data.any?
     { label: label, value: value, html_data: html_data }
   end
 

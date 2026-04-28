@@ -1,13 +1,25 @@
 <%# locals: topic:, exam_usage: %>
-<%# sub-53 — 4-card stat strip.  4th card has data-stat-target="usage" %>
-<%# so sub-3 (#52) can flip Questions ↔ Exam-uses without re-rendering. %>
+<%# sub-53 — 4-card stat strip. The 4th card carries BOTH the coverage- %>
+<%# mode and utilization-mode label/value as data attributes so %>
+<%# topic_heatmap_controller can swap them on mode change without %>
+<%# re-rendering. Initial render = coverage mode (matches default). %>
+<%
+  questions_value  = topic.questions.size
+  exam_uses_value  = exam_usage.respond_to?(:values) ? exam_usage.values.sum : 0
+%>
 <div class="topic-detail__stat-strip">
   <%= render 'stat_card', **topic_stat(label: 'MODULES', value: topic.topic_modules.size) %>
   <%= render 'stat_card', **topic_stat(label: 'CATEGORIES', value: topic.learning_objectives.map(&:category).compact.uniq.size) %>
   <%= render 'stat_card', **topic_stat(label: 'OUTCOMES', value: topic.learning_objectives.size) %>
-  <% if exam_usage.present? %>
-    <%= render 'stat_card', **topic_stat(label: 'EXAM USES', value: exam_usage.values.sum, mode: :usage) %>
-  <% else %>
-    <%= render 'stat_card', **topic_stat(label: 'QUESTIONS', value: topic.questions.size, mode: :usage) %>
-  <% end %>
+  <%= render 'stat_card', **topic_stat(
+        label: 'QUESTIONS',
+        value: questions_value,
+        mode: :usage,
+        extra_data: {
+          coverage_label: 'QUESTIONS',
+          coverage_value: questions_value,
+          utilization_label: 'EXAM USES',
+          utilization_value: exam_uses_value
+        }
+      ) %>
 </div>
