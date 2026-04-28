@@ -149,9 +149,12 @@ jobs:
 
           check() {
             local label="$1" url="$2" needle="$3"
-            local resp
-            resp=$(curl -fsS -u "$AUTH" "$url" -w '\n%{http_code}\n')
-            local code=$(echo "$resp" | tail -n1)
+            local resp code
+            # -L follows redirects (root may 301 to /topics for auth users);
+            # -f makes 4xx/5xx fail loudly so we never treat an error page as
+            # "smoke passed" just because grep happened to match.
+            resp=$(curl -fLsS -u "$AUTH" "$url" -w '\n%{http_code}\n')
+            code=$(echo "$resp" | tail -n1)
             if [ "$code" != "200" ]; then
               echo "::error::$label returned HTTP $code"
               return 1
@@ -160,15 +163,19 @@ jobs:
               echo "::error::$label rendered but missing marker: $needle"
               return 1
             fi
-            echo "  ok: $label (200, marker present)"
+            echo "  ok: $label ($code, marker present)"
           }
 
           echo "Smoke against $BASE..."
-          check "root"          "$BASE/"                    "ExamGenerator"
-          check "/topics/29"    "$BASE/topics/29"           "topic-detail"
-          check "/topics/29?v2" "$BASE/topics/29?v2=1"      "topic-detail-v2"
-          check "v2 heatmap"    "$BASE/topics/29?v2=1"      "topic-heatmap"
-          check "v2 module"     "$BASE/topics/29?v2=1"      "topic-module"
+          # Skip the root page — it 301's to a route that depends on
+          # the user's last-visited surface; the topic detail page is
+          # the meaningful canary. Add /topics back as a stable index
+          # check.
+          check "/topics"        "$BASE/topics"               "Topics"
+          check "/topics/29"     "$BASE/topics/29"            "topic-detail"
+          check "/topics/29?v2"  "$BASE/topics/29?v2=1"       "topic-detail-v2"
+          check "v2 heatmap"     "$BASE/topics/29?v2=1"       "topic-heatmap"
+          check "v2 module"      "$BASE/topics/29?v2=1"       "topic-module"
           echo "Smoke OK."
 
   rollback:
