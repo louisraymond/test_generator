@@ -43,10 +43,17 @@ class TopicsController < ApplicationController
   def set_topic
     scope = Topic.all
     if action_name == 'show'
+      # Preload chain: subtopics for the back-link, modules + their LOs +
+      # link rows for the heat-map / coverage badges, top-level LOs and
+      # questions for the no-modules render path. Switching from
+      # `:questions` to `:question_learning_objectives` on the LO branches
+      # eliminates an N+1 over questions for the modules path while
+      # keeping `:questions` available where the no-modules legacy view
+      # still calls `obj.questions.size` (see Topic::LearningObjectiveManagement).
       scope = scope.includes(
         :subtopics,
-        { topic_modules: { learning_objectives: :questions } },
-        { learning_objectives: :questions },
+        { topic_modules: { learning_objectives: :question_learning_objectives } },
+        { learning_objectives: :question_learning_objectives },
         :questions
       )
     end
