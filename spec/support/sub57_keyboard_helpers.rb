@@ -29,32 +29,57 @@ module Sub57KeyboardHelpers
     ApplicationController.render(partial: 'topics/keyboard_overlay')
   end
 
-  # Install the window-level event recorder for the topic-keyboard specs.
-  # The mount + overlay are now rendered server-side by sub-53's show.html.erb
-  # when ?v2=1 is set, so the helper only wires the recorder. The
-  # `module_count`/`active_module_index` arguments are kept for spec
-  # backwards-compatibility but are ignored — the integrated controller pulls
-  # those values from the DOM data attributes.
-  def inject_keyboard_controller!(module_count: 0, active_module_index: 0) # rubocop:disable Lint/UnusedMethodArgument
+  # Install the window-level event recorder for the topic-keyboard specs
+  # and override the controller's data values so individual tests can drive
+  # specific module counts / active module indexes without rebuilding the
+  # whole topic graph.
+  #
+  # Sub-53's show.html.erb mounts the topic-keyboard controller server-side
+  # when ?v2=1 is set; the overlay markup ships with it. This helper:
+  #   1. Locates the integrated controller mount.
+  #   2. Updates its data-* values to match the test's intent.
+  #   3. Re-emits a Stimulus reconnect by toggling data-controller, so the
+  #      controller re-reads its values.
+  #   4. Wires the window-level event recorder so specs can assert dispatches.
+  def inject_keyboard_controller!(module_count: 0, active_module_index: 0)
     events_js = EVENT_NAMES.to_json
 
     page.execute_script(<<~JS)
       (function() {
-        if (window.__sub57Recorder) return; // idempotent
-
-        window.__sub57Recorder = { events: [] };
-        var names = #{events_js};
-        names.forEach(function(name) {
-          window.addEventListener(name, function(e) {
-            window.__sub57Recorder.events.push({
-              name: name,
-              detail: e.detail || null,
-              timestamp: Date.now()
+        // 1. Recorder (idempotent).
+        if (!window.__sub57Recorder) {
+          window.__sub57Recorder = { events: [] };
+          var names = #{events_js};
+          names.forEach(function(name) {
+            window.addEventListener(name, function(e) {
+              window.__sub57Recorder.events.push({
+                name: name,
+                detail: e.detail || null,
+                timestamp: Date.now()
+              });
             });
           });
-        });
+        }
+
+        // 2. Override the integrated controller's values + reconnect.
+        var mount = document.querySelector('[data-controller~="topic-keyboard"]');
+        if (mount) {
+          mount.setAttribute('data-topic-keyboard-module-count-value', '#{module_count}');
+          mount.setAttribute('data-topic-keyboard-active-module-index-value', '#{active_module_index}');
+          // Toggle the controller binding to force Stimulus to disconnect/reconnect
+          // and pick up the new values.
+          var ctrls = mount.getAttribute('data-controller') || '';
+          mount.setAttribute('data-controller', ctrls.replace(/\\btopic-keyboard\\b/g, '').trim());
+          // Use setTimeout to let Stimulus process the disconnect before re-adding.
+          setTimeout(function() {
+            mount.setAttribute('data-controller', (ctrls.indexOf('topic-keyboard') >= 0 ? ctrls : ctrls + ' topic-keyboard').trim());
+          }, 10);
+        }
       })();
     JS
+
+    # Give Stimulus a moment to reconnect with the new values.
+    sleep 0.05
   end
 
   def recorded_events
@@ -86,7 +111,15 @@ module Sub57KeyboardHelpers
   end
 
   def seed_toast_seen_flag!
-    page.execute_script("try { localStorage.setItem('topic-detail:keyboard-toast-seen', 'true'); } catch(_) {}")
+    # The integrated controller mounted on page-load may already have removed
+    # the `hidden` attribute from the toast before the test had a chance to
+    # seed the flag. Re-hide the toast and clear any pending dismiss timer so
+    # the spec sees the post-seed steady state.
+    page.execute_script(<<~JS)
+      try { localStorage.setItem('topic-detail:keyboard-toast-seen', 'true'); } catch(_) {}
+      var toast = document.querySelector('[data-topic-keyboard-target="toast"]');
+      if (toast) toast.setAttribute('hidden', '');
+    JS
   end
 end
 
