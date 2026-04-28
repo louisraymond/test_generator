@@ -1,0 +1,61 @@
+<%#
+  Locals:
+    mod         — TopicModule
+    idx         — Integer (zero-based position in the topic's module list)
+    exam_usage  — Hash<Integer, Integer> (lo_id => count) from sub-52
+%>
+<article id="mod-<%= mod.id %>"
+         class="topic-module<%= ' topic-module--collapsed' if module_collapsed_default?(mod, idx) %>"
+         data-controller="topic-module"
+         data-topic-module-id-value="<%= mod.id %>"
+         data-topic-module-topic-id-value="<%= mod.topic_id %>">
+  <div class="topic-module__header-row">
+    <button type="button"
+            class="topic-module__toggle"
+            aria-expanded="<%= !module_collapsed_default?(mod, idx) %>"
+            aria-controls="mod-<%= mod.id %>-body"
+            data-topic-module-target="toggle"
+            data-action="click->topic-module#toggle">
+      <span class="topic-module__chevron" aria-hidden="true">&rsaquo;</span>
+      <span class="topic-module__m-label">M<%= idx + 1 %></span>
+      <span class="topic-module__title-block">
+        <span class="topic-module__name"><%= mod.name %></span>
+        <% if mod.description.present? %>
+          <span class="topic-module__description"><%= mod.description %></span>
+        <% end %>
+      </span>
+      <span class="topic-module__stats">
+        <span class="topic-module__stat-num"><%= mod.learning_objectives.size %></span>
+        <span class="topic-module__stat-label">LO</span>
+        <span class="topic-module__stat-sep">&middot;</span>
+        <span class="topic-module__stat-num"><%= mod.questions.size %></span>
+        <span class="topic-module__stat-label">Q</span>
+      </span>
+    </button>
+    <button type="button"
+            class="topic-module__edit"
+            aria-label="Edit module <%= mod.name %>"
+            data-action="click->topic-module#edit">
+      Edit
+    </button>
+  </div>
+
+  <div id="mod-<%= mod.id %>-body"
+       class="topic-module__body"
+       data-topic-module-target="body"
+       <%= 'hidden' if module_collapsed_default?(mod, idx) %>>
+    <% if mod.learning_objectives.empty? %>
+      <p class="topic-module__empty">No outcomes yet &mdash; press <kbd>a</kbd> to add one.</p>
+    <% else %>
+      <% category_grouping(mod).each do |category, los| %>
+        <%= render 'topics/module_category',
+                   mod: mod, category: category, los: los, exam_usage: exam_usage %>
+      <% end %>
+    <% end %>
+    <button type="button"
+            class="topic-module__add-cat"
+            data-action="click->topic-module#addCategory">
+      + Add category
+    </button>
+  </div>
+</article>
