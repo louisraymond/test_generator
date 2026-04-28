@@ -1622,6 +1622,33 @@
   letter-spacing: 0.1em;
 }
 
+/* Toolbar buttons (+ Outcome / + Module): design uses Inter 500 13px
+ * sentence case (no uppercase, no mono-letter-spacing). Match the
+ * module-card Edit button styling for visual consistency. */
+.topic-detail-v2 .topic-detail__btn {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 7px 14px;
+}
+.topic-detail-v2 .topic-detail__btn--ghost {
+  color: var(--ink-2);
+  border-color: var(--rule);
+}
+.topic-detail-v2 .topic-detail__btn--ghost:hover {
+  background: var(--paper-2);
+}
+.topic-detail-v2 .topic-detail__btn--filled {
+  color: var(--paper);
+}
+
+/* Search wrapper: design uses 4px radius (ours was 6px). */
+.topic-detail-v2 .topic-detail__search {
+  border-radius: 4px;
+}
+
 /* The v2 wrapper inherits .premium-page-wrapper's 32px padding from
  * application.css. V2 manages its own internal padding via the sidebar
  * and main partials, so reset it. */
