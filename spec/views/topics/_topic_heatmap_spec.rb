@@ -67,6 +67,25 @@ RSpec.describe 'topics/_topic_heatmap', type: :view do
       expect(rendered).to include('Forces — Newton, 4 exam uses')
     end
 
+    it 'truncates long outcome descriptions in title/aria-label/data-lo-description so cells stay small' do
+      long = 'A' * 400
+      long_lo = create(:learning_objective, topic: topic, topic_module: mod, category: 'Long', description: long, position: 99)
+      create(:question_learning_objective, learning_objective: long_lo, question: create(:question, topic: topic))
+
+      render_partial(presenter: TopicHeatmapPresenter.new(topic.reload, exam_usage: {}), mode: :coverage)
+      doc = Nokogiri::HTML5.fragment(rendered)
+      long_cell = doc.css('button.topic-heatmap__cell').find { |c| c['data-lo-description'].to_s.start_with?('AAAA') }
+      expect(long_cell).not_to be_nil, 'expected to find a cell for the long-description LO'
+
+      # Truncated description should be ≤ 80 chars (helper limit) + ellipsis.
+      # Originally these fields could carry 400+ chars per cell — at 1000+
+      # outcomes that's multi-MB of payload.
+      expect(long_cell['data-lo-description'].length).to be <= 81 # 80 + ellipsis
+      expect(long_cell['data-lo-description']).to end_with('…')
+      expect(long_cell['title'].length).to be < 200
+      expect(long_cell['aria-label']).to eq(long_cell['title'])
+    end
+
     it 'section heading reads "Question coverage" by default' do
       render_partial(presenter: presenter, mode: :coverage)
       expect(rendered).to match(/Question coverage/)

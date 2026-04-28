@@ -88,7 +88,12 @@
                   util_n = cell.utilization_count
                   active_n = mode == :utilization ? util_n : cov_n
                   units = heat_units(mode)
-                  label = "#{lo.category} — #{lo.description}, #{active_n} #{units}"
+                  # Heat-map cells repeat 1× per outcome; with 1000+ outcomes
+                  # full descriptions in title/aria-label/data-lo-description
+                  # bloat the doc to multi-MB. Truncate to a tooltip-sized
+                  # snippet that still identifies the outcome.
+                  short_desc = lo.description.to_s.truncate(80, separator: ' ', omission: '…')
+                  label = "#{lo.category} — #{short_desc}, #{active_n} #{units}"
                 %>
                 <button type="button"
                         class="topic-heatmap__cell <%= heat_color(active_n) %>"
@@ -96,7 +101,7 @@
                         data-action="click->topic-heatmap#focusOutcome"
                         data-cell-lo-id="<%= lo.id %>"
                         data-lo-category="<%= lo.category %>"
-                        data-lo-description="<%= lo.description %>"
+                        data-lo-description="<%= short_desc %>"
                         data-coverage-count="<%= cov_n %>"
                         data-utilization-count="<%= util_n %>"
                         data-coverage-bucket="<%= cell.bucket(:coverage) %>"

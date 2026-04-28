@@ -659,6 +659,10 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  /* Reserve scrollbar space inside the column so content width stays
+   * stable and titles like "Continuous Delivery" don't wrap on macOS
+   * (where overlay scrollbars consume ~15px at the right edge). */
+  scrollbar-gutter: stable;
   border-right: 1px solid var(--rule);
   padding: 24px 20px 0;
   display: flex;
