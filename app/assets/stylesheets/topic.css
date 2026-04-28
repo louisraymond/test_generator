@@ -1617,9 +1617,11 @@
   font-weight: 500;
 }
 
-/* "+ question" link: tighter tracking per design (0.1em ≈ 1.1px at 11px). */
+/* "+ question" link: tighter tracking per design (0.1em ≈ 1.1px at 11px),
+ * AND design renders it uppercase ("+ QUESTION") for the eyebrow look. */
 .topic-detail-v2 .topic-module__lo-add {
   letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 /* Toolbar buttons (+ Outcome / + Module): design uses Inter 500 13px
