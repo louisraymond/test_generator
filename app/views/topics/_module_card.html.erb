@@ -17,7 +17,7 @@
             data-topic-module-target="toggle"
             data-action="click->topic-module#toggle">
       <span class="topic-module__chevron" aria-hidden="true">&rsaquo;</span>
-      <span class="topic-module__m-label">M<%= idx + 1 %></span>
+      <span class="topic-module__m-label">M<%= format('%02d', idx + 1) %></span>
       <span class="topic-module__title-block">
         <span class="topic-module__name"><%= mod.name %></span>
         <% if mod.description.present? %>

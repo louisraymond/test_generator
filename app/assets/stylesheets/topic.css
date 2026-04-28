@@ -1536,6 +1536,35 @@
  * approved design (designs/Topic Detail Redesign.html). All rules
  * scope under .topic-detail-v2 so legacy pages stay untouched. */
 
+/* Sidebar mini-stats (under module name): tighter tracking per design. */
+.topic-detail-v2 .topic-detail__sidebar-ministats {
+  letter-spacing: 0.06em;
+}
+
+/* Sidebar module entry index "01" — design uses 11px (we had 12px). */
+.topic-detail-v2 .topic-detail__sidebar-index {
+  font-size: 11px;
+}
+
+/* View-switcher pills:
+ *   - Design uses Inter 500 12px (sentence case), not JetBrains Mono
+ *     uppercase. Switching to sans removes the "MODULES" all-caps look.
+ *   - Active pill on paper background instead of white. */
+.topic-detail-v2 .topic-detail__sidebar-pill {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  padding: 7px 12px;
+  text-transform: none;
+  color: var(--ink-2);
+}
+.topic-detail-v2 .topic-detail__sidebar-pill.is-active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
 /* The v2 wrapper inherits .premium-page-wrapper's 32px padding from
  * application.css. V2 manages its own internal padding via the sidebar
  * and main partials, so reset it. */

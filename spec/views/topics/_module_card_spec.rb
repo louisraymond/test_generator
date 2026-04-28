@@ -62,6 +62,15 @@ RSpec.describe 'topics/_module_card', type: :view do
       render_card
       expect(rendered).to have_css('.topic-module__edit[aria-label="Edit module Foundations"]')
     end
+
+    it 'renders the M-label as a zero-padded two-digit eyebrow (M01, not M1) per the design' do
+      render_card(idx: 0)
+      expect(rendered).to have_css('.topic-module__m-label', exact_text: 'M01')
+      render_card(idx: 8)
+      expect(rendered).to have_css('.topic-module__m-label', exact_text: 'M09')
+      render_card(idx: 11)
+      expect(rendered).to have_css('.topic-module__m-label', exact_text: 'M12')
+    end
   end
 
   describe 'content' do
