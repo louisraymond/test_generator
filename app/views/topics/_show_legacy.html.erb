@@ -1,0 +1,268 @@
+<div class="topic-detail premium-page-wrapper" data-controller="topic-detail module-focus" data-topic-detail-topic-id-value="<%= @topic.id %>" data-action="click@window->module-focus#handleBackgroundClick">
+  <div class="topic-detail__back">
+    <%= link_to topics_path, class: 'link-back' do %>
+      ← Back to Topics
+    <% end %>
+  </div>
+
+  <div class="premium-page-header">
+    <div class="premium-page-header__content">
+      <div class="topic-detail__title-row">
+        <svg class="topic-detail__icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <h1 class="premium-title"><%= @topic.name %></h1>
+      </div>
+
+      <% if @topic.epigraph_quote.present? %>
+        <div class="topic-detail__overview">
+          <div class="topic-detail__overview-content">
+            <%= outline_text_to_html(@topic.epigraph_quote) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="topic-detail__content">
+    <%  if @topic.topic_modules.any? %>
+      <h2 class="topic-detail__section-title">Modules</h2>
+      
+      <div class="modules-grid">
+        <% @topic.topic_modules.each do |mod| %>
+          <div class="module-card" 
+               data-module-focus-target="moduleCard"
+               data-module-id="<%= mod.id %>"
+               data-action="click->module-focus#focusModule">
+            <div class="module-card__header">
+              <div class="module-card__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              </div>
+              <h3 class="module-card__title"><%= mod.name %></h3>
+            </div>
+            
+            <% if mod.description.present? %>
+              <p class="module-card__description"><%= truncate(mod.description, length: 120) %></p>
+            <% end %>
+            
+            <div class="module-card__stats">
+              <div class="module-card__stat">
+                <span class="module-card__stat-label">Categories</span>
+                <span class="module-card__stat-value"><%= mod.categories.count %></span>
+              </div>
+              <div class="module-card__stat">
+                <span class="module-card__stat-label">Learning Objectives</span>
+                <span class="module-card__stat-value"><%= mod.learning_objectives.count %></span>
+              </div>
+              <div class="module-card__stat">
+                <span class="module-card__stat-label">Questions</span>
+                <span class="module-card__stat-value"><%= mod.questions.count %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="section-header">
+        <h2 class="topic-detail__section-title" style="margin: 0;">Add Another Module</h2>
+        <button type="button" class="add-module-btn" data-action="click->topic-detail#startAddModule" data-topic-detail-target="addModuleBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Module
+        </button>
+      </div>
+
+      <!-- WIP Module Card -->
+      <div class="module-card module-card--wip" style="display: none; margin-bottom: 2rem;" data-topic-detail-target="wipModuleCard">
+        <div class="module-card__header">
+          <div class="module-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <div class="module-card__title-editor" style="flex: 1;">
+            <input type="text" 
+                   class="module-title-input" 
+                   placeholder="Enter module name" 
+                   data-topic-detail-target="wipModuleName"
+                   data-action="keydown->topic-detail#handleModuleNameKeydown">
+          </div>
+        </div>
+        
+        <div class="module-card__description-editor">
+          <textarea class="module-description-input" 
+                    placeholder="Enter module description (optional)" 
+                    rows="2"
+                    data-topic-detail-target="wipModuleDescription"></textarea>
+        </div>
+        
+        <div class="wip-module-actions">
+          <button type="button" class="btn btn--small btn--primary" data-action="click->topic-detail#saveModule">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Save Module
+          </button>
+          <button type="button" class="btn btn--small btn--secondary" data-action="click->topic-detail#cancelAddModule">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <h2 class="topic-detail__section-title" style="margin-top: 3rem;">Learning Outcomes by Module</h2>
+    <% else %>
+      <h2 class="topic-detail__section-title">Learning Outcomes</h2>
+    <% end %>
+
+    <div class="categories-list">
+      <% if @topic.topic_modules.any? %>
+        <% @topic.topic_modules.each do |mod| %>
+          <div class="module-section" 
+               id="module-<%= mod.id %>" 
+               data-module-focus-target="moduleSection"
+               data-module-id="<%= mod.id %>">
+            <h3 class="module-section__title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <%= mod.name %>
+            </h3>
+            
+            <% mod.learning_objectives.group_by(&:category).sort_by { |cat, _| cat }.each do |category, objectives| %>
+              <div class="category-card" data-category="<%= category %>" data-topic-detail-target="categoryCard">
+                <!-- Category Header -->
+                <div class="category-card__header" data-action="click->topic-detail#toggleCategory">
+                  <div class="category-card__header-content">
+                    <svg class="category-card__chevron" data-topic-detail-target="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <h3 class="category-card__title"><%= category %></h3>
+                    <span class="category-card__badge"><%= pluralize(objectives.size, 'outcome') %></span>
+                  </div>
+                </div>
+
+                <!-- Learning Objectives List -->
+                <div class="category-card__body" data-topic-detail-target="categoryBody">
+                  <div class="learning-objectives">
+                    <% objectives.sort_by(&:position).each_with_index do |lo, idx| %>
+                      <div class="lo-item" data-lo-id="<%= lo.id %>">
+                        <div class="lo-item__content">
+                          <span class="lo-item__number"><%= idx + 1 %></span>
+                          <span class="lo-item__text"><%= lo.description %></span>
+                        </div>
+                        <%= link_to 'Add Question', new_question_path(learning_objective_id: lo.id), class: 'btn btn--small btn--primary lo-item__btn' %>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <!-- Add LO Form (Hidden by default) -->
+                  <div class="add-lo-form" data-topic-detail-target="addLoForm" style="display: none;">
+                    <div class="add-lo-form__content">
+                      <span class="lo-item__number lo-item__number--faded"><%= objectives.size + 1 %></span>
+                      <input type="text" class="add-lo-form__input" data-topic-detail-target="loInput" placeholder="Enter learning outcome...">
+                    </div>
+                    <div class="add-lo-form__actions">
+                      <button type="button" class="btn btn--small btn--primary" data-action="click->topic-detail#saveLo">Save</button>
+                      <button type="button" class="btn btn--small btn--secondary" data-action="click->topic-detail#cancelAddLo">Cancel</button>
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn-add-lo" data-action="click->topic-detail#startAddLo" data-category="<%= category %>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Add Learning Outcome</span>
+                  </button>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Add Category Button for this Module -->
+            <button type="button" class="btn-add-category" data-action="click->topic-detail#startAddCategory" data-topic-detail-target="addCategoryButton" data-module-id="<%= mod.id %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add New Category</span>
+            </button>
+          </div>
+        <% end %>
+      <% else %>
+        <% @topic.learning_outcome_sections_with_counts.each do |section| %>
+          <% category = section['title'] %>
+          <% items = section['items'] %>
+          
+          <div class="category-card" data-category="<%= category %>" data-topic-detail-target="categoryCard">
+          <!-- Category Header -->
+          <div class="category-card__header" data-action="click->topic-detail#toggleCategory">
+            <div class="category-card__header-content">
+              <svg class="category-card__chevron" data-topic-detail-target="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <h3 class="category-card__title"><%= category %></h3>
+              <span class="category-card__badge"><%= pluralize(items.size, 'outcome') %></span>
+            </div>
+          </div>
+
+          <!-- Learning Objectives List -->
+          <div class="category-card__body" data-topic-detail-target="categoryBody">
+            <div class="learning-objectives">
+              <% items.each_with_index do |item, idx| %>
+                <% 
+                  # Find the actual learning objective
+                  lo = @topic.learning_objectives.find { |obj| obj.category == category && obj.description == item['text'] }
+                %>
+                <% if lo %>
+                  <div class="lo-item" data-lo-id="<%= lo.id %>">
+                    <div class="lo-item__content">
+                      <span class="lo-item__number"><%= idx + 1 %></span>
+                      <span class="lo-item__text"><%= lo.description %></span>
+                    </div>
+                    <%= link_to 'Add Question', new_question_path(learning_objective_id: lo.id), class: 'btn btn--small btn--primary lo-item__btn' %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+
+            <!-- Add LO Form (Hidden by default) -->
+            <div class="add-lo-form" data-topic-detail-target="addLoForm" style="display: none;">
+              <div class="add-lo-form__content">
+                <span class="lo-item__number lo-item__number--faded"><%= items.size + 1 %></span>
+                <input type="text" class="add-lo-form__input" data-topic-detail-target="loInput" placeholder="Enter learning outcome...">
+              </div>
+              <div class="add-lo-form__actions">
+                <button type="button" class="btn btn--small btn--primary" data-action="click->topic-detail#saveLo">Save</button>
+                <button type="button" class="btn btn--small btn--secondary" data-action="click->topic-detail#cancelAddLo">Cancel</button>
+              </div>
+            </div>
+
+            <button type="button" class="btn-add-lo" data-action="click->topic-detail#startAddLo" data-category="<%= category %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add Learning Outcome</span>
+            </button>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <!-- Add Category Form (Hidden by default) -->
+      <div class="add-category-form" data-topic-detail-target="addCategoryForm" style="display: none;">
+        <div class="add-category-form__header">
+          <svg class="category-card__chevron category-card__chevron--static" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <input 
+            type="text" 
+            class="add-category-form__input" 
+            data-topic-detail-target="categoryNameInput" 
+            data-action="keydown->topic-detail#handleCategoryKeydown"
+            placeholder="Category name (e.g., Quantum Mechanics)">
+          <span class="category-card__badge category-card__badge--faded">0 outcomes</span>
+        </div>
+        <div class="add-category-form__body">
+          <div class="add-lo-form" style="display: block; margin-bottom: 0;">
+            <div class="add-lo-form__content">
+              <span class="lo-item__number lo-item__number--faded">1</span>
+              <input 
+                type="text" 
+                class="add-lo-form__input" 
+                data-topic-detail-target="firstLoInput" 
+                data-action="keydown->topic-detail#handleCategoryKeydown"
+                placeholder="Enter first learning outcome...">
+            </div>
+          </div>
+        </div>
+        <div class="add-category-form__actions">
+          <button type="button" class="btn btn--small btn--primary" data-action="click->topic-detail#saveCategory">Save</button>
+          <button type="button" class="btn btn--small btn--secondary" data-action="click->topic-detail#cancelAddCategory">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Add Category Button -->
+      <button type="button" class="btn-add-category" data-action="click->topic-detail#startAddCategory" data-topic-detail-target="addCategoryButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Add New Category</span>
+      </button>
+    </div>
+  </div>
+</div>

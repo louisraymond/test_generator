@@ -1,0 +1,35 @@
+<section class="topic-detail__view topic-detail__view--outcomes"
+         data-topic-view-target="pane"
+         data-view="outcomes"
+         hidden>
+  <div class="topic-detail__sort-row">
+    <label for="outcomes-sort" class="topic-detail__visually-hidden">Sort outcomes</label>
+    <select id="outcomes-sort"
+            data-topic-view-target="sortSelect"
+            data-action="change->topic-view#selectSort">
+      <option value="topic_order">Topic order</option>
+      <option value="nq_desc">Nq descending</option>
+      <option value="nq_asc">Nq ascending</option>
+      <option value="alpha">Alphabetical</option>
+    </select>
+  </div>
+
+  <ol class="topic-detail__outcomes-flat" data-outcomes-flat>
+    <% topic_outcomes_flat(topic, sort: :topic_order).each do |row| %>
+      <li class="topic-detail__lo-row"
+          data-outcome-row
+          data-lo-id="<%= row[:lo].id %>"
+          data-lo-text="<%= row[:lo].description %>"
+          data-nq="<%= row[:lo].questions.size %>"
+          data-topic-order="<%= row[:topic_order] %>">
+        <span class="topic-detail__m-tag mono">M<%= row[:module_idx].to_s.rjust(2, '0') %></span>
+        <span class="topic-detail__nq-chip"><%= row[:lo].questions.size %></span>
+        <span class="topic-detail__lo-text"><%= row[:lo].description %></span>
+        <span class="topic-detail__cat-tag mono"><%= row[:lo].category %></span>
+        <%= link_to '+ question',
+                    new_question_path(learning_objective_id: row[:lo].id),
+                    class: 'topic-detail__add-question' %>
+      </li>
+    <% end %>
+  </ol>
+</section>

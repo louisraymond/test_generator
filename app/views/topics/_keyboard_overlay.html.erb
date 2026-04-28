@@ -1,0 +1,66 @@
+<%# === sub-57: keyboard overlay, toast, aria-live announcer ===
+     Static partial. Hidden via aria-hidden="true" + CSS attribute selector
+     so the focus-trap selectors stay valid. Mounted by topic_keyboard_controller. %>
+<div class="kb-overlay"
+     data-topic-keyboard-target="overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="shortcuts-title"
+     aria-hidden="true"
+     data-action="click->topic-keyboard#backdropClose">
+  <div class="kb-overlay__dialog" data-action="click->topic-keyboard#stopPropagation">
+    <button class="kb-overlay__close"
+            type="button"
+            data-topic-keyboard-target="overlayClose"
+            data-action="click->topic-keyboard#closeOverlay"
+            aria-label="Close shortcuts overlay">×</button>
+    <h2 id="shortcuts-title" class="kb-overlay__title">Keyboard shortcuts</h2>
+    <p class="kb-overlay__subtitle">press ? again to close</p>
+    <div class="kb-overlay__grid">
+      <%= render 'topics/keyboard_group', title: 'Navigation', rows: [
+        ['j', 'next module'],
+        ['k', 'previous module'],
+        ['1–9', 'jump to module N'],
+        ['g g', 'scroll to top'],
+        ['/', 'focus search']
+      ] %>
+      <%= render 'topics/keyboard_group', title: 'Modules', rows: [
+        ['space', 'expand active'],
+        ['o', 'expand all'],
+        ['c', 'collapse all'],
+        ['e', 'edit active'],
+        ['n', 'new module']
+      ] %>
+      <%= render 'topics/keyboard_group', title: 'Outcomes', rows: [
+        ['a', 'add outcome to active module'],
+        ['q', 'new question for hovered outcome']
+      ] %>
+      <%= render 'topics/keyboard_group', title: 'Views & Heat-map', rows: [
+        ['v', 'cycle view (modules → categories → outcomes)'],
+        ['h', 'toggle heat-map mode']
+      ] %>
+      <%= render 'topics/keyboard_group', title: 'Misc', rows: [
+        ['?', 'open this overlay'],
+        ['Esc', 'close overlay or blur input']
+      ] %>
+    </div>
+  </div>
+</div>
+
+<%# Visually-hidden link for screen-reader discovery (antagonist B.2). %>
+<button type="button"
+        class="visually-hidden"
+        data-action="click->topic-keyboard#openOverlay">
+  Open keyboard shortcuts overlay
+</button>
+
+<div class="kb-toast"
+     data-topic-keyboard-target="toast"
+     hidden
+     data-action="click->topic-keyboard#dismissToast">
+  Press <kbd>?</kbd> for keyboard shortcuts
+</div>
+
+<div class="visually-hidden"
+     aria-live="polite"
+     data-topic-keyboard-target="ariaLive"></div>

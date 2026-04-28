@@ -1,0 +1,13 @@
+<%# locals: topic:, exam_usage: %>
+<%# sub-53 — 4-card stat strip.  4th card has data-stat-target="usage" %>
+<%# so sub-3 (#52) can flip Questions ↔ Exam-uses without re-rendering. %>
+<div class="topic-detail__stat-strip">
+  <%= render 'stat_card', **topic_stat(label: 'MODULES', value: topic.topic_modules.size) %>
+  <%= render 'stat_card', **topic_stat(label: 'CATEGORIES', value: topic.learning_objectives.map(&:category).compact.uniq.size) %>
+  <%= render 'stat_card', **topic_stat(label: 'OUTCOMES', value: topic.learning_objectives.size) %>
+  <% if exam_usage.present? %>
+    <%= render 'stat_card', **topic_stat(label: 'EXAM USES', value: exam_usage.values.sum, mode: :usage) %>
+  <% else %>
+    <%= render 'stat_card', **topic_stat(label: 'QUESTIONS', value: topic.questions.size, mode: :usage) %>
+  <% end %>
+</div>
