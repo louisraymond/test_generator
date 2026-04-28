@@ -66,7 +66,19 @@
       <% questions.each do |q| %>
         <div class="qbank-row">
           <div class="qbank-type"><%= q.question_type %></div>
-          <div class="qbank-stem"><%= truncate(strip_tags(q.content.to_s), length: 160) %></div>
+          <div class="qbank-stem">
+            <%= truncate(strip_tags(q.content.to_s), length: 160) %>
+            <%# LO chips: mirrors the pattern in app/views/questions/index.html.erb so
+                question→learning-objective links are visible from the workspace tab too.
+                Spec: spec/requests/workspace_tabs_spec.rb 'renders learning-objective chips'. %>
+            <% if q.learning_objectives.any? %>
+              <ul class="outcome-list">
+                <% q.learning_objectives.each do |lo| %>
+                  <li><span class="outcome-chip"><%= truncate(lo.description.to_s, length: 80) %></span></li>
+                <% end %>
+              </ul>
+            <% end %>
+          </div>
           <div class="qbank-marks"><%= q.points %></div>
           <div class="exam-links">
             <%= link_to 'Edit', edit_question_path(q), class: 'btn link sm' %>
