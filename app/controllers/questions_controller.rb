@@ -198,35 +198,54 @@ class QuestionsController < ApplicationController
       when 'update_part'
         return head(:unprocessable_entity) unless @question.question_type == 'composite'
 
-        parts = Array(current['parts'])
-        idx   = value['index'].to_i
-        return head(:unprocessable_entity) if idx.negative? || idx >= parts.length
+        idx = value['index'].to_i
+        return head(:unprocessable_entity) if idx.negative?
 
-        # TODO: when QuestionPart AR rows become the source of truth (per migration
-        # 20260422160100), replace this jsonb write with @question.parts[idx].update!(...)
-        # and re-run spec/system/ui/question_editor_spec.rb. The CM6 editor reads
-        # question.options['parts'] only — it has no AR-awareness.
-        updated = parts[idx].dup
-        %w[stem type marks answer_label answer_size unit].each do |attr|
-          updated[attr] = value[attr] if value.key?(attr)
+        part = @question.question_parts.find_by(position: idx + 1)
+        return head(:unprocessable_entity) unless part
+
+        # Whitelist the same attributes the legacy jsonb path accepted.
+        # The wire shape uses `type` (jsonb era) but AR uses `part_type`;
+        # accept either for backward compat with in-flight clients.
+        attrs = {}
+        attrs[:stem]         = value['stem']         if value.key?('stem')
+        attrs[:part_type]    = value['part_type']    if value.key?('part_type')
+        attrs[:part_type]    = value['type']         if value.key?('type') && !attrs.key?(:part_type)
+        attrs[:marks]        = value['marks'].to_i   if value.key?('marks')
+        attrs[:answer_label] = value['answer_label'] if value.key?('answer_label')
+        attrs[:unit]         = value['unit']         if value.key?('unit')
+        # `answer_size` lives on the QuestionPart#options jsonb (it isn't
+        # promoted to a column yet) — merge in place so we don't clobber
+        # other typed-options keys.
+        if value.key?('answer_size')
+          merged_options = (part.options.is_a?(Hash) ? part.options : {}).merge('answer_size' => value['answer_size'])
+          attrs[:options] = merged_options
         end
-        parts[idx] = updated
-        current['parts'] = parts
+
+        part.update!(attrs)
       when 'add_part'
         return head(:unprocessable_entity) unless @question.question_type == 'composite'
 
-        parts = Array(current['parts']).map(&:deep_dup)
-        after = value['after'].to_i
-        insert_at = (after + 1).clamp(0, parts.length)
+        after_index = value['after'].to_i
+        insert_position = after_index + 2 # 1-based position of the new part
 
-        new_part = {
-          'stem'        => '',
-          'type'        => 'written',
-          'marks'       => 1,
-          'answer_size' => 'medium',
-        }
-        parts.insert(insert_at, new_part)
-        current['parts'] = parts
+        ActiveRecord::Base.transaction do
+          # Shift subsequent parts (positions >= insert_position) by +1 to
+          # make room. Update higher positions first so we never collide
+          # on the unique-ish (question_id, parent_part_id, position) tuple.
+          @question.question_parts
+                   .where('position >= ?', insert_position)
+                   .order(position: :desc)
+                   .each { |p| p.update!(position: p.position + 1) }
+
+          @question.question_parts.create!(
+            position:  insert_position,
+            stem:      '',
+            part_type: 'written',
+            marks:     1,
+            options:   { 'answer_size' => 'medium' }
+          )
+        end
       else
         current[key] = value
       end
