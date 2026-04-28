@@ -6,7 +6,7 @@ RSpec.describe 'Topic detail keyboard shortcuts', type: :system, js: true do
   let!(:topic) { create(:topic, :with_modules) }
 
   def visit_topic_with_keyboard(module_count: 2, active_module_index: 0)
-    visit topic_path(topic)
+    visit topic_path(topic, v2: 1)
     inject_keyboard_controller!(module_count: module_count, active_module_index: active_module_index)
     # Give Stimulus a moment to instantiate the controller.
     expect(page).to have_css('[data-controller~="topic-keyboard"]', visible: :all)

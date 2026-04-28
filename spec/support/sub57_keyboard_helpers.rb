@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 # === sub-57: keyboard ===
-# Test-only helpers. In an isolated worktree, show.html.erb does not yet wire
-# the topic-keyboard controller (its mount point belongs to sub-2 / sub-53).
-# These helpers visit the existing topic page and graft the controller, the
-# overlay markup, and a window-level event recorder onto the DOM via JS.
-# When sub-53 merges and includes the partial in show.html.erb, the
-# `inject_keyboard_controller!` helper becomes a no-op shim.
+# Test-only helpers for the topic-keyboard system specs. After integration,
+# show.html.erb (sub-53) mounts the topic-keyboard controller and overlay
+# partial directly when ?v2=1 is set, so the original DOM-grafting in
+# `inject_keyboard_controller!` is no longer required for the mount itself.
+# The helper now only installs the window-level event recorder so specs can
+# assert dispatched events; it intentionally does NOT re-inject the overlay
+# (the integrated page already has one — duplicating it would break the
+# spec's CSS selectors).
 module Sub57KeyboardHelpers
   EVENT_NAMES = %w[
     topic-sidebar:select-module
@@ -27,17 +29,19 @@ module Sub57KeyboardHelpers
     ApplicationController.render(partial: 'topics/keyboard_overlay')
   end
 
-  # Inject the controller mount + overlay markup + an event recorder.
-  # Must be called AFTER `visit topic_path(...)`.
-  def inject_keyboard_controller!(module_count: 0, active_module_index: 0)
-    overlay_html = keyboard_overlay_html.to_json
+  # Install the window-level event recorder for the topic-keyboard specs.
+  # The mount + overlay are now rendered server-side by sub-53's show.html.erb
+  # when ?v2=1 is set, so the helper only wires the recorder. The
+  # `module_count`/`active_module_index` arguments are kept for spec
+  # backwards-compatibility but are ignored — the integrated controller pulls
+  # those values from the DOM data attributes.
+  def inject_keyboard_controller!(module_count: 0, active_module_index: 0) # rubocop:disable Lint/UnusedMethodArgument
     events_js = EVENT_NAMES.to_json
 
     page.execute_script(<<~JS)
       (function() {
         if (window.__sub57Recorder) return; // idempotent
 
-        // 1. Install the event recorder on window so we can inspect dispatches.
         window.__sub57Recorder = { events: [] };
         var names = #{events_js};
         names.forEach(function(name) {
@@ -49,15 +53,6 @@ module Sub57KeyboardHelpers
             });
           });
         });
-
-        // 2. Append a mount-point + overlay partial to body, then attach Stimulus.
-        var mount = document.createElement('div');
-        mount.id = 'sub57-mount';
-        mount.setAttribute('data-controller', 'topic-keyboard');
-        mount.setAttribute('data-topic-keyboard-module-count-value', '#{module_count}');
-        mount.setAttribute('data-topic-keyboard-active-module-index-value', '#{active_module_index}');
-        mount.innerHTML = #{overlay_html};
-        document.body.appendChild(mount);
       })();
     JS
   end

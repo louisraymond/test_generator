@@ -1,16 +1,41 @@
 <%# locals: topic:, exam_usage: %>
-<%# sub-53 — main pane.  Renders toolbar, stat strip, heat-map slot, %>
-<%# module cards, and the keyboard overlay slot.  Sub-54-#57 overwrite %>
-<%# the leaf partials (_topic_heatmap, _module_card, _keyboard_overlay) %>
-<%# without touching this orchestrator. %>
+<%# Topic Detail v2 — main pane orchestrator. %>
+<%# Renders toolbar, stat strip, heat-map, view panes (categories / outcomes /
+%>
+<%# default modules), search empty-state, keyboard overlay. %>
+<%# Sub-54-#57 own the leaf partials; this orchestrator wires the locals. %>
 <%= render 'topic_toolbar', topic: topic %>
 <%= render 'stat_strip', topic: topic, exam_usage: exam_usage %>
-<%= render 'topic_heatmap', topic: topic, exam_usage: exam_usage %>
 
-<div class="topic-detail-v2__modules">
-  <% topic.topic_modules.each_with_index do |mod, idx| %>
-    <%= render 'module_card', mod: mod, exam_usage: exam_usage, idx: idx %>
-  <% end %>
+<%# Heat-map (sub-54). Pure presenter; no DB beyond preloaded associations. %>
+<% heatmap_presenter = TopicHeatmapPresenter.new(topic, exam_usage: exam_usage) %>
+<%= render 'topic_heatmap', presenter: heatmap_presenter, mode: :coverage %>
+
+<%# Default ("modules") view — visible by default; sub-56's view-switcher
+    toggles `hidden` on the alternate panes (`_view_categories`, `_view_outcomes_flat`). %>
+<section class="topic-detail__view topic-detail__view--modules"
+         data-topic-view-target="pane"
+         data-view="modules">
+  <div class="topic-detail-v2__modules">
+    <% topic.topic_modules.each_with_index do |mod, idx| %>
+      <%= render 'module_card', mod: mod, exam_usage: exam_usage, idx: idx %>
+    <% end %>
+  </div>
+</section>
+
+<%# Alternate views (sub-56) — hidden initially; the view-switcher controller
+    in the toolbar (or sidebar) flips `hidden` between panes. %>
+<%= render 'view_categories', topic: topic %>
+<%= render 'view_outcomes_flat', topic: topic %>
+
+<%# Search empty-state (sub-56). Hidden until the search controller decides
+    no rows match the query. %>
+<%= render 'search_empty' %>
+
+<%# Keyboard overlay (sub-57). Static partial, hidden via aria-hidden until
+    the keyboard controller toggles it open on `?`. %>
+<div data-controller="topic-keyboard"
+     data-topic-keyboard-module-count-value="<%= topic.topic_modules.size %>"
+     data-topic-keyboard-active-module-index-value="0">
+  <%= render 'keyboard_overlay' %>
 </div>
-
-<%= render 'keyboard_overlay' %>
