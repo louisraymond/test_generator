@@ -155,6 +155,17 @@ class QuestionsController < ApplicationController
     return head(:unprocessable_entity) unless patch.is_a?(Hash)
     patch = patch.deep_stringify_keys
 
+    # Editor #51 — serialise concurrent options_patch calls on the same
+    # question. Without the row-level lock, two concurrent jsonb-path
+    # update_part requests for different sub-parts both snapshot the
+    # same `options` hash, mutate independently, and the second writer
+    # wins — silently dropping the first edit. Spec at
+    # spec/system/ui/question_editor_spec.rb:38 ("preserves both pending
+    # edits when the user switches between part editors").
+    # The AR path doesn't race (different rows), but the lock is cheap
+    # so we hold it across the whole action for consistency.
+    @question.with_lock do
+    @question.reload  # pick up writes from a sibling locked PATCH
     current = if @question.options.is_a?(Hash)
                 @question.options.deep_dup
               elsif @question.options.is_a?(Array)
@@ -286,6 +297,7 @@ class QuestionsController < ApplicationController
     end
 
     @question.update_columns(options: current, updated_at: Time.current)
+    end  # @question.with_lock
 
     respond_to do |format|
       format.json { head :ok }
