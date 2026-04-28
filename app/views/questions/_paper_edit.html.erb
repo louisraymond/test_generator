@@ -25,10 +25,16 @@
     <div class="page-head__actions"
          data-controller="save-chrome"
          data-action="click->save-chrome#save keydown.meta+s@window->save-chrome#save keydown.ctrl+s@window->save-chrome#save cm:dirty@window->save-chrome#onDirty cm:saved@window->save-chrome#onSaved">
+      <%# Editor #51 — DO NOT add `data-action="click->save-chrome#save"` here.
+          The parent .page-head__actions div already declares the click
+          action, and a real DOM click bubbles through both. Adding it on
+          the button caused save_chrome#save to fire twice per click,
+          which doubled the PATCHes per editor and caused the
+          concurrent-edits spec to flake. Regression net at
+          spec/system/ui/save_double_fire_spec.rb. %>
       <button type="button"
               class="page-head__save-btn"
               data-save-chrome-target="button"
-              data-action="click->save-chrome#save"
               data-test-id="save-button"
               data-dirty="false">
         Save
