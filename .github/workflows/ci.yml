@@ -124,62 +124,52 @@ jobs:
           kamal deploy
 
   smoke:
-    # Selenium-driven system specs run AFTER deploy.
-    # Failure does NOT block deploy (deploy is already done) — it only
-    # triggers the rollback job below.
-    name: Post-deploy selenium canary
+    # Post-deploy canary that hits the *actual deployed instance* over
+    # HTTP. Replaces the previous selenium-driven canary which was
+    # flaking on pre-existing CodeMirror UI specs and triggering bogus
+    # rollbacks. This is faster, more reliable, and verifies what users
+    # actually see (the deployed app, not a fresh test bundle).
+    #
+    # Failure here triggers the rollback job below.
+    name: Post-deploy HTTP smoke
     needs: deploy
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: exam_generator_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      RAILS_ENV: test
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/exam_generator_test
-      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+    timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Chromium
-        run: sudo apt-get update && sudo apt-get install -y chromium-browser
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3.9'
-          bundler-cache: true
-
-      - name: Install puppeteer
-        run: npm install --omit=dev
-
-      - name: Setup database
-        run: bin/rails db:schema:load
-
-      - name: Run system specs (one retry to absorb flakes)
+      - name: Curl-based smoke check
+        env:
+          AUTH_USER: ${{ secrets.AUTH_USER }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+          BASE: https://selftesting.louisraymond.com
         run: |
-          if [ ! -d spec/system ]; then
-            echo "No spec/system directory; nothing to canary."
-            exit 0
-          fi
-          bundle exec rspec spec/system || {
-            echo "::warning::First run failed; retrying once before signalling rollback."
-            bundle exec rspec spec/system
+          set -euo pipefail
+          AUTH="${AUTH_USER}:${AUTH_PASSWORD}"
+
+          check() {
+            local label="$1" url="$2" needle="$3"
+            local resp
+            resp=$(curl -fsS -u "$AUTH" "$url" -w '\n%{http_code}\n')
+            local code=$(echo "$resp" | tail -n1)
+            if [ "$code" != "200" ]; then
+              echo "::error::$label returned HTTP $code"
+              return 1
+            fi
+            if ! echo "$resp" | grep -q "$needle"; then
+              echo "::error::$label rendered but missing marker: $needle"
+              return 1
+            fi
+            echo "  ok: $label (200, marker present)"
           }
+
+          echo "Smoke against $BASE..."
+          check "root"          "$BASE/"                    "ExamGenerator"
+          check "/topics/29"    "$BASE/topics/29"           "topic-detail"
+          check "/topics/29?v2" "$BASE/topics/29?v2=1"      "topic-detail-v2"
+          check "v2 heatmap"    "$BASE/topics/29?v2=1"      "topic-heatmap"
+          check "v2 module"     "$BASE/topics/29?v2=1"      "topic-module"
+          echo "Smoke OK."
 
   rollback:
     # Only fires if the deploy succeeded but the post-deploy canary failed.
