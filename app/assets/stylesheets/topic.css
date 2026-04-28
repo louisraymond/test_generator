@@ -1013,3 +1013,178 @@
   .topic-detail__stat-strip { grid-template-columns: repeat(2, 1fr); }
 }
 /* === /sub-53 === */
+
+/* === sub-54: heat-map === */
+
+.topic-heatmap {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 20px 24px;
+}
+
+.topic-heatmap__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.topic-heatmap__title {
+  font-family: var(--serif);
+  font-size: 22px;
+  margin: 0;
+}
+
+.topic-heatmap__toggle {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-heatmap__tab {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.topic-heatmap__tab[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.topic-heatmap__summary {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin: 0;
+  text-align: right;
+}
+
+.topic-heatmap__row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.topic-heatmap__row:first-child { border-top: 0; }
+
+.topic-heatmap__row-label {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.topic-heatmap__row-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.topic-heatmap__row-name {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.topic-heatmap__row-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.topic-heatmap__row-empty {
+  font-family: var(--mono);
+  color: var(--ink-4);
+}
+
+.topic-heatmap__row-totals {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+.topic-heatmap__totals-accent { color: var(--accent); }
+
+.topic-heatmap__cell {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 24px;
+  padding: 0;
+  cursor: pointer;
+  transition: outline-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+/* Tap-target enlargement (Persona A2): ~42x42 hit area without growing the visible box. */
+.topic-heatmap__cell::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.topic-heatmap__cell:hover,
+.topic-heatmap__cell:focus-visible {
+  outline: 1px solid var(--ink-2);
+  outline-offset: 1px;
+}
+
+.topic-heatmap__cell--heat-0 { background: var(--heat-0-bg); color: var(--heat-0-fg); }
+.topic-heatmap__cell--heat-1 { background: var(--heat-1-bg); color: var(--heat-1-fg); }
+.topic-heatmap__cell--heat-2 { background: var(--heat-2-bg); color: var(--heat-2-fg); }
+.topic-heatmap__cell--heat-3 { background: var(--heat-3-bg); color: var(--heat-3-fg); }
+.topic-heatmap__cell--heat-4 { background: var(--heat-4-bg); color: var(--heat-4-fg); }
+
+.topic-heatmap__legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.topic-heatmap__legend-swatch {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* Mode-driven text swap — the only data-mode CSS rule we need. */
+.topic-heatmap[data-mode="coverage"] [data-mode-text="utilization"],
+.topic-heatmap[data-mode="utilization"] [data-mode-text="coverage"] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topic-heatmap__tab,
+  .topic-heatmap__cell {
+    transition: none;
+  }
+}
+
+/* === /sub-54 === */

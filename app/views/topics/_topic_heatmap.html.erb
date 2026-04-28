@@ -1,1 +1,141 @@
-<!-- placeholder for #54 (sub-54) -->
+<%#
+  Topic heat-map block (sub-54).
+  Locals:
+    presenter: TopicHeatmapPresenter
+    mode:      :coverage | :utilization (default :coverage)
+
+  Cross-issue contracts:
+    - Dispatches `topic-heatmap:mode-changed` on mode swap (sub-53 listens for the 4th stat card).
+    - Dispatches `topic-heatmap:focus-lo` with { loId: Number } on cell click (sub-4 owns scroll/pulse).
+%>
+<% mode = (local_assigns[:mode] || :coverage).to_sym %>
+<% rows = presenter.rows %>
+<% if rows.any? %>
+  <% summary_cov = presenter.summary(:coverage) %>
+  <% summary_util = presenter.summary(:utilization) %>
+  <section
+    class="topic-heatmap"
+    data-controller="topic-heatmap"
+    data-topic-heatmap-mode-value="<%= mode %>"
+    data-mode="<%= mode %>"
+    aria-labelledby="topic-heatmap-title">
+    <header class="topic-heatmap__head">
+      <h2 id="topic-heatmap-title"
+          class="topic-heatmap__title"
+          data-topic-heatmap-target="title">
+        <span data-mode-text="coverage">Question coverage</span>
+        <span data-mode-text="utilization">Exam utilization</span>
+      </h2>
+
+      <div class="topic-heatmap__toggle"
+           role="tablist"
+           aria-label="Heat-map mode">
+        <button type="button"
+                role="tab"
+                class="topic-heatmap__tab"
+                aria-selected="<%= mode == :coverage %>"
+                tabindex="<%= mode == :coverage ? 0 : -1 %>"
+                title="# questions written for this outcome"
+                data-topic-heatmap-target="tab"
+                data-action="click->topic-heatmap#selectMode"
+                data-topic-heatmap-mode-param="coverage">
+          Coverage
+        </button>
+        <button type="button"
+                role="tab"
+                class="topic-heatmap__tab"
+                aria-selected="<%= mode == :utilization %>"
+                tabindex="<%= mode == :utilization ? 0 : -1 %>"
+                title="# distinct exams that have used this outcome"
+                data-topic-heatmap-target="tab"
+                data-action="click->topic-heatmap#selectMode"
+                data-topic-heatmap-mode-param="utilization">
+          Utilization
+        </button>
+      </div>
+
+      <p class="topic-heatmap__summary"
+         data-topic-heatmap-target="summary">
+        <span data-mode-text="coverage">
+          <%= summary_cov[:question_count] %> questions across
+          <%= summary_cov[:outcome_count] %> outcomes
+        </span>
+        <span data-mode-text="utilization">
+          <%= summary_util[:appearances] %> appearances ·
+          <%= summary_util[:zero_count] %> outcomes never used
+        </span>
+      </p>
+    </header>
+
+    <div class="topic-heatmap__rows">
+      <% rows.each_with_index do |row, idx| %>
+        <% mod = row.topic_module %>
+        <div class="topic-heatmap__row">
+          <a class="topic-heatmap__row-label" href="#mod-<%= mod.id %>">
+            <span class="topic-heatmap__row-eyebrow">M<%= format('%02d', idx + 1) %></span>
+            <span class="topic-heatmap__row-name"><%= mod.name %></span>
+          </a>
+
+          <% if row.empty? %>
+            <div class="topic-heatmap__row-empty" aria-label="No outcomes in this module">—</div>
+            <div class="topic-heatmap__row-totals" aria-hidden="true"></div>
+          <% else %>
+            <div class="topic-heatmap__row-grid">
+              <% row.cells.each do |cell| %>
+                <%
+                  lo = cell.lo
+                  cov_n = cell.coverage_count
+                  util_n = cell.utilization_count
+                  active_n = mode == :utilization ? util_n : cov_n
+                  units = heat_units(mode)
+                  label = "#{lo.category} — #{lo.description}, #{active_n} #{units}"
+                %>
+                <button type="button"
+                        class="topic-heatmap__cell <%= heat_color(active_n) %>"
+                        data-topic-heatmap-target="cell"
+                        data-action="click->topic-heatmap#focusOutcome"
+                        data-cell-lo-id="<%= lo.id %>"
+                        data-lo-category="<%= lo.category %>"
+                        data-lo-description="<%= lo.description %>"
+                        data-coverage-count="<%= cov_n %>"
+                        data-utilization-count="<%= util_n %>"
+                        data-coverage-bucket="<%= cell.bucket(:coverage) %>"
+                        data-utilization-bucket="<%= cell.bucket(:utilization) %>"
+                        title="<%= label %>"
+                        aria-label="<%= label %>"><%= heat_text(active_n, mode: mode) %></button>
+              <% end %>
+            </div>
+
+            <div class="topic-heatmap__row-totals">
+              <span data-mode-text="coverage">
+                <%= row.totals[:lo_count] %> LO /
+                <span class="topic-heatmap__totals-accent"><%= row.totals[:question_count] %> Q</span>
+              </span>
+              <span data-mode-text="utilization">
+                <%= row.totals[:lo_count] %> LO /
+                <span class="topic-heatmap__totals-accent"><%= row.totals[:uses_count] %> uses</span>
+              </span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <footer class="topic-heatmap__legend" aria-label="Cell colour legend">
+      <span class="topic-heatmap__legend-caption"
+            data-topic-heatmap-target="legendCaption">
+        <span data-mode-text="coverage">Questions:</span>
+        <span data-mode-text="utilization">Exam uses:</span>
+      </span>
+      <% [['none', 0], ['1–2', 1], ['3–4', 2], ['5–6', 3], ['7+', 4]].each do |label, bucket| %>
+        <span class="topic-heatmap__legend-item">
+          <span class="topic-heatmap__legend-swatch topic-heatmap__cell--heat-<%= bucket %>"
+                aria-hidden="true"></span>
+          <span class="topic-heatmap__legend-label"><%= label %></span>
+        </span>
+      <% end %>
+    </footer>
+  </section>
+<% else %>
+  <%# heat-map omitted — topic has 0 outcomes %>
+<% end %>
