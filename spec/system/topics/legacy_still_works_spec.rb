@@ -2,9 +2,9 @@
 
 require 'rails_helper'
 
-# Regression guard for sub-53.  When the v2 feature flag is off, the topic
-# detail page must render the legacy chrome unchanged so existing users
-# (and the existing topic_detail_controller form flows) keep working.
+# Regression guard for sub-53.  V2 is now the default; the legacy chrome
+# is still reachable via `?legacy=1` so existing users and the legacy
+# topic_detail_controller form flows keep working until we delete it.
 RSpec.describe 'Topic detail — legacy path (sub-53 regression)', type: :system do
   let!(:topic) do
     create(:topic, name: 'Thermal Physics', epigraph_quote: 'Truth is...').tap do |t|
@@ -14,8 +14,8 @@ RSpec.describe 'Topic detail — legacy path (sub-53 regression)', type: :system
     end
   end
 
-  it 'renders the legacy markup when v2 is off' do
-    visit topic_path(topic)
+  it 'renders the legacy markup when ?legacy=1 is set' do
+    visit topic_path(topic, legacy: 1)
     # Legacy chrome markers — these must still be on the page.
     expect(page).to have_css('.topic-detail.premium-page-wrapper')
     expect(page).to have_css('.topic-detail__back')

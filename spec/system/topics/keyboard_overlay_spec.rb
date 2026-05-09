@@ -6,7 +6,7 @@ RSpec.describe 'Topic detail keyboard overlay', type: :system, js: true do
   let!(:topic) { create(:topic, :with_modules) }
 
   def visit_topic_with_keyboard
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     inject_keyboard_controller!(module_count: 2, active_module_index: 0)
     expect(page).to have_css('[data-controller~="topic-keyboard"]', visible: :all)
   end

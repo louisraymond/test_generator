@@ -1,8 +1,9 @@
-<%# sub-53 — Topic detail orchestrator. %>
+<%# sub-53 — Topic detail orchestrator. V2 is the default; %>
+<%# `?legacy=1` (or TOPIC_DETAIL_LEGACY=true ENV) opts back into the legacy chrome. %>
 <%# %>
 <%# Partial ownership: %>
-<%#   _show_legacy       — preserved as-is for the flag-off path %>
-<%#   _show_v2           — sub-53 (this issue) %>
+<%#   _show_legacy       — opt-in via ?legacy=1 %>
+<%#   _show_v2           — default %>
 <%#     _topic_sidebar   — sub-53 %>
 <%#     _topic_toolbar   — sub-53 (search wired by sub-56) %>
 <%#     _stat_strip      — sub-53 (4th card swap by sub-3 / #52) %>
@@ -13,8 +14,8 @@
 <%#     _view_categories — sub-56 %>
 <%#     _view_outcomes_flat — sub-56 %>
 <%#     _search_empty    — sub-56 %>
-<% if topic_detail_v2?(params) %>
-  <%= render 'show_v2', topic: @topic, exam_usage: @exam_usage %>
-<% else %>
+<% if topic_detail_legacy?(params) %>
   <%= render 'show_legacy', topic: @topic %>
+<% else %>
+  <%= render 'show_v2', topic: @topic, exam_usage: @exam_usage %>
 <% end %>

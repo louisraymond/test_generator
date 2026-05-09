@@ -14,8 +14,8 @@
               data-lo-id="<%= row[:lo].id %>"
               data-lo-text="<%= row[:lo].description %>">
             <span class="topic-detail__m-tag mono">M<%= row[:module_idx].to_s.rjust(2, '0') %></span>
-            <span class="topic-detail__nq-chip" data-nq="<%= row[:lo].questions.size %>">
-              <%= row[:lo].questions.size %>
+            <span class="topic-detail__nq-chip" data-nq="<%= row[:lo].question_count %>">
+              <%= row[:lo].question_count %>
             </span>
             <span class="topic-detail__lo-text"><%= row[:lo].description %></span>
             <%= link_to '+ question',

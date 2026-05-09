@@ -7,10 +7,6 @@ class TopicsController < ApplicationController
 
   def show
     @exam_usage = LearningObjective.exam_appearance_counts_for(@topic.learning_objectives)
-    # sub-53 — Topic Detail v2 feature flag.  V2 chrome ships behind the
-    # `?v2=1` query param (per-request opt-in for QA) or `TOPIC_DETAIL_V2=true`
-    # ENV.  Once #54-#57 land we'll graduate this to a full flag library.
-    @topic_detail_v2 = helpers.topic_v2_enabled_for?(request)
   end
 
   def new
@@ -47,16 +43,25 @@ class TopicsController < ApplicationController
   def set_topic
     scope = Topic.all
     if action_name == 'show'
-      # Preload chain: subtopics for the back-link, modules + their LOs +
-      # link rows for the heat-map / coverage badges, top-level LOs and
-      # questions for the no-modules render path. Switching from
-      # `:questions` to `:question_learning_objectives` on the LO branches
-      # eliminates an N+1 over questions for the modules path while
-      # keeping `:questions` available where the no-modules legacy view
-      # still calls `obj.questions.size` (see Topic::LearningObjectiveManagement).
+      # Preload chain for the V2 default render path.
+      #
+      # LO branches preload `:question_learning_objectives` (the join row).
+      # The view layer reads question counts via `LearningObjective#question_count`,
+      # which uses the loaded join collection — see the model for why join-row
+      # count == questions count for this association.
+      #
+      # `topic_modules.questions` is a direct has_many (not :through), so it
+      # needs its own preload — `_module_card.html.erb` and `module_ministats`
+      # call `mod.questions.size` directly.
+      #
+      # Top-level `:learning_objectives` and `:questions` are preserved for the
+      # no-modules legacy render path (Topic::LearningObjectiveManagement).
       scope = scope.includes(
         :subtopics,
-        { topic_modules: { learning_objectives: :question_learning_objectives } },
+        { topic_modules: [
+          { learning_objectives: :question_learning_objectives },
+          :questions
+        ] },
         { learning_objectives: :question_learning_objectives },
         :questions
       )

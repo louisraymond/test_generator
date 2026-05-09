@@ -14,10 +14,9 @@ RSpec.describe 'topics/show.html.erb', type: :view do
     assign(:exam_usage, nil)
   end
 
-  context 'when v2 flag is on' do
+  context 'by default (V2 is the default)' do
     it 'renders the v2 wrapper with sidebar and main' do
       controller.request.path_parameters[:id] = topic.id
-      params[:v2] = '1'
       render template: 'topics/show'
       expect(rendered).to have_css('.topic-detail-v2.premium-page-wrapper')
       expect(rendered).to have_css('aside.topic-detail-v2__sidebar')
@@ -27,9 +26,10 @@ RSpec.describe 'topics/show.html.erb', type: :view do
     end
   end
 
-  context 'when v2 flag is off' do
+  context 'when legacy flag is set' do
     it 'renders the legacy chrome' do
       controller.request.path_parameters[:id] = topic.id
+      params[:legacy] = '1'
       render template: 'topics/show'
       expect(rendered).to have_css('.topic-detail.premium-page-wrapper')
       expect(rendered).not_to have_css('.topic-detail-v2')

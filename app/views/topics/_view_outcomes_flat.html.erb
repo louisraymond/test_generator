@@ -20,10 +20,10 @@
           data-outcome-row
           data-lo-id="<%= row[:lo].id %>"
           data-lo-text="<%= row[:lo].description %>"
-          data-nq="<%= row[:lo].questions.size %>"
+          data-nq="<%= row[:lo].question_count %>"
           data-topic-order="<%= row[:topic_order] %>">
         <span class="topic-detail__m-tag mono">M<%= row[:module_idx].to_s.rjust(2, '0') %></span>
-        <span class="topic-detail__nq-chip"><%= row[:lo].questions.size %></span>
+        <span class="topic-detail__nq-chip"><%= row[:lo].question_count %></span>
         <span class="topic-detail__lo-text"><%= row[:lo].description %></span>
         <span class="topic-detail__cat-tag mono"><%= row[:lo].category %></span>
         <%= link_to '+ question',

@@ -8,6 +8,15 @@ class LearningObjective < ApplicationRecord
   validates :category, presence: true
   validates :description, presence: true
 
+  # Number of questions tied to this LO. Reads the join row directly
+  # because (question_id, learning_objective_id) is uniquely indexed
+  # (see QuestionLearningObjective), so the join-row count equals the
+  # questions count. Lets callers avoid the unpreloaded `:through`
+  # target when `question_learning_objectives` is already loaded.
+  def question_count
+    question_learning_objectives.size
+  end
+
   # Number of distinct exams that have included a question targeting this LO.
   # Returns 0 without touching exams when the LO has no questions.
   def exam_appearance_count

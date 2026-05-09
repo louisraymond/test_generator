@@ -51,7 +51,7 @@ class TopicHeatmapPresenter
       zeros = los.count { |lo| @exam_usage.fetch(lo.id, 0).zero? }
       { appearances: appearances, zero_count: zeros }
     else
-      { question_count: los.sum { |lo| lo.questions.size }, outcome_count: los.size }
+      { question_count: los.sum(&:question_count), outcome_count: los.size }
     end
   end
 
@@ -61,7 +61,7 @@ class TopicHeatmapPresenter
     cells = mod.learning_objectives.sort_by { |lo| [lo.position.to_i, lo.id] }.map do |lo|
       Cell.new(
         lo: lo,
-        coverage_count: lo.questions.size,
+        coverage_count: lo.question_count,
         utilization_count: @exam_usage.fetch(lo.id, 0)
       )
     end
