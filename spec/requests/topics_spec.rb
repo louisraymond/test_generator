@@ -14,20 +14,20 @@ RSpec.describe 'Topics show', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    # Budget rationale: V2 is now the default chrome and renders heat-map
-    # cells, module cards with LO chips, and per-LO exam-usage callouts.
-    # Each of those introduces N+1 patterns the original sub-52 budget
-    # (≤ 18 queries on the legacy view) never had to cover. The spec
-    # comment that used to live here flagged this as the next optimization
-    # ("Sub-53 must drive this number DOWN by replacing `.count` with `.size`
-    # on the loaded collection, ideally hitting the original ≤ 6 target") —
-    # that optimization is the real fix and is tracked as a follow-up.
+    # Budget rationale: V2 is the default chrome. Rendering 4 modules,
+    # 28 LOs, and 112 questions costs ~10 queries:
     #
-    # Until that lands we hold the line at the V2 default's measured cost
-    # so future regressions still trip the budget. Run the spec locally
-    # and bump this number IF AND ONLY IF you can justify the extra
-    # queries; the goal is to drive it back down.
-    it 'issues no more than 220 SQL queries for a realistic topic on V2 default (follow-up: drive back to ≤ 18)' do
+    #   ~8 set_topic preloads (topic, subtopics, modules, modules.LOs,
+    #     modules.LOs.QLOs, modules.questions, top-level LOs, top-level
+    #     LOs.QLOs, top-level questions)
+    #   1 LearningObjective.exam_appearance_counts_for bulk fetch
+    #   ≈ 10 measured. Budget set to 12 to allow tiny variance.
+    #
+    # The view layer reads question counts via LearningObjective#question_count,
+    # which uses the already-preloaded `:question_learning_objectives` join —
+    # so per-LO `.size` calls are free. Bump this number IF AND ONLY IF
+    # you can justify the extra queries.
+    it 'issues no more than 12 SQL queries for a realistic topic' do
       # 4 modules x 7 LOs x ~4 questions/LO; some questions in exams
       4.times do |m_idx|
         mod = create(:topic_module, topic: topic, name: "Module #{m_idx}", position: m_idx)
@@ -48,7 +48,7 @@ RSpec.describe 'Topics show', type: :request do
       count = QueryCounter.count_for do
         get topic_path(topic)
       end
-      expect(count).to be <= 220, "expected <= 220 queries, got #{count}"
+      expect(count).to be <= 12, "expected <= 12 queries, got #{count}"
     end
   end
 end

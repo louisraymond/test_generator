@@ -118,7 +118,7 @@ module TopicDetailHelper
   # `exam_usage` is the topic-wide hash from sub-52 ({lo_id => count}).
   # `mode` is 'questions' (default) or 'usage' — chooses initial text/colour.
   def lo_chip_html(lo, exam_usage:, mode: 'questions')
-    q_count = lo.questions.size
+    q_count = lo.question_count
     u_count = exam_usage.fetch(lo.id, 0)
 
     initial_value = mode == 'usage' ? u_count : q_count
@@ -167,8 +167,8 @@ module TopicDetailHelper
     end
 
     case sort
-    when :nq_desc then base.sort_by { |r| -r[:lo].questions.size }
-    when :nq_asc  then base.sort_by { |r| r[:lo].questions.size }
+    when :nq_desc then base.sort_by { |r| -r[:lo].question_count }
+    when :nq_asc  then base.sort_by { |r| r[:lo].question_count }
     when :alpha   then base.sort_by { |r| r[:lo].description.to_s.downcase }
     else               base
     end

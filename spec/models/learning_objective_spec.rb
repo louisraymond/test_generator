@@ -1,6 +1,22 @@
 require 'rails_helper'
 
 RSpec.describe LearningObjective, type: :model do
+  describe '#question_count' do
+    let(:topic) { create(:topic) }
+    let(:lo)    { create(:learning_objective, topic: topic) }
+
+    it 'returns 0 when the LO has no questions' do
+      expect(lo.question_count).to eq(0)
+    end
+
+    it 'matches questions.size for an LO with multiple questions' do
+      3.times { lo.questions << create(:question, topic: topic) }
+      lo.reload
+      expect(lo.question_count).to eq(lo.questions.size)
+      expect(lo.question_count).to eq(3)
+    end
+  end
+
   describe '#exam_appearance_count' do
     let(:topic) { create(:topic) }
     let(:lo)    { create(:learning_objective, topic: topic) }
