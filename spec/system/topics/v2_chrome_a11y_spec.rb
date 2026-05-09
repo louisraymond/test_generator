@@ -17,7 +17,7 @@ RSpec.describe 'Topic detail v2 chrome — a11y (sub-53)', type: :system, js: tr
     t
   end
 
-  before { visit topic_path(topic, v2: 1) }
+  before { visit topic_path(topic) }
 
   it 'wraps the module list in <nav aria-label="Topic outline">' do
     expect(page).to have_css('nav[aria-label="Topic outline"] ul.topic-detail__sidebar-list li')

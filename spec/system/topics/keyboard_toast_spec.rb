@@ -6,7 +6,7 @@ RSpec.describe 'Topic detail keyboard first-visit toast', type: :system, js: tru
   let!(:topic) { create(:topic, :with_modules) }
 
   def visit_and_inject(clear_flag: true)
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     clear_toast_seen_flag! if clear_flag
     inject_keyboard_controller!(module_count: 2, active_module_index: 0)
     expect(page).to have_css('[data-controller~="topic-keyboard"]', visible: :all)
@@ -42,7 +42,7 @@ RSpec.describe 'Topic detail keyboard first-visit toast', type: :system, js: tru
   end
 
   it 'subsequent visits (flag pre-seeded) do NOT show the toast' do
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     seed_toast_seen_flag!
     inject_keyboard_controller!(module_count: 2, active_module_index: 0)
     expect(page).to have_css('[data-controller~="topic-keyboard"]', visible: :all)

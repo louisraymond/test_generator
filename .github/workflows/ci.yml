@@ -171,11 +171,14 @@ jobs:
           # the user's last-visited surface; the topic detail page is
           # the meaningful canary. Add /topics back as a stable index
           # check.
-          check "/topics"        "$BASE/topics"               "Topics"
-          check "/topics/29"     "$BASE/topics/29"            "topic-detail"
-          check "/topics/29?v2"  "$BASE/topics/29?v2=1"       "topic-detail-v2"
-          check "v2 heatmap"     "$BASE/topics/29?v2=1"       "topic-heatmap"
-          check "v2 module"      "$BASE/topics/29?v2=1"       "topic-module"
+          check "/topics"        "$BASE/topics"                  "Topics"
+          # V2 is the default — the topic detail page must ship the V2
+          # wrapper, heat-map, and module-card markup with no flag.
+          check "/topics/29"     "$BASE/topics/29"               "topic-detail-v2"
+          check "v2 heatmap"     "$BASE/topics/29"               "topic-heatmap"
+          check "v2 module"      "$BASE/topics/29"               "topic-module"
+          # Legacy chrome stays reachable behind ?legacy=1 until we delete it.
+          check "legacy chrome"  "$BASE/topics/29?legacy=1"      "modules-grid"
           echo "Smoke OK."
 
   rollback:

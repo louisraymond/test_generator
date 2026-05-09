@@ -62,33 +62,33 @@ RSpec.describe TopicDetailHelper, type: :helper do
     end
   end
 
-  describe '#topic_detail_v2?' do
-    it 'returns true when params[:v2] is "1"' do
-      expect(helper.topic_detail_v2?(ActionController::Parameters.new(v2: '1'))).to be(true)
+  describe '#topic_detail_legacy?' do
+    it 'returns true when params[:legacy] is "1"' do
+      expect(helper.topic_detail_legacy?(ActionController::Parameters.new(legacy: '1'))).to be(true)
     end
 
-    it 'returns false when params[:v2] is missing' do
-      expect(helper.topic_detail_v2?(ActionController::Parameters.new)).to be(false)
+    it 'returns false when params[:legacy] is missing (V2 is the default)' do
+      expect(helper.topic_detail_legacy?(ActionController::Parameters.new)).to be(false)
     end
 
-    it 'returns true when ENV TOPIC_DETAIL_V2 is set to true' do
-      original = ENV['TOPIC_DETAIL_V2']
-      ENV['TOPIC_DETAIL_V2'] = 'true'
-      expect(helper.topic_detail_v2?(ActionController::Parameters.new)).to be(true)
+    it 'returns true when ENV TOPIC_DETAIL_LEGACY is set to true' do
+      original = ENV['TOPIC_DETAIL_LEGACY']
+      ENV['TOPIC_DETAIL_LEGACY'] = 'true'
+      expect(helper.topic_detail_legacy?(ActionController::Parameters.new)).to be(true)
     ensure
-      ENV['TOPIC_DETAIL_V2'] = original
+      ENV['TOPIC_DETAIL_LEGACY'] = original
     end
   end
 
-  describe '#topic_v2_enabled_for?' do
-    it 'mirrors topic_detail_v2? for now and accepts a request-like object' do
-      req = double('Request', params: ActionController::Parameters.new(v2: '1'))
-      expect(helper.topic_v2_enabled_for?(req)).to be(true)
+  describe '#topic_legacy_enabled_for?' do
+    it 'mirrors topic_detail_legacy? and accepts a request-like object' do
+      req = double('Request', params: ActionController::Parameters.new(legacy: '1'))
+      expect(helper.topic_legacy_enabled_for?(req)).to be(true)
     end
 
-    it 'returns false for a request without v2 param' do
+    it 'returns false for a request without legacy param' do
       req = double('Request', params: ActionController::Parameters.new)
-      expect(helper.topic_v2_enabled_for?(req)).to be(false)
+      expect(helper.topic_legacy_enabled_for?(req)).to be(false)
     end
   end
 

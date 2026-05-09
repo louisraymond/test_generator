@@ -4,10 +4,9 @@
 #
 # Hosts the small string/format helpers used by the v2 sidebar, toolbar,
 # and stat strip partials, plus the feature-flag predicate that gates the
-# v2 markup behind a `?v2=1` query param or a `TOPIC_DETAIL_V2=true` ENV.
-#
-# Sub-issues #54-#57 will read these helpers; do not move them inline back
-# into the partials.
+# legacy markup behind a `?legacy=1` query param or a `TOPIC_DETAIL_LEGACY=true`
+# ENV.  V2 is the default; the flag exists so the old chrome stays reachable
+# while we phase the legacy controller flows out.
 module TopicDetailHelper
   # === sub-53: chrome ===
   # Renders a module's category / LO / question counts as the dot-separated
@@ -37,20 +36,20 @@ module TopicDetailHelper
     { label: label, value: value, html_data: html_data }
   end
 
-  # Feature-flag predicate.  V2 chrome ships behind `?v2=1` (per-request
-  # opt-in for QA) or a `TOPIC_DETAIL_V2=true` ENV (global opt-in for staging).
-  # Once #54-#57 land we'll graduate this to a real flag library.
-  def topic_detail_v2?(params_like)
-    return true if params_like.respond_to?(:[]) && params_like[:v2].to_s == '1'
+  # Feature-flag predicate.  V2 is the default; the legacy chrome ships
+  # behind `?legacy=1` (per-request opt-out) or a `TOPIC_DETAIL_LEGACY=true`
+  # ENV (global opt-out for staging).
+  def topic_detail_legacy?(params_like)
+    return true if params_like.respond_to?(:[]) && params_like[:legacy].to_s == '1'
 
-    ENV['TOPIC_DETAIL_V2'].to_s.downcase == 'true'
+    ENV['TOPIC_DETAIL_LEGACY'].to_s.downcase == 'true'
   end
 
   # Convenience wrapper that takes a request-like object (anything with
-  # `#params`) and forwards to `topic_detail_v2?`.  Lets controllers and
+  # `#params`) and forwards to `topic_detail_legacy?`.  Lets controllers and
   # views call the same predicate without re-extracting params.
-  def topic_v2_enabled_for?(request_like)
-    topic_detail_v2?(request_like.params)
+  def topic_legacy_enabled_for?(request_like)
+    topic_detail_legacy?(request_like.params)
   end
   # === /sub-53 ===
 

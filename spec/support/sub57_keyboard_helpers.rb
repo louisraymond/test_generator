@@ -3,7 +3,7 @@
 # === sub-57: keyboard ===
 # Test-only helpers for the topic-keyboard system specs. After integration,
 # show.html.erb (sub-53) mounts the topic-keyboard controller and overlay
-# partial directly when ?v2=1 is set, so the original DOM-grafting in
+# partial directly (V2 is the default), so the original DOM-grafting in
 # `inject_keyboard_controller!` is no longer required for the mount itself.
 # The helper now only installs the window-level event recorder so specs can
 # assert dispatched events; it intentionally does NOT re-inject the overlay
@@ -35,7 +35,7 @@ module Sub57KeyboardHelpers
   # whole topic graph.
   #
   # Sub-53's show.html.erb mounts the topic-keyboard controller server-side
-  # when ?v2=1 is set; the overlay markup ships with it. This helper:
+  # by default (V2); the overlay markup ships with it. This helper:
   #   1. Locates the integrated controller mount.
   #   2. Updates its data-* values to match the test's intent.
   #   3. Re-emits a Stimulus reconnect by toggling data-controller, so the

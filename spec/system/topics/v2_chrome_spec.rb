@@ -20,7 +20,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'renders the sidebar with topic name, epigraph, and module entries' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
 
     expect(page).to have_css('nav[aria-label="Topic outline"]')
     expect(page).to have_css('.topic-detail-v2__sidebar')
@@ -42,7 +42,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'shows MODULES · 0 and a + NEW MODULE CTA when topic has no modules' do
     topic = create(:topic, name: 'Empty Topic')
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
 
     expect(page).to have_css('.topic-detail__sidebar-modules-header', text: /MODULES · 0/)
     expect(page).to have_button('+ NEW MODULE')
@@ -50,7 +50,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'shows the stat strip with 4 cards' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
 
     expect(page).to have_css('.topic-detail__stat-card', count: 4)
     cards = page.all('.topic-detail__stat-card')
@@ -64,7 +64,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'shows the toolbar with search, +Outcome, +Module, ?' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
 
     expect(page).to have_css('input[placeholder="Search outcomes, categories, modules…"]')
     expect(page).to have_button('+ Outcome')
@@ -74,13 +74,13 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'renders the footer hint' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     expect(page).to have_css('.topic-detail__footer-hint', text: /press \? for keyboard shortcuts/i)
   end
 
   it 'renders the skip-to-content link as the first focusable element' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     expect(page).to have_css('a.topic-detail__skip-link', text: /Skip to main content/i, visible: :all)
     # The skip link must point at the main element id.
     expect(page).to have_css('a.topic-detail__skip-link[href="#topic-detail-main"]', visible: :all)
@@ -89,7 +89,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'sets aria-current on the clicked sidebar entry and scrolls main pane to that module' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
 
     third = topic.topic_modules[2]
     # Wait for Stimulus to connect (entry target binding implies the
@@ -115,7 +115,7 @@ RSpec.describe 'Topic detail v2 chrome (sub-53)', type: :system, js: true do
 
   it 'renders module sections in main pane with mod-{id} ids and tabindex on heading' do
     topic = build_topic_with_modules
-    visit topic_path(topic, v2: 1)
+    visit topic_path(topic)
     topic.topic_modules.each do |mod|
       expect(page).to have_css("##{ "mod-#{mod.id}" }")
     end
