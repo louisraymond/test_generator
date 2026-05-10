@@ -235,4 +235,9 @@ jobs:
             exit 1
           fi
           echo "Rolling back to $PREVIOUS_SHA"
-          kamal app rollback "$PREVIOUS_SHA"
+          # Kamal v2 doesn't have `kamal app rollback`. Equivalent is to
+          # re-run `kamal deploy` against the previous SHA; --skip-push tells
+          # Kamal not to rebuild/repush — the image for that SHA is already
+          # in the registry from its original deploy, so this just swaps the
+          # running container back.
+          kamal deploy --version="$PREVIOUS_SHA" --skip-push
