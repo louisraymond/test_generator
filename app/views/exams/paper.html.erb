@@ -37,7 +37,7 @@
   end
 %>
 
-<%= render 'cover_page', exam: @exam %>
+<%= render 'exams/cover_page', exam: @exam %>
 
 <% paper_pages.each_with_index do |pg, idx| %>
   <% section = pg[:section] %>
@@ -66,7 +66,7 @@
 
     <% pg[:questions].each do |eq| %>
       <% global_counter += 1 %>
-      <%= render 'paper_question', question: eq.question, counter: global_counter, exam_question: eq, editable: (@editable == true) %>
+      <%= render 'exams/paper_question', question: eq.question, counter: global_counter, exam_question: eq, editable: (@editable == true) %>
     <% end %>
 
     <div class="runfoot">

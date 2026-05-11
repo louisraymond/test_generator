@@ -37,12 +37,16 @@ module Api
       render json: { error: e.message }, status: :unprocessable_entity
     end
 
+    # Default → modern `exams/paper` template (matches web UI). Legacy
+    # `exams/show` is preserved as an escape hatch via `?style=legacy` for
+    # any external client pinned to the old layout.
     def pdf
       @exam = Exam.includes(exam_questions: :question).find(params[:id])
       @font_size = params[:font_size]&.to_i || 14
       @question_spacing = params[:question_spacing]&.to_i || 18
 
-      html = render_to_string(template: 'exams/show', layout: 'pdf', formats: [:html])
+      template = params[:style].to_s == 'legacy' ? 'exams/show' : 'exams/paper'
+      html = render_to_string(template: template, layout: 'pdf', formats: [:html])
       pdf_data = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
       send_data pdf_data, filename: "exam_#{@exam.id}.pdf", type: 'application/pdf'
     end
@@ -50,7 +54,8 @@ module Api
     def marking_scheme_pdf
       @exam = Exam.includes(exam_questions: :question).find(params[:id])
 
-      html = render_to_string(template: 'exams/marking_scheme', layout: 'pdf', formats: [:html])
+      template = params[:style].to_s == 'legacy' ? 'exams/marking_scheme' : 'exams/marker_paper'
+      html = render_to_string(template: template, layout: 'pdf', formats: [:html])
       pdf_data = PdfRenderer.render_to_pdf(html: html, base_url: request.base_url)
       send_data pdf_data, filename: "marking_scheme_#{@exam.id}.pdf", type: 'application/pdf'
     end

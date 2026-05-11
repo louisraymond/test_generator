@@ -76,6 +76,153 @@ components:
       properties:
         error: { type: string }
 
+    SectionSourceRuleInput:
+      type: object
+      required: [source_type, source_id]
+      properties:
+        source_type:
+          type: string
+          enum: [Topic, TopicModule, LearningObjective]
+        source_id: { type: integer }
+        weight:
+          type: integer
+          minimum: 1
+          default: 1
+        question_count_override:
+          type: integer
+          description: When set, this rule contributes exactly this many questions to the section, overriding weighted allocation.
+
+    SectionQuestionRuleInput:
+      type: object
+      required: [question_id, rule_type]
+      properties:
+        question_id: { type: integer }
+        rule_type:
+          type: string
+          enum: [force_include, exclude]
+        repeat_count:
+          type: integer
+          minimum: 1
+          default: 1
+          description: How many times the question is inserted (force_include only).
+
+    ExamSectionInput:
+      type: object
+      required: [name, position, question_count]
+      properties:
+        name: { type: string }
+        position:
+          type: integer
+          minimum: 0
+          description: Sort order within the template. Section A is position 0.
+        question_count:
+          type: integer
+          minimum: 1
+        duration_minutes: { type: integer }
+        min_points: { type: integer }
+        max_points: { type: integer }
+        letter:
+          type: string
+          description: Optional explicit section letter (defaults to A/B/C... from position).
+        question_type_filter:
+          type: array
+          description: Allowlist of question types this section accepts. Empty array = no filter.
+          items:
+            type: string
+        section_source_rules_attributes:
+          type: array
+          items: { $ref: '#/components/schemas/SectionSourceRuleInput' }
+        section_question_rules_attributes:
+          type: array
+          items: { $ref: '#/components/schemas/SectionQuestionRuleInput' }
+
+    ExamTemplateInput:
+      type: object
+      required: [exam_template]
+      properties:
+        exam_template:
+          type: object
+          required: [name, exam_sections_attributes]
+          properties:
+            name: { type: string }
+            description: { type: string }
+            duration_minutes: { type: integer }
+            subject: { type: string }
+            paper_number: { type: string }
+            tier:
+              type: string
+              enum: [foundation, higher, standard]
+            exam_sections_attributes:
+              type: array
+              items: { $ref: '#/components/schemas/ExamSectionInput' }
+
+    SectionSourceRule:
+      allOf:
+        - { $ref: '#/components/schemas/SectionSourceRuleInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+
+    SectionQuestionRule:
+      allOf:
+        - { $ref: '#/components/schemas/SectionQuestionRuleInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+
+    ExamSection:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        position: { type: integer }
+        question_count: { type: integer }
+        duration_minutes: { type: integer, nullable: true }
+        min_points: { type: integer, nullable: true }
+        max_points: { type: integer, nullable: true }
+        letter: { type: string, nullable: true }
+        question_type_filter:
+          type: array
+          items: { type: string }
+        section_source_rules:
+          type: array
+          items: { $ref: '#/components/schemas/SectionSourceRule' }
+        section_question_rules:
+          type: array
+          items: { $ref: '#/components/schemas/SectionQuestionRule' }
+
+    ExamTemplateResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        duration_minutes: { type: integer, nullable: true }
+        tier: { type: string, nullable: true }
+        subject: { type: string, nullable: true }
+        paper_number: { type: string, nullable: true }
+        total_questions: { type: integer }
+        total_duration: { type: integer, nullable: true }
+        use_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        exam_sections:
+          type: array
+          items: { $ref: '#/components/schemas/ExamSection' }
+
+    ExamTemplateSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        total_questions: { type: integer }
+        total_duration: { type: integer, nullable: true }
+        sections_count: { type: integer }
+        use_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
 paths:
   /up:
     get:
@@ -454,7 +601,10 @@ paths:
   /api/exams/{id}/pdf:
     get:
       summary: Download exam as PDF
-      description: Renders via Chromium/Grover. May take 10-30 seconds.
+      description: |
+        Renders via Chromium/Grover. May take 10-30 seconds.
+        Defaults to the modern paper-style template (`exams/paper`).
+        Pass `?style=legacy` to fall back to the original `exams/show` layout.
       parameters:
         - name: id
           in: path
@@ -466,6 +616,13 @@ paths:
         - name: question_spacing
           in: query
           schema: { type: integer, default: 18 }
+        - name: style
+          in: query
+          description: '`modern` (default) renders the paper-style layout with section headers; `legacy` renders the original show template.'
+          schema:
+            type: string
+            enum: [modern, legacy]
+            default: modern
       responses:
         '200':
           description: PDF binary
@@ -479,6 +636,71 @@ paths:
   /api/exams/{id}/marking_scheme_pdf:
     get:
       summary: Download marking scheme as PDF
+      description: |
+        Defaults to the modern marker-paper layout (`exams/marker_paper`).
+        Pass `?style=legacy` to fall back to the original `exams/marking_scheme` layout.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: style
+          in: query
+          description: '`modern` (default) or `legacy`.'
+          schema:
+            type: string
+            enum: [modern, legacy]
+            default: modern
+      responses:
+        '200':
+          description: PDF binary
+          content:
+            application/pdf: {}
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/exam_templates:
+    get:
+      summary: List exam templates
+      description: Returns a summary list ordered by `created_at` desc.
+      responses:
+        '200':
+          description: Array of exam-template summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ExamTemplateSummary' }
+
+    post:
+      summary: Create an exam template with sections and rules
+      description: |
+        Creates a sectioned `ExamTemplate` in a single nested payload. Each section can
+        filter the candidate pool by `question_type` and pin specific questions via
+        `force_include` rules (or remove them via `exclude` rules). Use `POST /api/exam_templates/{id}/generate`
+        to materialise an `Exam` from the template.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExamTemplateInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExamTemplateResponse' }
+        '422':
+          description: Validation error (e.g. force_include question's type isn't allowed by the section's question_type_filter, or referenced question_id does not exist)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/exam_templates/{id}:
+    get:
+      summary: Fetch a single exam template with its full nested structure
       parameters:
         - name: id
           in: path
@@ -486,9 +708,64 @@ paths:
           schema: { type: integer }
       responses:
         '200':
-          description: PDF binary
+          description: Exam template
           content:
-            application/pdf: {}
+            application/json:
+              schema: { $ref: '#/components/schemas/ExamTemplateResponse' }
+        '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/exam_templates/{id}/generate:
+    post:
+      summary: Materialise an exam from a template
+      description: |
+        Generates an `Exam` from the template using `preserve_order: true` semantics —
+        `force_include` questions are inserted in the order their rules were created,
+        and section ordering is preserved. If a section's `force_include` count exceeds
+        its `question_count`, the call returns 422 (no silent truncation).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Optional exam title. Defaults to `"{template.name} - {today}"`.
+      responses:
+        '201':
+          description: Exam generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exam_id: { type: integer }
+                  title: { type: string }
+                  question_count: { type: integer }
+                  pdf_url: { type: string }
+                  marking_scheme_url: { type: string }
+                  sections:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        position: { type: integer }
+                        name: { type: string }
+                        question_count: { type: integer }
+        '422':
+          description: Generation failed (e.g. over-pinned section or type-filter mismatch)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
         '404':
           content:
             application/json:
