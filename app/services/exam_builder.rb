@@ -4,25 +4,34 @@ class ExamBuilder
   class NotEnoughQuestionsError < Error; end
   class MissingSectionsError < Error; end
 
-  # Builds an exam from a template
-  def self.from_template(template_id:, title: nil)
+  # Builds an exam from a template.
+  #
+  # preserve_order: when true, force_include rules are inserted in rule-id
+  # order (i.e., the order they were created via the API), the section-final
+  # `shuffle` is skipped, and the generator raises if a section's force_include
+  # count exceeds its question_count. Used by the API path; defaults to false
+  # so the web UI keeps its existing shuffle behavior.
+  def self.from_template(template_id:, title: nil, preserve_order: false)
     template = ExamTemplate.find(template_id)
     raise MissingSectionsError, 'Template has no sections.' if template.exam_sections.empty?
-    
+
     title ||= "#{template.name} - #{Time.current.strftime('%Y-%m-%d')}"
-    
+
     ActiveRecord::Base.transaction do
+      duration = template.total_duration
+      duration = nil unless duration.to_i.positive? # Exam validates > 0 or nil
+
       exam = Exam.create!(
         title: title,
-        duration_minutes: template.total_duration,
+        duration_minutes: duration,
         exam_template_id: template.id
       )
-      
+
       position = 1
-      
+
       template.exam_sections.order(:position).each do |section|
-        questions = build_section_questions(section)
-        
+        questions = build_section_questions(section, preserve_order: preserve_order)
+
         questions.each do |question|
           exam.exam_questions.create!(
             question: question,
@@ -32,7 +41,7 @@ class ExamBuilder
           position += 1
         end
       end
-      
+
       template.increment_use_count!
       exam
     end
@@ -144,37 +153,53 @@ class ExamBuilder
     picked
   end
   
-  # Build questions for a specific section based on its rules
-  def self.build_section_questions(section)
-    questions = []
-    
-    # First, add all force-included questions (with repeats if specified)
-    section.section_question_rules.force_includes.includes(:question).each do |rule|
-      rule.repeat_count.times do
-        questions << rule.question
+  # Build questions for a specific section based on its rules.
+  #
+  # preserve_order: when true, force_includes are emitted in rule-id order,
+  # the final shuffle is skipped, and over-pinning (forced > question_count)
+  # raises. See ExamBuilder.from_template for context.
+  def self.build_section_questions(section, preserve_order: false)
+    forced_rules = section.section_question_rules.force_includes.order(:id).includes(:question)
+
+    forced = []
+    forced_rules.each do |rule|
+      type_filter = section.question_types
+      if type_filter.any? && rule.question.question_type.present? && !type_filter.include?(rule.question.question_type)
+        raise Error,
+              "Section '#{section.name}' force_includes question ##{rule.question_id} of " \
+              "type '#{rule.question.question_type}', which is not allowed by question_type_filter " \
+              "#{type_filter.inspect}."
       end
+      rule.repeat_count.times { forced << rule.question }
     end
-    
-    # Calculate how many more questions we need
-    remaining_count = section.question_count - questions.size
-    
+
+    if preserve_order && forced.size > section.question_count
+      raise Error,
+            "Section '#{section.name}' has #{forced.size} force_include rule(s) but " \
+            "question_count is #{section.question_count}. Reduce force_includes or " \
+            "raise question_count."
+    end
+
+    remaining_count = section.question_count - forced.size
+    filled = []
+
     if remaining_count > 0
-      # Get available questions from source rules
       available = section.available_questions
-      
-      # Apply weighted selection if multiple source rules
-      if section.section_source_rules.size > 1
-        selected = select_by_source_weights(section, available, remaining_count)
-      else
-        # Load to array first to avoid DISTINCT + RANDOM() conflict
-        selected = available.to_a.shuffle.take(remaining_count)
-      end
-      
-      questions.concat(selected)
+
+      filled = if section.section_source_rules.size > 1
+                 select_by_source_weights(section, available, remaining_count)
+               else
+                 # Load to array first to avoid DISTINCT + RANDOM() conflict
+                 available.to_a.shuffle.take(remaining_count)
+               end
     end
-    
-    # Shuffle to mix force-included with randomly selected
-    questions.shuffle
+
+    if preserve_order
+      # Pinned questions stay in their declared order; only the random fill is shuffled.
+      forced + filled.shuffle
+    else
+      (forced + filled).shuffle
+    end
   end
   
   # Select questions using weighted distribution across source rules

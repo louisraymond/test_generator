@@ -71,6 +71,12 @@ Rails.application.routes.draw do
         patch :autosave
       end
     end
+
+    resources :exam_templates, only: %i[create show index] do
+      member do
+        post :generate
+      end
+    end
   end
 
   if Rails.env.development?

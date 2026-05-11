@@ -13,7 +13,7 @@
     <tbody>
       <% items.each do |item| %>
         <tr>
-          <td class="ranking-item"><%= item %></td>
+          <td class="ranking-item"><%= item.is_a?(Hash) ? (item['text'] || item[:text]) : item %></td>
           <% scale.each do |_n| %>
             <td class="ranking-box"></td>
           <% end %>
