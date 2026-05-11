@@ -154,12 +154,18 @@ jobs:
             # -f makes 4xx/5xx fail loudly so we never treat an error page as
             # "smoke passed" just because grep happened to match.
             resp=$(curl -fLsS -u "$AUTH" "$url" -w '\n%{http_code}\n')
-            code=$(echo "$resp" | tail -n1)
+            # Use here-strings instead of `echo "$resp" | …`. `grep -q` exits
+            # the moment it finds the needle, which closes the pipe; the
+            # upstream `echo` then gets SIGPIPE and exits 141, and `set -o
+            # pipefail` propagates that as a pipeline failure — false-
+            # positive "marker missing". A here-string redirects the variable
+            # without spawning a pipe, so SIGPIPE never enters the picture.
+            code=$(tail -n1 <<< "$resp")
             if [ "$code" != "200" ]; then
               echo "::error::$label returned HTTP $code"
               return 1
             fi
-            if ! echo "$resp" | grep -q "$needle"; then
+            if ! grep -q "$needle" <<< "$resp"; then
               echo "::error::$label rendered but missing marker: $needle"
               return 1
             fi
@@ -229,4 +235,9 @@ jobs:
             exit 1
           fi
           echo "Rolling back to $PREVIOUS_SHA"
-          kamal app rollback "$PREVIOUS_SHA"
+          # Kamal v2 doesn't have `kamal app rollback`. Equivalent is to
+          # re-run `kamal deploy` against the previous SHA; --skip-push tells
+          # Kamal not to rebuild/repush — the image for that SHA is already
+          # in the registry from its original deploy, so this just swaps the
+          # running container back.
+          kamal deploy --version="$PREVIOUS_SHA" --skip-push
