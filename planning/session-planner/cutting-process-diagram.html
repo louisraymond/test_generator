@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Breakdown</title>
+<!-- Real typefaces (Fraunces / Inter / JetBrains Mono). Falls back gracefully to
+     Georgia / system-ui / ui-monospace if offline, so the file still renders. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== Exam Generator screen tokens (warm editorial palette) ===== */
+  :root {
+    --ink: #15110c; --ink-2: #3a342c; --ink-3: #6b6358; --ink-4: #9a9287;
+    --paper: #f7f4ee; --paper-2: #efeae0; --paper-3: #e5dfd3; --card: #fbf9f4;
+    --rule: #d8d0c0; --rule-2: #c6bda9;
+    --accent: #b4532a; --accent-ink: #7a3317;
+
+    --sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --r-card: 6px; --r-inner: 3px; --r-pill: 4px;
+    --shadow-overlay: 0 8px 24px rgba(21, 17, 12, 0.12);
+    --ease: cubic-bezier(0.2, 0.7, 0.3, 1); --dur: 150ms;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 14px; line-height: 1.5; height: 100%;
+  }
+  body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  header {
+    padding: 13px 22px; border-bottom: 1px solid var(--rule); background: var(--card);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 16px;
+  }
+  header h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: 20px; letter-spacing: -0.01em; }
+  header h1 small { color: var(--ink-3); font-family: var(--mono); font-size: 11px; margin-left: 10px; letter-spacing: 0.04em; }
+  .toggles { display: flex; gap: 6px; font-size: 11px; align-items: center; flex-wrap: wrap; }
+  .toggles label {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--ink-3);
+    padding: 4px 10px; border-radius: var(--r-pill); border: 1px solid var(--rule); user-select: none;
+    font-family: var(--mono); letter-spacing: 0.03em; background: var(--paper); transition: all var(--dur) var(--ease);
+  }
+  .toggles label:hover { color: var(--ink); border-color: var(--rule-2); }
+  .toggles label.off { opacity: 0.42; }
+  .toggles .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .toggles input { display: none; }
+  .toggles .sep { width: 1px; height: 18px; background: var(--rule); margin: 0 3px; }
+
+  main { display: grid; grid-template-columns: 1fr 384px; flex: 1; overflow: hidden; }
+  .canvas-wrap {
+    overflow: auto; padding: 30px 24px 90px; background: var(--paper);
+    background-image: radial-gradient(circle, rgba(107,99,88,0.13) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .canvas { position: relative; margin: 0 auto; }
+  .canvas svg.edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .edges path.spine { fill: none; stroke: var(--rule-2); stroke-width: 1.5; }
+  .edges line.guide { stroke: var(--rule); stroke-width: 1; }
+  .edges path.ann-edge { fill: none; stroke-width: 1.25; opacity: 0.55; }
+
+  .bubble {
+    position: absolute; background: var(--card); border: 1px solid var(--rule);
+    border-radius: 30px; padding: 10px 18px 10px 13px; color: var(--ink); cursor: pointer;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    display: flex; align-items: center; gap: 12px; min-height: 56px;
+    box-shadow: 0 1px 0 rgba(21,17,12,0.04); user-select: none; z-index: 3;
+  }
+  .bubble:hover { border-color: var(--rule-2); transform: translateY(-1px); box-shadow: var(--shadow-overlay); z-index: 7; }
+  .bubble.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(180,83,42,0.18), var(--shadow-overlay); z-index: 7; }
+
+  .bubble .num {
+    background: var(--paper-2); color: var(--ink-3); border-radius: 50%;
+    width: 27px; height: 27px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; flex-shrink: 0; font-variant-numeric: tabular-nums;
+    font-family: var(--mono); border: 1px solid var(--rule);
+  }
+  .bubble .titles { min-width: 0; flex: 1; }
+  .bubble .title { font-family: var(--serif); font-size: 15px; font-weight: 400; line-height: 1.25; letter-spacing: -0.005em; }
+  .bubble .subtitle { font-size: 11px; color: var(--ink-3); font-family: var(--mono); margin-top: 3px; letter-spacing: 0.01em; }
+  .bubble .pips { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+  .bubble .pip {
+    width: 19px; height: 19px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: var(--paper); font-family: var(--mono);
+  }
+
+  .bubble.kind-physical { border-style: dashed; background: transparent; }
+  .bubble.kind-physical .num { background: transparent; }
+  .bubble.kind-physical .title { color: var(--ink-3); font-style: italic; }
+  .bubble.kind-decision { border-color: var(--accent); }
+
+  .annotation {
+    position: absolute; background: var(--card); border: 1px solid var(--rule);
+    border-left-width: 3px; border-radius: var(--r-card); padding: 9px 12px; font-size: 11.5px;
+    line-height: 1.5; width: 300px; pointer-events: none; color: var(--ink-2);
+    box-shadow: 0 1px 2px rgba(21,17,12,0.05); z-index: 6;
+  }
+  .annotation .ann-label {
+    display: block; font-weight: 700; font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 4px; font-family: var(--mono);
+  }
+
+  .phase-label {
+    position: absolute; color: var(--ink-3); font-size: 9.5px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.14em; padding: 3px 10px; background: var(--paper);
+    border: 1px solid var(--rule); border-radius: var(--r-pill); z-index: 2; max-width: 220px;
+    font-family: var(--mono);
+  }
+
+  aside.detail { background: var(--card); border-left: 1px solid var(--rule); overflow-y: auto; padding: 24px 22px; }
+  aside.detail .placeholder { color: var(--ink-3); font-style: italic; font-family: var(--serif); font-size: 16px; text-align: center; padding-top: 52px; line-height: 1.7; }
+  .detail-title { margin: 0 0 7px; font-family: var(--serif); font-size: 19px; font-weight: 400; line-height: 1.3; letter-spacing: -0.01em; }
+  .detail-sub { color: var(--ink-3); font-size: 12px; font-family: var(--mono); margin-bottom: 18px; }
+  .detail-step-num {
+    display: inline-block; background: var(--accent); color: var(--paper); border-radius: var(--r-pill);
+    padding: 1px 8px; font-size: 11px; font-weight: 600; margin-right: 9px; vertical-align: 2px; font-family: var(--mono);
+  }
+  .detail-section { margin-bottom: 18px; }
+  .detail-section h4 { margin: 0 0 7px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3); font-weight: 700; font-family: var(--mono); }
+  .detail-section pre {
+    margin: 0; background: var(--paper-2); border: 1px solid var(--rule); border-radius: var(--r-inner);
+    padding: 11px 13px; font-family: var(--mono); font-size: 11px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word; color: var(--ink-2);
+  }
+  .detail-list { list-style: none; padding: 0; margin: 0; }
+  .detail-list li { padding: 9px 12px; margin-bottom: 7px; border-radius: var(--r-inner); font-size: 12px; border-left: 3px solid var(--rule); background: var(--paper-2); line-height: 1.5; color: var(--ink-2); }
+  .detail-nav { display: flex; gap: 8px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .detail-nav button {
+    flex: 1; padding: 8px 12px; background: var(--paper); border: 1px solid var(--rule);
+    color: var(--ink-2); border-radius: var(--r-pill); cursor: pointer; font-family: var(--sans); font-size: 12px;
+    transition: border-color var(--dur) var(--ease);
+  }
+  .detail-nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .detail-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .legend { background: var(--card); border-top: 1px solid var(--rule); padding: 8px 22px; display: flex; gap: 18px; font-size: 10.5px; color: var(--ink-3); flex-shrink: 0; flex-wrap: wrap; font-family: var(--mono); letter-spacing: 0.02em; }
+  .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="diagram-title">Breakdown</h1>
+  <div class="toggles" id="toggles"></div>
+</header>
+
+<main>
+  <div class="canvas-wrap"><div class="canvas" id="canvas"></div></div>
+  <aside class="detail" id="detail">
+    <div class="placeholder">Click a node (or use ↓/↑) to read its<br>full detail and notes here.</div>
+  </aside>
+</main>
+
+<div class="legend" id="legend"></div>
+
+<script>
+/* ===BEGIN DIAGRAM===
+   Replace this entire object with the breakdown for the user's topic.
+   See SKILL.md for the schema. Keep the sentinel comments so the data block
+   stays easy to find and replace on the next iteration. */
+const DIAGRAM = {
+  title: 'How session-planner cuts a book into sessions',
+  categories: [
+    { id: 'decision', label: 'Decided',       color: '#2e6b3f' },
+    { id: 'open',     label: 'Open question', color: '#2f5a8a' },
+    { id: 'risk',     label: 'Risk',          color: '#9a2a1e' }
+  ],
+  steps: [
+    { id: 's1', phase: 'Input',
+      title: 'Read the concept map',
+      subtitle: 'input: the existing concept map',
+      body: [{ heading: 'What it reads', text: 'The section index with page ranges, the dependency graph, and the key-figures table. No PDF needed.' }],
+      annotations: [
+        { category: 'decision', text: 'Slice from the concept map, never raw prose - the map is the global context that makes cutting tractable.' },
+        { category: 'risk', text: 'A thin or partial concept map passes its gaps straight into the cuts.' }
+      ] },
+    { id: 's2', phase: 'Reason about cuts',
+      title: 'Seed candidate cut points from headings',
+      subtitle: 'author structure = first guess',
+      body: [{ heading: 'Step', text: 'Take the section and sub-section headings in the map as the initial candidate boundaries.' }],
+      annotations: [
+        { category: 'decision', text: 'Start from the section seams the book already provides.' },
+        { category: 'risk', text: 'Narrative or un-signposted books give few headings - fall back to clustering by dependency instead.' }
+      ] },
+    { id: 's3',
+      title: 'Estimate load per section',
+      subtitle: 'cognitive load, not page count',
+      body: [{ heading: 'Step', text: 'Combine page-span with a density proxy (figure count, formula / quantitative concepts, dependency fan-in) into a rough number of sittings.' }],
+      annotations: [
+        { category: 'decision', text: 'Budget by load, not pages - 25 minutes of derivations is not 25 minutes of narrative.' },
+        { category: 'open', text: 'What goes into the density proxy, and how is each factor weighted?' },
+        { category: 'risk', text: 'The estimate is heuristic - the reason the whole plan is human-gated.' }
+      ] },
+    { id: 's4',
+      title: 'Map dependencies between concepts',
+      subtitle: 'find the safe seams',
+      body: [{ heading: 'Step', text: 'Read the dependency graph to find boundaries with few cross-edges, and flag any cut that would split a prerequisite from the concept that needs it.' }],
+      annotations: [
+        { category: 'decision', text: 'Never separate a prerequisite from its dependent inside one slice.' },
+        { category: 'open', text: 'Honour cross-chapter dependencies, or only within the current chapter?' }
+      ] },
+    { id: 's5',
+      title: 'Reconcile: resize for load, snap to seams',
+      subtitle: 'the crux of the cut',
+      body: [{ heading: 'Step', text: 'Merge sections under the load floor and split those over the ceiling, then move the resulting boundaries onto low-cross-edge dependency seams.' }],
+      annotations: [
+        { category: 'decision', text: 'A slice targets one sitting; allow a "2 sittings" tag rather than an unreadable chunk.' },
+        { category: 'open', text: 'What are the floor and ceiling thresholds in load terms?' },
+        { category: 'open', text: 'When load wants a cut but a dependency forbids it, which wins?' },
+        { category: 'risk', text: 'This is the step most likely to produce a cut you distrust.' }
+      ] },
+    { id: 's6',
+      title: 'Attach the standard definition of done',
+      subtitle: 'one uniform contract for every section',
+      body: [{ heading: 'Step', text: 'Every slice inherits the same definition of done - the standard contract. There is no bespoke per-section DoD; what differs between sections is only the content each criterion produces (e.g. a calculation question where the section has formulas, a diagram to make where it has a key figure).' }],
+      annotations: [
+        { category: 'decision', text: 'The DoD is uniform across sections - one standard contract stamped on every card, not assembled per slice.' },
+        { category: 'decision', text: 'The only per-slice variation is reassessment: if a section proves too big or needs more context, split it in two, or flag it for further refinement.' }
+      ] },
+    { id: 's7',
+      title: 'Emit the draft plan with a rationale per cut',
+      subtitle: 'slice, pages, load, why',
+      body: [{ heading: 'Output', text: 'The ordered slice list: each with page range, load estimate, and a one-line reason for the cut.' }],
+      annotations: [
+        { category: 'decision', text: 'Every cut carries a one-line rationale, so the plan is inspectable rather than a black box.' }
+      ] },
+    { id: 's8', phase: 'Gate',
+      title: 'You review and adjust the cuts',
+      subtitle: 'human sign-off', kind: 'decision',
+      body: [{ heading: 'Step', text: 'You merge, move, or override cut points and load estimates. Only approved cuts become the plan.' }],
+      annotations: [
+        { category: 'decision', text: 'Nothing becomes a plan without your sign-off - the core answer to "I do not trust the slicing".' },
+        { category: 'open', text: 'After approval, what gets produced - the diagram, a Kanban board, or both?' }
+      ] }
+  ]
+};
+/* ===END DIAGRAM=== */
+
+// ===================== RENDER ENGINE (generic — do not edit per-topic) =====================
+const SPINE_X = 250, BUBBLE_W = 380, BUBBLE_HALF = BUBBLE_W / 2;
+const ROW_GAP = 92, TOP_PAD = 46, BUBBLE_H = 56, ANN_GAP = 10, PHASE_GAP = 30;
+const ANNOTATION_X = SPINE_X + BUBBLE_HALF + 70, ANNOTATION_W = 300;
+const svgNS = 'http://www.w3.org/2000/svg';
+
+const catMap = {};
+DIAGRAM.categories.forEach(c => catMap[c.id] = c);
+const hiddenCats = new Set();
+let pinned = false;
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function stepIndex(id){ return DIAGRAM.steps.findIndex(s => s.id === id); }
+function visibleAnns(step){ return (step.annotations||[]).filter(a => !hiddenCats.has(a.category)); }
+
+function nodeBorderColor(step){
+  const anns = visibleAnns(step);
+  for (const c of DIAGRAM.categories){
+    if (anns.some(a => a.category === c.id)) return c.color;
+  }
+  return null;
+}
+
+// Measure real annotation heights off-screen so pinned layout never overlaps.
+function measureAnnHeights(){
+  const meas = document.createElement('div');
+  meas.style.cssText = 'position:absolute;visibility:hidden;left:-9999px;top:0;';
+  document.body.appendChild(meas);
+  const heights = DIAGRAM.steps.map(step => visibleAnns(step).map(a => {
+    const cat = catMap[a.category] || { label: a.category };
+    const el = document.createElement('div');
+    el.className = 'annotation';
+    el.style.position = 'static';
+    el.style.left = 'auto'; el.style.top = 'auto';
+    el.innerHTML = `<span class="ann-label">${esc(cat.label)}</span>${esc(a.text)}`;
+    meas.appendChild(el);
+    return el.offsetHeight;
+  }));
+  document.body.removeChild(meas);
+  return heights;
+}
+
+function layout(measured){
+  let y = TOP_PAD;
+  const pos = [];
+  let prevPhase = null;
+  DIAGRAM.steps.forEach((step, i) => {
+    // Open a gap before a new phase so its label sits clear of the previous bubble/arrow.
+    if (i > 0 && step.phase && step.phase !== prevPhase) y += PHASE_GAP;
+    if (step.phase) prevPhase = step.phase;
+    let rowHeight = ROW_GAP;
+    if (pinned && measured){
+      const stack = measured[i].reduce((s,h) => s + h + ANN_GAP, 0);
+      rowHeight = Math.max(ROW_GAP, stack + 16);
+    }
+    pos.push({ y, rowHeight });
+    y += rowHeight;
+  });
+  return { pos, total: y + 80 };
+}
+
+function render(){
+  const measured = pinned ? measureAnnHeights() : null;
+  const { pos, total } = layout(measured);
+  const canvas = document.getElementById('canvas');
+  canvas.style.width = (pinned ? (ANNOTATION_X + ANNOTATION_W + 40) : (SPINE_X + BUBBLE_HALF + 90)) + 'px';
+  canvas.style.height = total + 'px';
+  canvas.innerHTML = '';
+
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.classList.add('edges');
+  svg.setAttribute('preserveAspectRatio','none');
+
+  const defs = document.createElementNS(svgNS, 'defs');
+  let markers = '';
+  DIAGRAM.categories.forEach(c => {
+    markers += `<marker id="arr-${c.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${c.color}"/></marker>`;
+  });
+  markers += `<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c6bda9"/></marker>`;
+  defs.innerHTML = markers;
+  svg.appendChild(defs);
+
+  const guide = document.createElementNS(svgNS, 'line');
+  guide.classList.add('guide');
+  guide.setAttribute('x1', SPINE_X); guide.setAttribute('x2', SPINE_X);
+  guide.setAttribute('y1', pos[0].y + BUBBLE_H/2);
+  guide.setAttribute('y2', pos[pos.length-1].y + BUBBLE_H/2);
+  svg.appendChild(guide);
+
+  DIAGRAM.steps.forEach((step, i) => {
+    const targets = (step.children && step.children.length)
+      ? step.children.map(stepIndex).filter(j => j >= 0)
+      : (i < DIAGRAM.steps.length - 1 ? [i + 1] : []);
+    const y1 = pos[i].y + BUBBLE_H/2;
+    targets.forEach(j => {
+      const y2 = pos[j].y + BUBBLE_H/2;
+      const p = document.createElementNS(svgNS, 'path');
+      p.classList.add('spine');
+      p.setAttribute('d', `M ${SPINE_X} ${y1 + BUBBLE_H/2 + 2} L ${SPINE_X} ${y2 - BUBBLE_H/2 - 2}`);
+      p.setAttribute('marker-end','url(#arr)');
+      svg.appendChild(p);
+    });
+  });
+  canvas.appendChild(svg);
+
+  function addAnnEdge(from, to, color){
+    const p = document.createElementNS(svgNS, 'path');
+    const cx = (from.x + to.x)/2;
+    p.classList.add('ann-edge');
+    p.setAttribute('d', `M ${from.x} ${from.y} C ${cx} ${from.y}, ${cx} ${to.y}, ${to.x} ${to.y}`);
+    p.setAttribute('marker-end', `url(#arr-${color.id})`);
+    p.setAttribute('stroke', color.color);
+    svg.appendChild(p);
+  }
+
+  let lastPhase = null;
+  DIAGRAM.steps.forEach((step, i) => {
+    const p = pos[i];
+    if (step.phase && step.phase !== lastPhase){
+      const pl = document.createElement('div');
+      pl.className = 'phase-label';
+      pl.style.left = (SPINE_X - BUBBLE_HALF) + 'px';   // align with the bubble's left edge
+      pl.style.top = (p.y - 24) + 'px';                  // float ABOVE the first bubble of the phase
+      pl.textContent = step.phase;
+      canvas.appendChild(pl);
+      lastPhase = step.phase;
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (step.kind) bubble.classList.add('kind-' + step.kind);
+    bubble.dataset.idx = i;
+    bubble.style.left = (SPINE_X - BUBBLE_HALF) + 'px';
+    bubble.style.top = p.y + 'px';
+    bubble.style.width = BUBBLE_W + 'px';
+    const bc = nodeBorderColor(step);
+    if (bc) bubble.style.borderColor = bc;
+
+    const counts = {};
+    visibleAnns(step).forEach(a => counts[a.category] = (counts[a.category]||0)+1);
+    const pips = DIAGRAM.categories
+      .filter(c => counts[c.id])
+      .map(c => `<span class="pip" style="background:${c.color}">${counts[c.id]}</span>`).join('');
+
+    bubble.innerHTML = `
+      <div class="num"${bc ? ` style="border-color:${bc};color:${bc}"`:''}>${i+1}</div>
+      <div class="titles">
+        <div class="title">${esc(step.title)}</div>
+        ${step.subtitle ? `<div class="subtitle">${esc(step.subtitle)}</div>` : ''}
+      </div>
+      <div class="pips">${pips}</div>`;
+    bubble.onclick = () => select(i);
+    canvas.appendChild(bubble);
+
+    // annotation cards ONLY render in "pin all" mode; measured heights → no overlap
+    if (pinned){
+      let ay = p.y;
+      visibleAnns(step).forEach((a, k) => {
+        const cat = catMap[a.category] || { id: a.category, color: '#6b6358', label: a.category };
+        const ann = document.createElement('div');
+        ann.className = 'annotation';
+        ann.style.left = ANNOTATION_X + 'px';
+        ann.style.top = ay + 'px';
+        ann.style.borderLeftColor = cat.color;
+        ann.innerHTML = `<span class="ann-label" style="color:${cat.color}">${esc(cat.label)}</span>${esc(a.text)}`;
+        canvas.appendChild(ann);
+        addAnnEdge({ x: SPINE_X + BUBBLE_HALF, y: p.y + BUBBLE_H/2 }, { x: ANNOTATION_X, y: ay + 16 }, cat);
+        ay += measured[i][k] + ANN_GAP;
+      });
+    }
+  });
+}
+
+let selectedIdx = null;
+
+function select(idx){
+  document.querySelectorAll('.bubble.selected').forEach(b => b.classList.remove('selected'));
+  const b = document.querySelector(`.bubble[data-idx="${idx}"]`);
+  if (b){ b.classList.add('selected'); b.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  selectedIdx = idx;
+  renderDetail(DIAGRAM.steps[idx], idx);
+}
+
+function renderDetail(step, idx){
+  const root = document.getElementById('detail');
+  let html = `<div class="detail-title"><span class="detail-step-num">${idx+1}</span>${esc(step.title)}</div>`;
+  if (step.subtitle) html += `<div class="detail-sub">${esc(step.subtitle)}</div>`;
+  (step.body||[]).forEach(sec => {
+    html += `<div class="detail-section"><h4>${esc(sec.heading)}</h4><pre>${esc(sec.text)}</pre></div>`;
+  });
+  DIAGRAM.categories.forEach(c => {
+    const items = (step.annotations||[]).filter(a => a.category === c.id);
+    if (!items.length) return;
+    html += `<div class="detail-section"><h4 style="color:${c.color}">${esc(c.label)} (${items.length})</h4><ul class="detail-list">`;
+    items.forEach(a => html += `<li style="border-left-color:${c.color}">${esc(a.text)}</li>`);
+    html += `</ul></div>`;
+  });
+  if (!(step.body||[]).length && !(step.annotations||[]).length){
+    html += `<div style="color:var(--ink-3);font-style:italic;text-align:center;padding:20px 0;">No detail for this step.</div>`;
+  }
+  html += `<div class="detail-nav">
+    <button id="prev" ${idx===0?'disabled':''}>← Previous</button>
+    <button id="next" ${idx===DIAGRAM.steps.length-1?'disabled':''}>Next →</button>
+  </div>`;
+  root.innerHTML = html;
+  document.getElementById('prev').onclick = () => select(idx-1);
+  document.getElementById('next').onclick = () => select(idx+1);
+}
+
+function buildChrome(){
+  document.getElementById('diagram-title').innerHTML = `${esc(DIAGRAM.title)} <small>// breakdown</small>`;
+  document.title = DIAGRAM.title + ' — breakdown';
+  const tg = document.getElementById('toggles');
+
+  DIAGRAM.categories.forEach(c => {
+    const lbl = document.createElement('label');
+    lbl.innerHTML = `<span class="dot" style="background:${c.color}"></span><input type="checkbox" checked> ${esc(c.label)}`;
+    lbl.querySelector('input').onchange = e => {
+      lbl.classList.toggle('off', !e.target.checked);
+      if (e.target.checked) hiddenCats.delete(c.id); else hiddenCats.add(c.id);
+      render();
+      if (selectedIdx !== null) select(selectedIdx);
+    };
+    tg.appendChild(lbl);
+  });
+
+  const sep = document.createElement('span'); sep.className = 'sep'; tg.appendChild(sep);
+
+  const pinLbl = document.createElement('label');
+  pinLbl.classList.add('off');
+  pinLbl.innerHTML = `<input type="checkbox"> 📌 Pin all notes`;
+  pinLbl.querySelector('input').onchange = e => {
+    pinned = e.target.checked;
+    pinLbl.classList.toggle('off', !pinned);
+    render();
+    if (selectedIdx !== null) select(selectedIdx);
+  };
+  tg.appendChild(pinLbl);
+
+  const lg = document.getElementById('legend');
+  lg.innerHTML = DIAGRAM.categories.map(c => `<span><span class="swatch" style="background:${c.color}"></span>${esc(c.label)}</span>`).join('')
+    + `<span style="margin-left:auto">click / ↓↑ to read a node · pin to splay all notes on the canvas</span>`;
+}
+
+document.addEventListener('keydown', e => {
+  if (selectedIdx === null) return;
+  if (e.key==='ArrowDown'||e.key==='j'){ e.preventDefault(); if (selectedIdx < DIAGRAM.steps.length-1) select(selectedIdx+1); }
+  if (e.key==='ArrowUp'||e.key==='k'){ e.preventDefault(); if (selectedIdx > 0) select(selectedIdx-1); }
+});
+
+buildChrome();
+render();
+// re-measure once webfonts settle so pinned layout stays correct
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (pinned) render(); });
+</script>
+</body>
+</html>
