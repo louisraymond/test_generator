@@ -71,7 +71,7 @@ group :test do
   gem "capybara-screenshot-diff", "~> 1.9"
 end
 
-gem "rspec-rails", "~> 7.1", group: :test
+gem "rspec-rails", "~> 8.0", group: :test
 gem "factory_bot_rails", "~> 6.5", group: :test
 
 # OpenAPI spec generation from request specs
