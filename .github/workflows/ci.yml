@@ -37,7 +37,7 @@ jobs:
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Chromium
         # Some non-system specs still touch Grover/puppeteer for PDF rendering.
@@ -83,7 +83,7 @@ jobs:
       previous_sha: ${{ steps.capture_prev.outputs.sha }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2  # need HEAD~1 for rollback target
 
@@ -202,7 +202,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ruby/setup-ruby@v1
         with:
