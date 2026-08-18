@@ -60,6 +60,12 @@ RSpec.describe 'Exams paper (student PDF redesign)', type: :request do
       expect(body).to include('lines lines--5 lines--ruled')
       expect(body).to include('lines lines--8 lines--ruled')
     end
+
+    it 'never renders the calculation-style final-answer line on prose questions' do
+      get paper_exam_path(prose_exam)
+      doc = Nokogiri::HTML(response.body)
+      expect(doc.css('.finalans')).to be_empty
+    end
   end
 
   describe 'GET /exams/:id/paper' do

@@ -280,13 +280,12 @@
       </ol>
 
     <% else %>
-      <%# written / markdown / fallback — plain prose with ruled lines %>
+      <%# written / markdown / fallback — plain prose with ruled lines.
+          No final-answer rule here: that's calculation furniture, and on
+          multi-part written answers it reads as noise. %>
       <div class="q__stem markdown-content"
            <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
       <%= render_ruled_lines(marks_to_workspace(question)) %>
-      <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
-        <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
-      <% end %>
     <% end %>
   </div>
   <div class="q__marks"><i>[<b><%= question.points %></b> <%= 'mark'.pluralize(question.points.to_i) %>]</i></div>
