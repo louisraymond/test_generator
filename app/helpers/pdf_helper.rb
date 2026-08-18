@@ -69,12 +69,18 @@ module PdfHelper
   # (.q carries page-break-inside: avoid, so the failure mode is a question
   # spilling wholesale to an unnumbered sheet — cosmetic, but avoid it.)
 
-  PAGE_BUDGET = 880             # px of question space per .paper (983px content minus runhead/runfoot)
-  SECTION_HEAD_COST = 90        # the section banner on a section's first page
+  # Constants calibrated against puppeteer-measured renders of real
+  # questions (2026-08-18): line box 26px, flowing stems fit ~80 chars/line
+  # (72 keeps a raggedness margin), per-question chrome ~34px incl. the
+  # 18px margin-bottom, usable page = 983px content - runhead - runfoot
+  # and their margins ≈ 913px.
+  PAGE_BUDGET = 900             # px of question space per .paper (983px content - runhead/runfoot ≈ 913)
+  SECTION_HEAD_COST = 80        # the section banner on a section's first page
   MAX_QUESTIONS_PER_PAGE = 6    # bounds estimator error on batches of tiny questions
-  STEM_CHARS_PER_LINE = 60      # conservative for 11.5pt Cormorant across the stem column
-  TEXT_LINE = 24
-  QUESTION_CHROME = 64          # question number/title row + margins around a .q
+  STEM_CHARS_PER_LINE = 88      # measured ~90 with the widest fallback font; Cormorant packs more
+  TEXT_LINE = 26                # measured line box (em-based, so font-independent)
+  PARAGRAPH_GAP = 6             # a blank markdown line renders as a paragraph margin, not a text line
+  QUESTION_CHROME = 36          # measured 34: question number row + .q margin-bottom
 
   # Greedy packer: fill each page up to the budget, never splitting a
   # question. The first page of a section reserves room for its banner.
@@ -129,7 +135,10 @@ module PdfHelper
   def workspace_height(question)
     klass = marks_to_workspace(question)
     h = if (n = klass[/lines--(\d+)/, 1])
-          14 + n.to_i * TEXT_LINE
+          # Exact height of the emitted ruling: 14px lead-in rule, 24px
+          # pitch thereafter, 1px stroke each (matches measured renders).
+          n = n.to_i
+          14 + (n - 1) * 24 + n
         else
           { 'workbox--sm' => 120, 'workbox--md' => 200,
             'workbox--lg' => 350, 'workbox--xl' => 550 }.find { |k, _| klass.include?(k) }&.last || 550
@@ -141,8 +150,15 @@ module PdfHelper
   end
 
   def estimated_text_height(text)
-    lines = text.to_s.split("\n").sum { |ln| [(ln.length / STEM_CHARS_PER_LINE.to_f).ceil, 1].max }
-    [lines, 1].max * TEXT_LINE
+    h = 0
+    text.to_s.split("\n").each do |ln|
+      if ln.strip.empty?
+        h += PARAGRAPH_GAP
+      else
+        h += [(ln.length / STEM_CHARS_PER_LINE.to_f).ceil, 1].max * TEXT_LINE
+      end
+    end
+    [h, TEXT_LINE].max
   end
 
   # Renders a prose answer region as stacked <hr class="rule-line"> strokes
