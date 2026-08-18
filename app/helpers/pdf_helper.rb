@@ -29,21 +29,25 @@ module PdfHelper
 
     prose = %w[written markdown composite].include?(type)
 
-    # answer_size override
+    # answer_size override. Prose sizes are calibrated against real
+    # handwritten sittings — a 4-mark written answer occupies 2-4 lines,
+    # so the region is ~marks + 1 lines, capped at 8. The old half-page
+    # regions (lines--12/16/22) made short-answer papers mostly whitespace.
     case size
-    when 'long'   then return prose ? 'lines lines--22' : 'workbox workbox--xl'
-    when 'medium' then return prose ? 'lines lines--12' : 'workbox workbox--lg'
-    when 'short'  then return 'lines lines--1'
+    when 'long'   then return prose ? 'lines lines--8' : 'workbox workbox--xl'
+    when 'medium' then return prose ? 'lines lines--5' : 'workbox workbox--lg'
+    when 'short'  then return prose ? 'lines lines--3' : 'lines lines--1'
     end
 
     if prose
       # Prose answers — ruled lines, no enclosing box.
       case marks
-      when 0, 1 then 'lines lines--4'
-      when 2    then 'lines lines--6'
-      when 3    then 'lines lines--10'
-      when 4    then 'lines lines--16'
-      else           'lines lines--22'    # 550-ish px ≈ half-page ruled
+      when 0, 1 then 'lines lines--2'
+      when 2    then 'lines lines--3'
+      when 3    then 'lines lines--4'
+      when 4    then 'lines lines--5'
+      when 5    then 'lines lines--6'
+      else           'lines lines--8'
       end
     else
       # Math / calculation — blank working box.

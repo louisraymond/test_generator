@@ -52,26 +52,33 @@ RSpec.describe PdfHelper, type: :helper do
     describe 'prose question types render ruled lines, not a workbox' do
       Qtype = Struct.new(:points, :answer_size, :question_type)
 
+      # Prose sizing is calibrated against real handwritten sittings
+      # (2-4 mark answers take 2-4 written lines): roughly marks + 1
+      # lines, capped at 8 — never the old half-page regions.
       it 'written → ruled lines sized by marks' do
-        expect(helper.marks_to_workspace(Qtype.new(1, nil, 'written'))).to eq('lines lines--4')
-        expect(helper.marks_to_workspace(Qtype.new(3, nil, 'written'))).to eq('lines lines--10')
-        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'written'))).to eq('lines lines--22')
+        expect(helper.marks_to_workspace(Qtype.new(1, nil, 'written'))).to eq('lines lines--2')
+        expect(helper.marks_to_workspace(Qtype.new(2, nil, 'written'))).to eq('lines lines--3')
+        expect(helper.marks_to_workspace(Qtype.new(3, nil, 'written'))).to eq('lines lines--4')
+        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'written'))).to eq('lines lines--6')
+        expect(helper.marks_to_workspace(Qtype.new(8, nil, 'written'))).to eq('lines lines--8')
       end
 
       it 'markdown → same as written' do
-        expect(helper.marks_to_workspace(Qtype.new(4, nil, 'markdown'))).to eq('lines lines--16')
+        expect(helper.marks_to_workspace(Qtype.new(4, nil, 'markdown'))).to eq('lines lines--5')
       end
 
       it 'composite → ruled lines (sub-parts each render their own region)' do
-        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'composite'))).to eq('lines lines--22')
+        expect(helper.marks_to_workspace(Qtype.new(5, nil, 'composite'))).to eq('lines lines--6')
       end
 
       it 'calculation stays on workbox' do
         expect(helper.marks_to_workspace(Qtype.new(5, nil, 'calculation'))).to eq('workbox workbox--xl')
       end
 
-      it "answer_size 'long' on a written question yields tall ruled lines" do
-        expect(helper.marks_to_workspace(Qtype.new(1, 'long', 'written'))).to eq('lines lines--22')
+      it 'answer_size overrides on prose stay line-scaled, not workbox-scaled' do
+        expect(helper.marks_to_workspace(Qtype.new(1, 'long', 'written'))).to eq('lines lines--8')
+        expect(helper.marks_to_workspace(Qtype.new(6, 'medium', 'markdown'))).to eq('lines lines--5')
+        expect(helper.marks_to_workspace(Qtype.new(6, 'short', 'written'))).to eq('lines lines--3')
       end
     end
   end
