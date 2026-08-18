@@ -284,6 +284,20 @@
 .lines--16 { min-height: 384px; }
 .lines--22 { min-height: 528px; }
 
+/* Ruled regions emitted as real <hr> strokes (via PdfHelper#render_ruled_lines).
+ * Borders are vector stroke ops in Skia/PDF, so unlike the gradient
+ * background above (stripped in @media print — see the note there), these
+ * survive into the printed paper. .lines--ruled kills the gradient so
+ * screen and print show a single, identical ruling. */
+.lines--ruled { background: none; min-height: 0; }
+.rule-line {
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  height: 23px;
+  margin: 0;
+}
+.rule-line:first-child { height: 14px; } /* breathing room under the stem */
+
 .workbox {
   border: .5pt solid var(--rule);
   border-radius: 2px;
