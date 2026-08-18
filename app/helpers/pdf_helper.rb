@@ -61,6 +61,20 @@ module PdfHelper
     end
   end
 
+  # Renders a prose answer region as stacked <hr class="rule-line"> strokes
+  # inside its .lines--N container. Skia/PDF keeps borders as vector stroke
+  # ops, so unlike the gradient background (stripped in @media print — see
+  # paper.css), these rules survive into the printed paper without
+  # rasterising. Workbox classes pass through as a plain (blank) div.
+  def render_ruled_lines(workspace_class)
+    count = workspace_class[/lines--(\d+)/, 1].to_i
+    return tag.div(class: workspace_class) if count.zero? || workspace_class.include?('workbox')
+
+    tag.div(class: "#{workspace_class} lines--ruled") do
+      safe_join(Array.new(count) { tag.hr(class: 'rule-line') })
+    end
+  end
+
   # Renders a "Final answer: ___ unit" rule. Omit unit: to skip the unit span.
   def render_final_answer(label:, unit: nil)
     tag.div(class: 'finalans') do

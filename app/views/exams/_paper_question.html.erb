@@ -274,7 +274,7 @@
             <span <% if editable %>data-edit data-field="parts.<%= i %>.stem"<% end %>
                   class="markdown-content"><%= render_markdown_inline(stem.to_s) %></span>
             <span class="composite__marks">[<%= marks %>]</span>
-            <div class="lines lines--2"></div>
+            <%= render_ruled_lines('lines lines--2') %>
           </li>
         <% end %>
       </ol>
@@ -283,7 +283,7 @@
       <%# written / markdown / fallback — plain prose with ruled lines %>
       <div class="q__stem markdown-content"
            <% if editable %>data-edit data-field="content"<% end %>><%= render_markdown(question.content.to_s) %></div>
-      <div class="<%= marks_to_workspace(question) %>"></div>
+      <%= render_ruled_lines(marks_to_workspace(question)) %>
       <% if question.points.to_i >= 5 || question.answer_size == 'long' %>
         <%= render_final_answer(label: "#{question.answer_label.presence || 'Answer'} =", unit: question.unit) %>
       <% end %>

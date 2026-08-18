@@ -37,6 +37,31 @@ RSpec.describe 'Exams paper (student PDF redesign)', type: :request do
     exam
   end
 
+  describe 'prose answer regions print with vector ruling' do
+    let(:prose_exam) do
+      pe = create(:exam, title: 'Prose paper', exam_template: template)
+      q1 = create(:question, topic: topic, source: source, question_type: 'markdown',
+                             points: 4, answer_size: nil, content: 'Explain the recency guarantee.')
+      q2 = create(:question, topic: topic, source: source, question_type: 'written',
+                             points: 6, answer_size: 'long', content: 'Critique the CAP framing.')
+      create(:exam_question, exam: pe, question: q1, position: 1)
+      create(:exam_question, exam: pe, question: q2, position: 2)
+      pe
+    end
+
+    it 'renders each ruled line as an <hr class="rule-line"> stroke (borders stay vector in Skia/PDF)' do
+      get paper_exam_path(prose_exam)
+      body = response.body
+      # 4-mark markdown → lines--5 → 5 rules; answer_size 'long' → lines--8 → 8 rules.
+      # Parse the DOM rather than scanning the raw body: the inlined
+      # stylesheets mention `<hr class="rule-line">` in comments.
+      doc = Nokogiri::HTML(body)
+      expect(doc.css('hr.rule-line').size).to eq(13)
+      expect(body).to include('lines lines--5 lines--ruled')
+      expect(body).to include('lines lines--8 lines--ruled')
+    end
+  end
+
   describe 'GET /exams/:id/paper' do
     it 'responds 200 and renders the redesigned paper HTML' do
       get paper_exam_path(exam)
