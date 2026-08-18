@@ -68,6 +68,26 @@ RSpec.describe 'Exams paper (student PDF redesign)', type: :request do
     end
   end
 
+  describe 'height-aware page packing' do
+    let(:packed_exam) do
+      pe = create(:exam, title: 'Short-answer paper', exam_template: template)
+      6.times do |i|
+        q = create(:question, topic: topic, source: source, question_type: 'written',
+                              points: 2, answer_size: nil, content: "State fact #{i} and its mechanism.")
+        create(:exam_question, exam: pe, question: q, position: i + 1)
+      end
+      pe
+    end
+
+    it 'fills pages by estimated height instead of a fixed two questions per page' do
+      get paper_exam_path(packed_exam)
+      doc = Nokogiri::HTML(response.body)
+      per_page = doc.css('.paper').map { |p| p.css('.q').size }.reject(&:zero?)
+      expect(per_page.sum).to eq(6)          # nothing dropped
+      expect(per_page.max).to be >= 3        # impossible under the old 2/page slicing
+    end
+  end
+
   describe 'GET /exams/:id/paper' do
     it 'responds 200 and renders the redesigned paper HTML' do
       get paper_exam_path(exam)

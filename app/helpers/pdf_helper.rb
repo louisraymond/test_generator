@@ -61,6 +61,90 @@ module PdfHelper
     end
   end
 
+  # --- height-aware page packing -------------------------------------------
+  # The paper renders one .paper block per physical A4 page, so the view
+  # must decide up front which questions share a page. These estimates are
+  # deliberately conservative: an overestimate wastes a little paper, but an
+  # underestimate overflows the 297mm sheet and shifts every later footer.
+  # (.q carries page-break-inside: avoid, so the failure mode is a question
+  # spilling wholesale to an unnumbered sheet — cosmetic, but avoid it.)
+
+  PAGE_BUDGET = 880             # px of question space per .paper (983px content minus runhead/runfoot)
+  SECTION_HEAD_COST = 90        # the section banner on a section's first page
+  MAX_QUESTIONS_PER_PAGE = 6    # bounds estimator error on batches of tiny questions
+  STEM_CHARS_PER_LINE = 60      # conservative for 11.5pt Cormorant across the stem column
+  TEXT_LINE = 24
+  QUESTION_CHROME = 64          # question number/title row + margins around a .q
+
+  # Greedy packer: fill each page up to the budget, never splitting a
+  # question. The first page of a section reserves room for its banner.
+  # Returns an array of pages, each an array of exam_questions, in order.
+  def pack_exam_questions(exam_questions, budget: PAGE_BUDGET)
+    pages = []
+    current = []
+    used = 0
+    page_budget = budget - SECTION_HEAD_COST
+    exam_questions.each do |eq|
+      h = estimated_question_height(eq.question)
+      if current.any? && (used + h > page_budget || current.size >= MAX_QUESTIONS_PER_PAGE)
+        pages << current
+        current = []
+        used = 0
+        page_budget = budget
+      end
+      current << eq
+      used += h
+    end
+    pages << current if current.any?
+    pages
+  end
+
+  def estimated_question_height(question)
+    h = QUESTION_CHROME + estimated_text_height(question.content)
+    opts = question.options
+    case question.question_type
+    when 'multiple_choice', 'ordering', 'ranking'
+      h + Array(opts).size * 30 + 10
+    when 'matching'
+      pairs = opts.is_a?(Hash) ? Array(opts['left']).size : 0
+      h + pairs * 30 + 20
+    when 'cloze'
+      h + 20
+    when 'code_analysis'
+      o = opts.is_a?(Hash) ? opts : {}
+      h + o['code'].to_s.lines.size * 20 + 40 + Array(o['choices']).size * 30
+    when 'composite'
+      parts = question.respond_to?(:question_parts) ? question.question_parts.size : 0
+      parts = Array(opts).size if parts.zero?
+      h + [parts, 1].max * (TEXT_LINE + 62) # part stem + two ruled lines each
+    when 'diagram_label', 'image_occlusion'
+      h + 500
+    else
+      h + workspace_height(question)
+    end
+  end
+
+  # Pixel height of the answer region marks_to_workspace will emit,
+  # including the calculation final-answer rule where it applies.
+  def workspace_height(question)
+    klass = marks_to_workspace(question)
+    h = if (n = klass[/lines--(\d+)/, 1])
+          14 + n.to_i * TEXT_LINE
+        else
+          { 'workbox--sm' => 120, 'workbox--md' => 200,
+            'workbox--lg' => 350, 'workbox--xl' => 550 }.find { |k, _| klass.include?(k) }&.last || 550
+        end
+    if question.question_type.to_s == 'calculation' && (question.points.to_i >= 3 || question.answer_size == 'long')
+      h += 44
+    end
+    h
+  end
+
+  def estimated_text_height(text)
+    lines = text.to_s.split("\n").sum { |ln| [(ln.length / STEM_CHARS_PER_LINE.to_f).ceil, 1].max }
+    [lines, 1].max * TEXT_LINE
+  end
+
   # Renders a prose answer region as stacked <hr class="rule-line"> strokes
   # inside its .lines--N container. Skia/PDF keeps borders as vector stroke
   # ops, so unlike the gradient background (stripped in @media print — see
