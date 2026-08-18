@@ -11,10 +11,10 @@
 %>
 
 <%
-  # Math questions now get ~half-page workboxes; 4/page overflows A4
-  # badly. 2/page keeps each .paper close to A4 height with room for
-  # a two-question section page.
-  questions_per_page = 2
+  # Pages are packed by estimated question height (PdfHelper#pack_exam_questions):
+  # short-answer questions share a page, half-page math workboxes don't.
+  # The old fixed 2/page slicing printed short-answer papers as mostly
+  # whitespace once prose regions shrank to realistic line counts.
   sections_data = @exam.exam_questions.to_a.group_by(&:section_number)
   global_counter = 0
 
@@ -23,7 +23,7 @@
   paper_pages = []
   sections_data.sort_by { |k, _| k || -1 }.each do |section_number, exam_questions|
     section = section_number ? @exam.section_info(section_number) : nil
-    chunks = exam_questions.each_slice(questions_per_page).to_a
+    chunks = pack_exam_questions(exam_questions)
     chunks.each_with_index do |chunk, i|
       paper_pages << {
         section: section,
