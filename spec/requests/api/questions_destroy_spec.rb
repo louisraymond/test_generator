@@ -37,6 +37,20 @@ RSpec.describe 'API DELETE /api/questions/:id', type: :request do
     expect(LearningObjective.find_by(id: lo.id)).to be_present
   end
 
+  it 'cascades to section_question_rules but preserves the template section' do
+    template = create(:exam_template)
+    section = create(:exam_section, exam_template: template, position: 0, question_count: 1)
+    create(:section_question_rule, exam_section: section, question: question, rule_type: 'force_include')
+
+    expect {
+      delete "/api/questions/#{question.id}"
+    }.to change(Question, :count).by(-1)
+       .and change(SectionQuestionRule, :count).by(-1)
+
+    expect(response).to have_http_status(:no_content)
+    expect(ExamSection.find_by(id: section.id)).to be_present
+  end
+
   it 'cascades to exam_questions but preserves the exam itself' do
     exam = create(:exam)
     create(:exam_question, exam: exam, question: question, position: 1)
