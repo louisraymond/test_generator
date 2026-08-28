@@ -29,6 +29,10 @@ class Question < ApplicationRecord
 
   has_many :exam_questions, dependent: :destroy
   has_many :exams, through: :exam_questions
+  # A force_include/exclude rule is meaningless without its question; without
+  # this, the FK on section_question_rules makes Question#destroy! raise
+  # (API DELETE 500s) for any question referenced by an exam template.
+  has_many :section_question_rules, dependent: :destroy
   has_many :question_learning_objectives, dependent: :destroy
   has_many :learning_objectives, through: :question_learning_objectives
   has_many :marking_steps, -> { ordered }, dependent: :destroy
