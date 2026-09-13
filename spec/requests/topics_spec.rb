@@ -52,3 +52,45 @@ RSpec.describe 'Topics show', type: :request do
     end
   end
 end
+
+RSpec.describe 'Topics form', type: :request do
+  describe 'POST /topics' do
+    it 'creates modules in form order when no position is submitted' do
+      post topics_path, params: {
+        topic: {
+          name: 'OAuth2 in Action (v.2)',
+          topic_modules_attributes: {
+            '0' => { name: 'Chapter 3: Building A Simple OAuth Client' },
+            '1' => { name: 'Module 2' }
+          }
+        }
+      }
+
+      topic = Topic.find_by!(name: 'OAuth2 in Action (v.2)')
+      expect(response).to redirect_to(topic_path(topic))
+      expect(topic.topic_modules.pluck(:name, :position)).to eq(
+        [['Chapter 3: Building A Simple OAuth Client', 1], ['Module 2', 2]]
+      )
+    end
+  end
+
+  describe 'PATCH /topics/:id' do
+    it 'appends a module added on the edit form after the existing ones' do
+      topic = create(:topic)
+      existing = create(:topic_module, topic: topic, name: 'Existing', position: 3)
+
+      patch topic_path(topic), params: {
+        topic: {
+          name: topic.name,
+          topic_modules_attributes: {
+            '0' => { id: existing.id, name: 'Existing' },
+            '1' => { name: 'New' }
+          }
+        }
+      }
+
+      expect(response).to redirect_to(topic_path(topic))
+      expect(topic.topic_modules.pluck(:name, :position)).to eq([['Existing', 3], ['New', 4]])
+    end
+  end
+end
